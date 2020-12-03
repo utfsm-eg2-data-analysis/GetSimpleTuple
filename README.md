@@ -88,3 +88,7 @@ A ClasTool-formatted root file must be located in the same directory as the bina
 * `include/TIdentificatorV2.h`
 
   This is the historical program **Analyser** condensed into a single-file standalone library.
+
+## How to send jobs to the USM farm
+
+Please, refer to `sh/README.md`
