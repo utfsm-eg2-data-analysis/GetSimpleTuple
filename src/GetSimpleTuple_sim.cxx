@@ -5,7 +5,7 @@
 /*                                     */
 /***************************************/
 
-// October 2020
+// December 2020
 // Independent of Analyser
 
 #include "GetSimpleTuple_sim.hxx"
@@ -84,11 +84,16 @@ int main(int argc, char **argv) {
     /*** STEP 1: FIND PARTICLES ***/
 
     if (input->GetNRows("GSIM") > 0) { // prevent seg-fault
-      if (t->Id(0, 1) == 11) {
+      
+      // first, check numbering scheme
+      if (t->Id(0, 1) == 11) SetNumberingScheme("PDG");
+      else if (t->Id(0, 1) == 3) SetNumberingScheme("GEANT");
+	    
+      if (t->Id(0, 1) == gElectronID) {
 	for (Int_t q = 1; q < input->GetNRows("GSIM"); q++) {
-	  if (t->Id(q, 1) == 211) gsimPip_row.push_back(q);
-	  else if (t->Id(q, 1) == -211) gsimPim_row.push_back(q);
-	  else if (t->Id(q, 1) == 22) gsimGamma_row.push_back(q);
+	  if (t->Id(q, 1) == gPiPlusID) gsimPip_row.push_back(q);
+	  else if (t->Id(q, 1) == gPiMinusID) gsimPim_row.push_back(q);
+	  else if (t->Id(q, 1) == gGammaID) gsimGamma_row.push_back(q);
 	} // end of loop in gsim-particles
 
 	if (input->GetNRows("EVNT") > 0) { // prevent seg-fault
@@ -103,7 +108,7 @@ int main(int argc, char **argv) {
       
       } // end of electron-in-gsim condition
     } // end of smth-in-GSIM-bank
-    
+
     /*** STEP 2: SORT BY MOMENTUM ***/
     
     gsimPip_row   = SortByMomentum(t, gsimPip_row, 1);
@@ -119,12 +124,12 @@ int main(int argc, char **argv) {
     simrecPip_row   = AngularMatching(t, simrecPip_row, gsimPip_row);
     simrecPim_row   = AngularMatching(t, simrecPim_row, gsimPim_row);
     simrecGamma_row = AngularMatching(t, simrecGamma_row, gsimGamma_row);
-    
+
     /*** STEP 4: FILL ***/
 
     // electron
     if (input->GetNRows("GSIM") > 0) { // prevent seg-fault
-      if (t->Id(0, 1) == 11) {
+      if (t->Id(0, 1) == gElectronID) {
 	AssignElectronVar_GSIM(t, se, i, "Sim"); // (TIdentificatorV2, sim_e, evnt, targetOption)
 	if (input->GetNRows("EVNT") > 0) { // prevent seg-fault
 	  if (t->GetCategorization(0, "Sim") != "electron") NullElectronVar_SIMREC(se);

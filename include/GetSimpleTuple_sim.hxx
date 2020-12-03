@@ -471,7 +471,7 @@ void AssignParticleVar_SIMREC(TIdentificatorV2* t, sim_p& sp, Int_t row, Int_t e
   sp.NRowsCCEl  = t->NRowsCC();
   // simrec particle (42)
   sp.pid        = particleID(t->GetCategorization(row, targetOption));
-  Float_t mass  = particleMass(sp.pid);
+  Float_t mass  = particleMass(ToPDG(sp.pid));
   sp.Zh         = t->Zh(row, 0, mass);
   sp.ThetaPQ    = t->ThetaPQ(row, 0);
   sp.PhiPQ      = t->PhiPQ(row, 0);
@@ -532,16 +532,16 @@ void AssignParticleVar_GSIM(TIdentificatorV2* t, sim_p& sp, Int_t row, Int_t evn
   sp.mc_vye      = t->Y(0, 1);
   sp.mc_vze      = t->Z(0, 1);
   sp.mc_Sector   = t->Sector(0, 1);
-  sp.mc_Px       = t->Px(0, 1);
-  sp.mc_Py       = t->Py(0, 1);
-  sp.mc_Pz       = t->Pz(0, 1);
-  sp.mc_P        = t->Momentum(0, 1);
+  sp.mc_Pex      = t->Px(0, 1);
+  sp.mc_Pey      = t->Py(0, 1);
+  sp.mc_Pez      = t->Pz(0, 1);
+  sp.mc_Pe       = t->Momentum(0, 1);
   sp.mc_Betta    = t->Betta(0, 1);
   TVector3 *mc_vert = new TVector3(t->X(0, 1), t->Y(0, 1), t->Z(0, 1));
   sp.mc_TargType = t->TargType(mc_vert, targetOption);
   // gsim particle (19)
-  sp.mc_pid     = t->Id(row, 1);
-  Float_t mc_mass = particleMass(sp.mc_pid);
+  sp.mc_pid     = ToPDG(t->Id(row, 1));
+  Float_t mc_mass = particleMass(ToPDG(sp.mc_pid));
   sp.mc_ThetaPQ = t->ThetaPQ(row, 1);
   sp.mc_PhiPQ   = t->PhiPQ(row, 1);
   sp.mc_Pt2     = t->Pt2(row, 1);
