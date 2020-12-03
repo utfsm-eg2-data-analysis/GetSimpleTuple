@@ -20,4 +20,4 @@ where:
 Feel free to edit the directories `SIMDIR`, `GSTDIR`, `OUTDIR`, `TMPDIR` at convenience.
 The directory `SIMDIR` and the naming scheme of the input files is described within the script.
 
-To run the full sample of simulations, you should run all <ndir> for each <target>, that would be a total of 36 jobs.
+To run the full sample of simulations, you should run all the `<ndir>` for each `<target>`, that would be a total of 36 jobs.
