@@ -78,36 +78,46 @@ Int_t ToPDG(Int_t fID) {
   if (gNumberingScheme == "PDG") {
     return fID; // if detected numbering scheme was PDG, then there's no problem
   } else if (gNumberingScheme == "GEANT") {
-    if (fID == gGammaID) return 22;
-    else if (fID == gPositronID) return -11; 
-    else if (fID == gElectronID) return 11;
-    else if (fID == gNeutrinoID) return 12;
-    else if (fID == gMuonPlusID) return -13;
-    else if (fID == gMuonMinusID) return 13;
-    else if (fID == gPiZeroID) return 111;
-    else if (fID == gPiPlusID) return 211;
-    else if (fID == gPiMinusID) return -211;
-    else if (fID == gKaonZeroLongID) return 130;
-    else if (fID == gKaonPlusID) return  321;
-    else if (fID == gKaonMinusID) return -321;
-    else if (fID == gNeutronID) return 2112;
-    else if (fID == gProtonID) return 2212;
-    else if (fID == gKaonZeroShortID) return 310;
-    else if (fID == gEtaID) return 221;
-    else if (fID == gOmegaID) return 223;
-    else if (fID == gKaonZeroID) return 311;
+    if      (fID == gGammaID)         return   22;
+    else if (fID == gPositronID)      return  -11; 
+    else if (fID == gElectronID)      return   11;
+    else if (fID == gNeutrinoID)      return   12;
+    else if (fID == gMuonPlusID)      return  -13;
+    else if (fID == gMuonMinusID)     return   13;
+    else if (fID == gPiZeroID)        return  111;
+    else if (fID == gPiPlusID)        return  211;
+    else if (fID == gPiMinusID)       return -211;
+    else if (fID == gKaonZeroLongID)  return  130;
+    else if (fID == gKaonPlusID)      return  321;
+    else if (fID == gKaonMinusID)     return -321;
+    else if (fID == gNeutronID)       return 2112;
+    else if (fID == gProtonID)        return 2212;
+    else if (fID == gKaonZeroShortID) return  310;
+    else if (fID == gEtaID)           return  221;
+    else if (fID == gOmegaID)         return  223;
+    else if (fID == gKaonZeroID)      return  311;
   }
 }
 
 Int_t particleID(TString particleName) {
-  if (particleName == "omega") return 223;
-  else if (particleName == "pi0") return 111;
-  else if (particleName == "pi+") return 211;
-  else if (particleName == "pi-") return -211;
-  else if (particleName == "gamma") return 22;
-  else if (particleName == "electron") return 11;
-  else if (particleName == "proton") return 2212;
-  else if (particleName == "neutron") return 2112;
+  if      (particleName == "gamma")    return   22;
+  else if (particleName == "positron") return  -11;
+  else if (particleName == "electron") return   11;
+  else if (particleName == "neutrino") return   12;
+  else if (particleName == "muon+")    return  -13;
+  else if (particleName == "muon")     return   13;
+  else if (particleName == "pi0")      return  111;  
+  else if (particleName == "pi+")      return  211;
+  else if (particleName == "pi-")      return -211;
+  else if (particleName == "K0L")      return  130;
+  else if (particleName == "K+")       return  321;
+  else if (particleName == "K-")       return -321;
+  else if (particleName == "neutron")  return 2112;  
+  else if (particleName == "proton")   return 2212;
+  else if (particleName == "K0S")      return  310;
+  else if (particleName == "eta")      return  221;
+  else if (particleName == "omega")    return  223;
+  else if (particleName == "K0")       return  311;
   else return 0;
 }
 
