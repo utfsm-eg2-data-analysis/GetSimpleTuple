@@ -434,7 +434,7 @@ void NullParticleVar_GSIM(sim_p& sp) {
   sp.mc_pid        = INVLD;
 }
 
-void AssignElectronVar_SIMREC(TIdentificatorV2* t, sim_e& se, Int_t evnt, TString targetOption) {  
+void AssignElectronVar_SIMREC(TIdentificatorV2* t, sim_e& se, Int_t evnt, TString dataKind, TString targetOption) {  
   // simrec (46)
   se.Q2       = t->Q2();
   se.W        = t->W();
@@ -457,7 +457,8 @@ void AssignElectronVar_SIMREC(TIdentificatorV2* t, sim_e& se, Int_t evnt, TStrin
   se.vxec     = vert->X();
   se.vyec     = vert->Y();
   se.vzec     = vert->Z();
-  se.TargType = t->TargType(vert, targetOption);
+  // se.TargType = t->TargType(vert, dataKind, targetOption); // (previous)
+  se.TargType = t->TargTypeSM(dataKind, targetOption, 0);
   se.XEC      = t->XEC(0);
   se.YEC      = t->YEC(0);
   se.ZEC      = t->ZEC(0);
@@ -485,7 +486,7 @@ void AssignElectronVar_SIMREC(TIdentificatorV2* t, sim_e& se, Int_t evnt, TStrin
   se.NRowsCC  = t->NRowsCC();
 }
 
-void AssignElectronVar_GSIM(TIdentificatorV2* t, sim_e& se, Int_t evnt, TString targetOption) {  
+void AssignElectronVar_GSIM(TIdentificatorV2* t, sim_e& se, Int_t evnt, TString dataKind, TString targetOption) {  
   // event-related (1)
   se.evnt = evnt;
   // gsim (17)
@@ -506,10 +507,11 @@ void AssignElectronVar_GSIM(TIdentificatorV2* t, sim_e& se, Int_t evnt, TString 
   se.mc_ThetaLab = t->ThetaLab(0,1);
   se.mc_PhiLab   = t->PhiLab(0,1);
   TVector3 *mc_vert = new TVector3(t->X(0,1), t->Y(0,1), t->Z(0,1));
-  se.mc_TargType = t->TargType(mc_vert, targetOption);
+  // se.mc_TargType = t->TargType(mc_vert, dataKind, targetOption); // (previous)
+  se.mc_TargType = t->TargTypeSM(dataKind, targetOption, 1);
 }
 
-void AssignParticleVar_SIMREC(TIdentificatorV2* t, sim_p& sp, Int_t row, Int_t evnt, TString targetOption) {
+void AssignParticleVar_SIMREC(TIdentificatorV2* t, sim_p& sp, Int_t row, Int_t evnt, TString dataKind, TString targetOption) {
   // simrec electron (46)
   sp.Q2         = t->Q2();
   sp.W          = t->W();
@@ -532,7 +534,8 @@ void AssignParticleVar_SIMREC(TIdentificatorV2* t, sim_p& sp, Int_t row, Int_t e
   sp.vxec       = vert->X();
   sp.vyec       = vert->Y();
   sp.vzec       = vert->Z();
-  sp.TargType   = t->TargType(vert, targetOption);
+  // sp.TargType   = t->TargType(vert, dataKind, targetOption); // (previous)
+  sp.TargType   = t->TargTypeSM(dataKind, targetOption, 0);
   sp.XECe       = t->XEC(0);
   sp.YECe       = t->YEC(0);
   sp.ZECe       = t->ZEC(0);
@@ -559,7 +562,7 @@ void AssignParticleVar_SIMREC(TIdentificatorV2* t, sim_p& sp, Int_t row, Int_t e
   sp.NRowsSCEl  = t->NRowsSC();
   sp.NRowsCCEl  = t->NRowsCC();
   // simrec particle (48)
-  sp.pid        = particleID(t->GetCategorization(row, targetOption));
+  sp.pid        = particleID(t->GetCategorization(row, dataKind, targetOption));
   Float_t mass  = particleMass(ToPDG(sp.pid));
   sp.Zh         = t->Zh(row, 0, mass);
   sp.ThetaPQ    = t->ThetaPQ(row, 0);
@@ -610,7 +613,7 @@ void AssignParticleVar_SIMREC(TIdentificatorV2* t, sim_p& sp, Int_t row, Int_t e
   sp.NRowsCC    = t->NRowsCC();
 }
 
-void AssignParticleVar_GSIM(TIdentificatorV2* t, sim_p& sp, Int_t row, Int_t evnt, TString targetOption) {
+void AssignParticleVar_GSIM(TIdentificatorV2* t, sim_p& sp, Int_t row, Int_t evnt, TString dataKind, TString targetOption) {
   // event-related (1)
   sp.evnt        = evnt;
   // gsim electron (17)
@@ -631,7 +634,8 @@ void AssignParticleVar_GSIM(TIdentificatorV2* t, sim_p& sp, Int_t row, Int_t evn
   sp.mc_ThetaLabEl = t->ThetaLab(0, 1);
   sp.mc_PhiLabEl   = t->PhiLab(0, 1);
   TVector3 *mc_vert = new TVector3(t->X(0,1), t->Y(0,1), t->Z(0,1));
-  sp.mc_TargType    = t->TargType(mc_vert, targetOption);
+  // sp.mc_TargType    = t->TargType(mc_vert, dataKind, targetOption); // (previous)
+  sp.mc_TargType    = t->TargTypeSM(dataKind, targetOption, 1);
   // gsim particle (19)
   sp.mc_pid      = ToPDG(t->Id(row, 1));
   sp.mc_ThetaPQ  = t->ThetaPQ(row, 1);

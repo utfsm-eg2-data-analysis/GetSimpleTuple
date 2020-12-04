@@ -13,6 +13,7 @@
 
 struct data_e {
   // (47 variables)
+  // electron (46)
   Float_t Q2, W, Nu, Xb, Yb;
   Float_t vxe, vye, vze;
   Float_t Sector;
@@ -24,6 +25,7 @@ struct data_e {
   Float_t ThetaLab, PhiLab;
   Float_t StatDC, DCStatus, StatEC, ECStatus, TimeEC, PathEC, Chi2EC, StatSC, SCStatus, TimeSC, PathSC, StatCC, CCStatus, Nphe, Chi2CC, Status;
   Float_t NRowsDC, NRowsEC, NRowsSC, NRowsCC;
+  // evnt (1)
   Float_t evnt;
 };
 

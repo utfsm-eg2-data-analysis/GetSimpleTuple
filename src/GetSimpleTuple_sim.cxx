@@ -15,6 +15,8 @@
 TString targetOption;
 TString rnOption;
 
+TString dataKind = "sim";
+
 /*** Declaration of functions ***/
 
 int parseCommandLine(int argc, char* argv[]);
@@ -94,9 +96,11 @@ int main(int argc, char **argv) {
 	} // end of loop in gsim-particles
 
 	if (input->GetNRows("EVNT") > 0) { // prevent seg-fault
-	  if (t->GetCategorization(0, "Sim") == "electron") {
+	  if (t->GetCategorization(0, dataKind, targetOption) == "electron") {
 	    for (Int_t p = 1; p < input->GetNRows("EVNT"); p++) {
-	      if (t->GetCategorization(p, "Sim") == "pi+" || t->GetCategorization(p, "Sim") == "pi-" || t->GetCategorization(p, "Sim") == "gamma") {
+	      if (t->GetCategorization(p, dataKind, targetOption) == "pi+" ||
+		  t->GetCategorization(p, dataKind, targetOption) == "pi-" ||
+		  t->GetCategorization(p, dataKind, targetOption) == "gamma") {
 		simrec_row.push_back(p);
 	      }
 	    } // end of loop in simrec-particles
@@ -120,10 +124,10 @@ int main(int argc, char **argv) {
     // (1) electron ntuple
     if (input->GetNRows("GSIM") > 0) { // prevent seg-fault
       if (t->Id(0, 1) == gElectronID) {
-	AssignElectronVar_GSIM(t, se, i, "Sim"); // (TIdentificatorV2, sim_e, evnt, targetOption)
+	AssignElectronVar_GSIM(t, se, i, dataKind, targetOption); // (TIdentificatorV2, sim_e, evnt, dataKind, targetOption)
 	if (input->GetNRows("EVNT") > 0) { // prevent seg-fault
-	  if (t->GetCategorization(0, "Sim") != "electron") NullElectronVar_SIMREC(se);
-	  else AssignElectronVar_SIMREC(t, se, i, "Sim");
+	  if (t->GetCategorization(0, dataKind, targetOption) != "electron") NullElectronVar_SIMREC(se);
+	  else AssignElectronVar_SIMREC(t, se, i, dataKind, targetOption);
 	} // end of smth-in-EVNT-bank condition
 	tElectrons->Fill();
       } // end of electorn-in-GSIM condition
@@ -133,10 +137,10 @@ int main(int argc, char **argv) {
     for (Int_t index = 0; index < (Int_t) simrec_row.size(); index++) { // simrec_row.size() == gsim_row.size()
       // gsim
       if (gsim_row[index] == -1) NullParticleVar_GSIM(sp);
-      else AssignParticleVar_GSIM(t, sp, gsim_row[index], i, "Sim"); // (TIdentificatorV2, sim_p, row, evnt, targetOption)
+      else AssignParticleVar_GSIM(t, sp, gsim_row[index], i, dataKind, targetOption); // (TIdentificatorV2, sim_p, row, evnt, dataKind, targetOption)
       // simrec
       if (simrec_row[index] == -1) NullParticleVar_SIMREC(sp);
-      else AssignParticleVar_SIMREC(t, sp, simrec_row[index], i, "Sim"); // (TIdentificatorV2, sim_p, row, evnt, targetOption)
+      else AssignParticleVar_SIMREC(t, sp, simrec_row[index], i, dataKind, targetOption); // (TIdentificatorV2, sim_p, row, evnt, dataKind, targetOption)
       // fill!
       tParticles->Fill();
     }

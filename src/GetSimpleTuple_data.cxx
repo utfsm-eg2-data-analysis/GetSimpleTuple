@@ -15,6 +15,8 @@
 TString targetOption;
 TString rnOption;
 
+TString dataKind = "data";
+
 /*** Declaration of functions ***/
 
 int parseCommandLine(int argc, char* argv[]);
@@ -25,6 +27,8 @@ int main(int argc, char **argv) {
 
   parseCommandLine(argc, argv);
   printOptions();
+
+  SetNumberingScheme("PDG");
   
   // assign options
   TString inputFiles = "clas_" + rnOption + "_*.pass2.root"; // *: all rn files, node dir
@@ -69,14 +73,16 @@ int main(int argc, char **argv) {
   // loop around events
   for (Int_t i = 0; i < nEvents; i++) { // nEvents
     if (input->GetNRows("EVNT") > 0) { // prevent seg-fault
-      if (t->GetCategorization(0, targetOption) == "electron") {
-	AssignElectronVar_Data(t, de, i, targetOption); // (TIdentificator, data_e, evnt, targetOption)
+      if (t->GetCategorization(0, dataKind, targetOption) == "electron") {
+	AssignElectronVar_Data(t, de, i, dataKind, targetOption); // (TIdentificator, data_e, evnt, dataKind, targetOption)
 	tElectrons->Fill();
 	// loop in detected particles
 	for (Int_t p = 1; p < input->GetNRows("EVNT"); p++) {
 	  // rest of particles
-	  if (t->GetCategorization(p, targetOption) == "gamma" || t->GetCategorization(p, targetOption) == "pi+" || t->GetCategorization(p, targetOption) == "pi-") {
-	    AssignParticleVar_Data(t, dp, p, i, targetOption); // (TIdentificator, data_p, row, evnt, targetOption)
+	  if (t->GetCategorization(p, dataKind, targetOption) == "gamma" ||
+	      t->GetCategorization(p, dataKind, targetOption) == "pi+" ||
+	      t->GetCategorization(p, dataKind, targetOption) == "pi-") {
+	    AssignParticleVar_Data(t, dp, p, i, dataKind, targetOption); // (TIdentificator, data_p, row, evnt, dataKind, targetOption)
 	    tParticles->Fill();
 	  }
 	} // end of loop in rest of particles

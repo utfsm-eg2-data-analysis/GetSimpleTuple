@@ -157,7 +157,7 @@ public:
   Double_t Y(Int_t k, Bool_t kind = 0) {
     // Returns the Y coordinate for the particle in the row k
     if (kind == 0) {
-      fEVNT = (TEVNTClass*)fCT->GetBankRow("EVNT",k);
+      fEVNT = (TEVNTClass*)fCT->GetBankRow("EVNT", k);
       return fEVNT->Y;
     } else { 
       fGSIM = (TGSIMClass *) fCT->GetBankRow("GSIM", k);
@@ -168,7 +168,7 @@ public:
   Double_t Z(Int_t k, Bool_t kind = 0) {
     // Returns the Z coordinate for the particle in the row k
     if (kind == 0) {
-      fEVNT = (TEVNTClass*)fCT->GetBankRow("EVNT",k);
+      fEVNT = (TEVNTClass*)fCT->GetBankRow("EVNT", k);
       return fEVNT->Z;
     } else {                            // Fix this
       fGSIM = (TGSIMClass *) fCT->GetBankRow("GSIM", k);
@@ -580,7 +580,7 @@ public:
   }
 
   TVector3 *GetCorrectedVert() {
-    // Returns electron's vertex correction
+    // Returns electron's vertex correction (only for data and simrec)
     TVector3 RotatedVertPos(X(0), Y(0), Z(0));
     TVector3 RotatedVertDir(Px(0), Py(0), Pz(0));
     TVector3 TargetPos(0.043, -0.33, 0);
@@ -598,17 +598,63 @@ public:
     return V_corr;
   }
   
-  Int_t TargType(TVector3 *vertex, TString targetOption) {
+  Int_t TargType(TVector3 *vertex, TString dataKind, TString targetOption) {
     // assigns TargType according to corrected vertex cut
-    if (targetOption == "C" && vertex->Z() > -25.33 && vertex->Z() < -24.10) {
-      return 2;
-    } else if (targetOption == "Fe" && vertex->Z() > -25.65 && vertex->Z() < -24.26) {
-      return 2;
-    } else if (targetOption == "Pb" && vertex->Z() > -25.54 && vertex->Z() < -24.36) {
-      return 2;
-    } else if (vertex->Z() > -31.8 && vertex->Z() < -28.4) {
-      return 1;
-    }
+    // Taisiya Mineeva & Orlando Soto cuts
+    if (dataKind == "data") {
+      if (targetOption == "C" && vertex->Z() > -25.33 && vertex->Z() < -24.10) {
+	return 2;
+      } else if (targetOption == "Fe" && vertex->Z() > -25.65 && vertex->Z() < -24.26) {
+	return 2;
+      } else if (targetOption == "Pb" && vertex->Z() > -25.54 && vertex->Z() < -24.36) {
+	return 2;
+      } else if (vertex->Z() > -31.80 && vertex->Z() < -28.40) {
+	return 1; // liquid
+      }
+    } else if (dataKind == "sim") {
+      if (targetOption == "D") return 1;
+      else if (targetOption == "C") return 2;
+      else if (targetOption == "Fe") return 2;
+      else if (targetOption == "Pb") return 2;
+    } // closure
+    return 0;
+  }
+  
+  Int_t TargTypeSM(TString dataKind, TString targetOption, Int_t kind) {
+    // assigns TargType according to corrected vertex cut
+    Int_t sector = Sector(0, kind);
+    // Sebastián Morán vertex cuts
+    Double_t shift[6] = {0.1, -0.4, -0.6, -0.1, 0.4, 0.6};
+    if (dataKind == "data") {
+      // Raphael Dupré cuts
+      if (targetOption == "C") {
+	if (TMath::Abs(-30.1 - Z(0) + shift[sector]) < 2.0)      return 1;
+	else if (TMath::Abs(-24.7 - Z(0) + shift[sector]) < 1.5) return 2;
+      } else if (targetOption == "Fe") {
+	if (TMath::Abs(-30.2 - Z(0) + shift[sector]) < 2.0)      return 1;
+	else if (TMath::Abs(-24.9 - Z(0) + shift[sector]) < 1.5) return 2;
+      } else if (targetOption == "Pb") {
+	if (TMath::Abs(-30.1 - Z(0) + shift[sector]) < 2.0)      return 1;
+	else if (TMath::Abs(-24.9 - Z(0) + shift[sector]) < 1.5) return 2;
+      }
+    } else if (dataKind == "sim") {
+      // Hayk Hakobyan cuts
+      if ((sector == 0)*(-32.50 < Z(0, kind) && Z(0, kind) < -28.00) +
+	  (sector == 1)*(-32.50 < Z(0, kind) && Z(0, kind) < -27.50) +
+	  (sector == 2)*(-32.00 < Z(0, kind) && Z(0, kind) < -27.25) +
+	  (sector == 3)*(-32.00 < Z(0, kind) && Z(0, kind) < -27.75) +
+	  (sector == 4)*(-32.50 < Z(0, kind) && Z(0, kind) < -28.35) +
+	  (sector == 5)*(-33.50 < Z(0, kind) && Z(0, kind) < -28.75)) {
+	return 1; // liquid
+      } else if ((sector == 0)*(-26.50 < Z(0, kind) && Z(0, kind) < -20.00) +
+		 (sector == 1)*(-26.00 < Z(0, kind) && Z(0, kind) < -20.00) +
+		 (sector == 2)*(-25.65 < Z(0, kind) && Z(0, kind) < -20.00) +
+		 (sector == 3)*(-25.85 < Z(0, kind) && Z(0, kind) < -20.00) +
+		 (sector == 4)*(-26.65 < Z(0, kind) && Z(0, kind) < -20.00) +
+		 (sector == 5)*(-27.15 < Z(0, kind) && Z(0, kind) < -20.00)) {
+	return 2; // solid
+      }
+    } // closure
     return 0; // default value
   }
 
@@ -694,81 +740,100 @@ public:
     return uvw;
   }
 
-  Bool_t SampFracCheck(TString targetOption) {  
+  Bool_t SampFracCheck(Int_t k, TString dataKind, TString targetOption) {  
     // Sampling Fraction Cut exclusive for electrons
-    Double_t E = TMath::Max(Etot(0), Ein(0) + Eout(0));
-    Double_t p = Momentum(0);
-    Int_t    s = Sector(0);
+    /*
+    // Just in case, Taisiya Mineeva cuts for sim
+    // MeanE  = 0.2623 + 0.0089*p - 0.0019*p*p;
+    // SigmaE = TMath::Sqrt(0.0057*0.0057 + 0.0305*0.0305/p);
+    */
+    Double_t E = TMath::Max(Etot(k), Ein(k) + Eout(k));
+    Double_t p = Momentum(k);
+    Int_t    s = Sector(k);
     Double_t MeanE;
     Double_t SigmaE;
-    if (targetOption == "C") {
-      MeanE  = kCPar[s][0] + kCPar[s][1]*p + kCPar[s][2]*p*p;
-      SigmaE = TMath::Sqrt(kCPar[s][3]*kCPar[s][3] + kCPar[s][4]*kCPar[s][4]/p);
-    } else if (targetOption == "Fe") {
-      MeanE  = kFePar[s][0] + kFePar[s][1]*p + kFePar[s][2]*p*p;
-      SigmaE = TMath::Sqrt(kFePar[s][3]*kFePar[s][3] + kFePar[s][4]*kFePar[s][4]/p);
-    } else if (targetOption == "Pb") {
-      MeanE  = kPbPar[s][0] + kPbPar[s][1]*p + kPbPar[s][2]*p*p;
-      SigmaE = TMath::Sqrt(kPbPar[s][3]*kPbPar[s][3] + kPbPar[s][4]*kPbPar[s][4]/p);
-    } else if (targetOption == "Sim") { // based on Taisiya Mineeva Analysis
-      MeanE  = 0.2623 + 0.0089*p - 0.0019*p*p;
-      SigmaE = TMath::Sqrt(0.0057*0.0057 + 0.0305*0.0305/p);
+    if (dataKind == "data") {
+      if (targetOption == "C") {
+	MeanE  = kCPar[s][0] + kCPar[s][1]*p + kCPar[s][2]*p*p;
+	SigmaE = TMath::Sqrt(kCPar[s][3]*kCPar[s][3] + kCPar[s][4]*kCPar[s][4]/p);
+      } else if (targetOption == "Fe") {
+	MeanE  = kFePar[s][0] + kFePar[s][1]*p + kFePar[s][2]*p*p;
+	SigmaE = TMath::Sqrt(kFePar[s][3]*kFePar[s][3] + kFePar[s][4]*kFePar[s][4]/p);
+      } else if (targetOption == "Pb") {
+	MeanE  = kPbPar[s][0] + kPbPar[s][1]*p + kPbPar[s][2]*p*p;
+	SigmaE = TMath::Sqrt(kPbPar[s][3]*kPbPar[s][3] + kPbPar[s][4]*kPbPar[s][4]/p);
+      }
+    } else if (dataKind == "sim") {
+      if (targetOption == "D") {
+	MeanE  = kDPar_Sim[s][0] + kDPar_Sim[s][1]*p + kDPar_Sim[s][2]*p*p;
+	SigmaE = TMath::Sqrt(kDPar_Sim[s][3]*kDPar_Sim[s][3] + kDPar_Sim[s][4]*kDPar_Sim[s][4]/p);
+      } else if (targetOption == "C") {
+	MeanE  = kCPar_Sim[s][0] + kCPar_Sim[s][1]*p + kCPar_Sim[s][2]*p*p;
+	SigmaE = TMath::Sqrt(kCPar_Sim[s][3]*kCPar_Sim[s][3] + kCPar_Sim[s][4]*kCPar_Sim[s][4]/p);
+      } else if (targetOption == "Fe") {
+	MeanE  = kFePar_Sim[s][0] + kFePar_Sim[s][1]*p + kFePar_Sim[s][2]*p*p;
+	SigmaE = TMath::Sqrt(kFePar_Sim[s][3]*kFePar_Sim[s][3] + kFePar_Sim[s][4]*kFePar_Sim[s][4]/p);
+      } else if (targetOption == "Pb") {
+	MeanE  = kPbPar_Sim[s][0] + kPbPar_Sim[s][1]*p + kPbPar_Sim[s][2]*p*p;
+	SigmaE = TMath::Sqrt(kPbPar_Sim[s][3]*kPbPar_Sim[s][3] + kPbPar_Sim[s][4]*kPbPar_Sim[s][4]/p);
+      }
     }
+    // final step
     if (TMath::Abs(E/p - MeanE) < 2.5*SigmaE) {
       return true;
     } // closure
     return false;
   }
   
-  /*** Electrons DC Fiducial Cuts ***/
+  /*** Electron DC Fiducial Cuts ***/
 
-  Double_t FidThetaMin() {
+  Double_t FidThetaMin(Int_t k) {
     // minimum DC theta angle
-    Int_t sector = Sector(0);
+    Int_t sector = Sector(k);
     Double_t theta_min_val = kThetaPar0[sector] +
-      kThetaPar1[sector]/TMath::Power(Momentum(0), 2) +
-      kThetaPar2[sector]*Momentum(0) +
-      kThetaPar3[sector]/Momentum(0) +
-      kThetaPar4[sector]*TMath::Exp(kThetaPar5[sector]*Momentum(0));
+      kThetaPar1[sector]/TMath::Power(Momentum(k), 2) +
+      kThetaPar2[sector]*Momentum(k) +
+      kThetaPar3[sector]/Momentum(k) +
+      kThetaPar4[sector]*TMath::Exp(kThetaPar5[sector]*Momentum(k));
     return theta_min_val;
   }
     
-  Double_t FidFunc(Int_t side, Int_t param) {
+  Double_t FidFunc(Int_t k, Int_t side, Int_t param) {
     // (?)
-    Int_t sector = Sector(0);  
+    Int_t sector = Sector(k);  
     if (side == 0 && param == 0) {
-      return kFidPar0Low0[sector] + kFidPar0Low1[sector]*TMath::Exp(kFidPar0Low2[sector]*(Momentum(0) - kFidPar0Low3[sector]));
+      return kFidPar0Low0[sector] + kFidPar0Low1[sector]*TMath::Exp(kFidPar0Low2[sector]*(Momentum(k) - kFidPar0Low3[sector]));
     } else if (side == 1 && param==0) {
-      return kFidPar0High0[sector] + kFidPar0High1[sector]*TMath::Exp(kFidPar0High2[sector]*(Momentum(0) - kFidPar0High3[sector]));
+      return kFidPar0High0[sector] + kFidPar0High1[sector]*TMath::Exp(kFidPar0High2[sector]*(Momentum(k) - kFidPar0High3[sector]));
     } else if (side == 0 && param==1) {
-      return kFidPar1Low0[sector] + kFidPar1Low1[sector]*Momentum(0)*TMath::Exp(kFidPar1Low2[sector]*TMath::Power((Momentum(0) - kFidPar1Low3[sector]), 2));
+      return kFidPar1Low0[sector] + kFidPar1Low1[sector]*Momentum(k)*TMath::Exp(kFidPar1Low2[sector]*TMath::Power((Momentum(k) - kFidPar1Low3[sector]), 2));
     } else if (side == 1 && param==1) {
-      return kFidPar1High0[sector] + kFidPar1High1[sector]*Momentum(0)*TMath::Exp(kFidPar1High2[sector]*TMath::Power((Momentum(0) - kFidPar1High3[sector]), 2));
+      return kFidPar1High0[sector] + kFidPar1High1[sector]*Momentum(k)*TMath::Exp(kFidPar1High2[sector]*TMath::Power((Momentum(k) - kFidPar1High3[sector]), 2));
     } // closure
     return 0.0; // default
   }
   
-  Double_t FidPhiMin() {
-    // (?)
-    Int_t sector = Sector(0);
-    if (ThetaLab(0, 0) > FidThetaMin()) {
-      return 60.*sector - FidFunc(0,0)*(1 - 1/(1 + (ThetaLab(0, 0) - FidThetaMin())/FidFunc(0,1)));
+  Double_t FidPhiMin(Int_t k) {
+    // minimum DC phi angle
+    Int_t sector = Sector(k);
+    if (ThetaLab(k, 0) > FidThetaMin(k)) {
+      return 60.*sector - FidFunc(k, 0, 0)*(1 - 1/(1 + (ThetaLab(k, 0) - FidThetaMin(k))/FidFunc(k, 0, 1)));
     } // closure
     return 60.*sector;
   }
 
-  Double_t FidPhiMax() {
-    // (?)
-    Int_t sector = Sector(0);  
-    if (ThetaLab(0,0) > FidThetaMin()) {
-      return 60.*sector + FidFunc(1,0)*(1 - 1/(1 + (ThetaLab(0, 0) - FidThetaMin())/FidFunc(1,1)));
+  Double_t FidPhiMax(Int_t k) {
+    // maximum DC phi angle
+    Int_t sector = Sector(k);  
+    if (ThetaLab(k, 0) > FidThetaMin(k)) {
+      return 60.*sector + FidFunc(k, 1, 0)*(1 - 1/(1 + (ThetaLab(k, 0) - FidThetaMin(k))/FidFunc(k, 1, 1)));
     } // closure
     return 60.*sector;
   }
   
-  Bool_t FidCheckCut() {
-    // Checks DC fiducial cut for electrons
-    if (ThetaLab(0, 0) > FidThetaMin() && PhiLab(0, 0) > FidPhiMin() && PhiLab(0, 0) < FidPhiMax()) {
+  Bool_t FidCheckCut(Int_t k) {
+    // checks DC fiducial cut for electrons
+    if (ThetaLab(k, 0) > FidThetaMin(k) && PhiLab(k, 0) > FidPhiMin(k) && PhiLab(k, 0) < FidPhiMax(k)) {
       return 1;
     } // closure
     return 0;
@@ -776,8 +841,8 @@ public:
 
   /*** PID cuts ***/
 
-  Bool_t ElectronPhaseSpace(Int_t k, TString targetOption) {
-    if (targetOption == "Sim") {
+  Bool_t ElectronPhaseSpace(Int_t k, TString dataKind) {
+    if (dataKind == "sim") {
       if ((Etot(k)/0.27 >
 	   (Sector(k)==0||Sector(k)==1)*(1.03*Momentum(k) - 0.42) +
 	   (Sector(k)==2)*(1.05*Momentum(k) - 0.46) + 
@@ -800,14 +865,14 @@ public:
 	   (Sector(k)==4)*(0.79*Momentum(k)))) {
 	return true;
       }
-    } else if (targetOption != "Sim") {
+    } else if (dataKind == "data") {
       if ((Etot(k)/0.27 >
 	   (Sector(k)==0||Sector(k)==1)*(1.05*Momentum(k) - 0.46) +
-	   (Sector(k)==2||Sector(k)==4||Sector(k)==5)*(1.1*Momentum(k) - 0.43) +
+	   (Sector(k)==2||Sector(k)==4||Sector(k)==5)*(1.11*Momentum(k) - 0.43) +
 	   (Sector(k)==3)*(1.07*Momentum(k) - 0.43)) &&
 	  (Etot(k)/0.27 <
 	   (Sector(k)==0||Sector(k)==1)*(1.05*Momentum(k) + 0.18) +
-	   (Sector(k)==2||Sector(k)==4||Sector(k)==5)*(1.1*Momentum(k) + 0.18) +
+	   (Sector(k)==2||Sector(k)==4||Sector(k)==5)*(1.11*Momentum(k) + 0.18) +
 	   (Sector(k)==3)*(1.07*Momentum(k) + 0.18)) &&
 	  ((Ein(k)/0.27 + Eout(k)/0.27) <
 	   (Sector(k)==0||Sector(k)==1)*(1.11*Momentum(k)) +
@@ -825,8 +890,8 @@ public:
     return false;
   }
   
-  Bool_t IsElectron(Int_t k, TString targetOption, TVector3* ECuvw) {
-    if (Status(k) > 0 &&
+  Bool_t IsElectron(Int_t k, TString dataKind, TString targetOption, TVector3* ECuvw) {
+    if (Status(k) > 0 && // Status(k) < 100 does nothing
 	NRowsDC() != 0 && DCStatus(k) > 0 && StatDC(k) > 0 &&
 	NRowsEC() != 0 && StatEC(k) > 0 &&
 	NRowsSC() != 0 && SCStatus(k) == 33 &&
@@ -835,16 +900,16 @@ public:
 	(TimeEC(k) - TimeSC(k) - (PathEC(k) - PathSC(k))/30) < 5*0.35 && (TimeEC(k) - TimeSC(k) - (PathEC(k) - PathSC(k))/30) > -5*0.35 &&
 	Eout(k) != 0 && Ein(k) > 0.06 &&
 	ECuvw->X() > 40 && ECuvw->X() < 410 && ECuvw->Y() < 370 && ECuvw->Z() < 405 &&
-	SampFracCheck(targetOption) &&
-	ElectronPhaseSpace(k, targetOption) &&
-	FidCheckCut()) {
+	SampFracCheck(k, dataKind, targetOption) &&
+	ElectronPhaseSpace(k, dataKind) &&
+	FidCheckCut(k)) {
       return true;
     } //closure
     return false;
   }
   
-  Bool_t IsPositron(Int_t k, TString targetOption, TVector3* ECuvw) {
-    if (Status(k) > 0 &&
+  Bool_t IsPositron(Int_t k, TString dataKind, TString targetOption, TVector3* ECuvw) {
+    if (Status(k) > 0 && // Status(k) < 100 does nothing
 	NRowsDC() != 0 && DCStatus(k) > 0 && StatDC(k) > 0 &&
 	NRowsEC() != 0 && StatEC(k) > 0 &&
 	NRowsSC() != 0 && SCStatus(k) == 33 &&
@@ -853,9 +918,9 @@ public:
 	(TimeEC(k) - TimeSC(k) - (PathEC(k) - PathSC(k))/30) < 5*0.35 && (TimeEC(k) - TimeSC(k) - (PathEC(k) - PathSC(k))/30) > -5*0.35 &&
 	Eout(k) != 0 && Ein(k) > 0.06 &&
 	ECuvw->X() > 40 && ECuvw->X() < 410 && ECuvw->Y() < 370 && ECuvw->Z() < 405 &&
-	SampFracCheck(targetOption) &&
-	ElectronPhaseSpace(k, targetOption) &&
-	FidCheckCut()) {
+	SampFracCheck(k, dataKind, targetOption) &&
+	ElectronPhaseSpace(k, dataKind) &&
+	FidCheckCut(k)) {
       return true;
     } //closure
     return false;
@@ -903,9 +968,8 @@ public:
     return false;
   }
   
-  Bool_t IsPiPlus(Int_t k, TString targetOption, TVector3* ECuvw) {
-    if (!IsPositron(k, targetOption, ECuvw) &&
-	Charge(k) == 1 &&
+  Bool_t IsPiPlus(Int_t k, TVector3* ECuvw) {
+    if (Charge(k) == 1 &&
 	Status(k) > 0 &&
 	NRowsDC() != 0 && StatDC(k) > 0 && DCStatus(k) > 0 && 
 	(PiPlusPhaseSpace_CC(k) || PiPlusPhaseSpace_SC(k))) {
@@ -944,10 +1008,9 @@ public:
     return false;
   }
   
-  Bool_t IsPiMinus(Int_t k, TString targetOption, TVector3 *ECuvw) {
+  Bool_t IsPiMinus(Int_t k, TVector3 *ECuvw) {
     Float_t deltaBetta = Betta(k) - (Momentum(k)/TMath::Sqrt(Momentum(k)*Momentum(k) + 0.13957*0.13957));
-    if (!IsElectron(k, targetOption, ECuvw) &&
-	Charge(k) == -1 &&
+    if (Charge(k) == -1 &&
 	Status(k) > 0 &&
 	NRowsDC() != 0 && DCStatus(k) > 0 && StatDC(k) > 0 &&
 	Etot(k) < 0.15 && (Ein(k) < 0.085 - 0.5*Eout(k)) &&
@@ -959,7 +1022,7 @@ public:
     return false;
   }
   
-  Bool_t IsGamma(Int_t k, TString targetOption, TVector3* ECuvw) {
+  Bool_t IsGamma(Int_t k, TVector3* ECuvw) {
     if (Charge(k) == 0 &&
 	ECuvw->X() > 40 && ECuvw->X() < 410 && ECuvw->Y() < 370 && ECuvw->Z() < 410 && 
 	((PathEC(k)/(Betta(k)*30) - PathEC(k)/30) > -2.2) && ((PathEC(k)/(Betta(k)*30) - PathEC(k)/30) < 1.3) &&
@@ -983,20 +1046,22 @@ public:
   }
 
   
-  TString GetCategorization(Int_t k, TString targetOption) {
+  TString GetCategorization(Int_t k, TString dataKind, TString targetOption) {
     // transformation vectors
     TVector3 *ECxyz = new TVector3(XEC(k), YEC(k), ZEC(k));
     TVector3 *ECuvw = XYZToUVW(ECxyz);
-    if (IsElectron(k, targetOption, ECuvw)) {
+    if (IsElectron(k, dataKind, targetOption, ECuvw)) {
       return "electron";
-    } else if (IsPiPlus(k, targetOption, ECuvw)) {
-      return "pi+";
-    } else if (IsPiMinus(k, targetOption, ECuvw)) {
+    } else if (IsPiMinus(k, ECuvw)) {
       return "pi-";
-    } else if (IsGamma(k, targetOption, ECuvw)) {
-      return "gamma";
+    } else if (IsPositron(k, dataKind, targetOption, ECuvw)) {
+      return "positron";
+    } else if (IsPiPlus(k, ECuvw)) {
+      return "pi+";
     } else if (IsProton(k)) {
       return "proton";
+    } else if (IsGamma(k, ECuvw)) {
+      return "gamma";
     } // closure
     return "not recognized";
   }
@@ -1029,28 +1094,58 @@ public:
 
   /*** Sampling Fraction Cuts ***/
 
-  const Double_t kCPar[6][5]={{0.252164, 0.0122263 , -0.000793937, 9.55113e-03, 3.40672e-02},
-			      {0.278574, 0.0187482 , -0.00238217 , 1.39889e-02, 3.74682e-02},
-			      {0.262079, 0.0230685 , -0.00354741 , 9.32762e-03, 2.90046e-02},
-			      {0.251108, 0.0201568 , -0.00332367 , 8.21055e-03, 2.98893e-02},
-			      {0.263396, 0.00955238, -0.00102038 , 2.25684e-02, 3.06508e-02},
-			      {0.255245, 0.0232659 , -0.00304798 , 1.17254e-02, 3.64221e-02}};
+  // for data
+  const Double_t kCPar[6][5] = {{0.252164, 0.0122263 , -0.000793937, 9.55113e-03, 3.40672e-02},
+				{0.278574, 0.0187482 , -0.00238217 , 1.39889e-02, 3.74682e-02},
+				{0.262079, 0.0230685 , -0.00354741 , 9.32762e-03, 2.90046e-02},
+				{0.251108, 0.0201568 , -0.00332367 , 8.21055e-03, 2.98893e-02},
+				{0.263396, 0.00955238, -0.00102038 , 2.25684e-02, 3.06508e-02},
+				{0.255245, 0.0232659 , -0.00304798 , 1.17254e-02, 3.64221e-02}};
 
-  const Double_t kFePar[6][5]={{0.222404, 0.0222688, -0.0024153 , 9.23027e-03, 2.98343e-02},
-			       {0.234623, 0.0194985, -0.00208357, 8.66367e-03, 3.08858e-02},
-			       {0.252287, 0.024248 , -0.00338846, 1.07826e-02, 2.63854e-02},
-			       {0.250946, 0.0208409, -0.00326824, 7.22581e-03, 2.98809e-02},
-			       {0.271956, 0.0118487, -0.00187084, 1.84073e-02, 3.48029e-02},
-			       {0.252613, 0.022819 , -0.00311242, 4.11461e-03, 3.55081e-02}};
+  const Double_t kFePar[6][5] = {{0.222404, 0.0222688, -0.0024153 , 9.23027e-03, 2.98343e-02},
+				 {0.234623, 0.0194985, -0.00208357, 8.66367e-03, 3.08858e-02},
+				 {0.252287, 0.024248 , -0.00338846, 1.07826e-02, 2.63854e-02},
+				 {0.250946, 0.0208409, -0.00326824, 7.22581e-03, 2.98809e-02},
+				 {0.271956, 0.0118487, -0.00187084, 1.84073e-02, 3.48029e-02},
+				 {0.252613, 0.022819 , -0.00311242, 4.11461e-03, 3.55081e-02}};
 
-  const Double_t kPbPar[6][5]={{0.253431, 0.0138251, -0.00140160, 7.67408e-03, 3.54391e-02},
-			       {0.249059, 0.0147784, -0.00148693, 7.52798e-03, 3.38371e-02},
-			       {0.254573, 0.0225890, -0.00305686, 8.13241e-03, 2.77300e-02},
-			       {0.255589, 0.0190419, -0.00305263, 7.20303e-03, 3.03627e-02},
-			       {0.276739, 0.0111585, -0.00175784, 1.80841e-02, 3.53020e-02},
-			       {0.262587, 0.0191659, -0.0026264 , 1.99220e-03, 3.76172e-02}};
-    
-  /*** Fiducial Cuts ***/
+  const Double_t kPbPar[6][5] = {{0.253431, 0.0138251, -0.00140160, 7.67408e-03, 3.54391e-02},
+				 {0.249059, 0.0147784, -0.00148693, 7.52798e-03, 3.38371e-02},
+				 {0.254573, 0.0225890, -0.00305686, 8.13241e-03, 2.77300e-02},
+				 {0.255589, 0.0190419, -0.00305263, 7.20303e-03, 3.03627e-02},
+				 {0.276739, 0.0111585, -0.00175784, 1.80841e-02, 3.53020e-02},
+				 {0.262587, 0.0191659, -0.0026264 , 1.99220e-03, 3.76172e-02}};
+
+  // for simulations
+  const Double_t kDPar_Sim[6][5] = {{0.24876 , 0.0179894, -0.00442957, 0.00399225, 0.0249298},
+				    {0.248957, 0.0181533, -0.00416637, 0.00538627, 0.0242045}, 
+				    {0.248164, 0.0188304, -0.00427462, 0.00335732, 0.0247301}, 
+				    {0.250525, 0.0161461, -0.0041662 , 0.00346977, 0.0251755}, 
+				    {0.248031, 0.0196832, -0.00456827, 0.00354094, 0.0252441}, 
+				    {0.249069, 0.015629 , -0.00363472, 0.00274538, 0.0254185}};
+  
+  const Double_t kCPar_Sim[6][5] = {{0.250469, 0.015964 , -0.00389408, 0.00510237, 0.0248174}, 
+				    {0.251445, 0.0159875, -0.00375825, 0.00431604, 0.0244632}, 
+				    {0.250031, 0.0178331, -0.00422464, 8.4798e-08, 0.024983 },  
+				    {0.25105 , 0.0152426, -0.00390999, 0.00255027, 0.0254091}, 
+				    {0.25027 , 0.01694  , -0.00381344, 0.00399372, 0.0249107}, 
+				    {0.249087, 0.0150609, -0.0034316 , 0.00552327, 0.0246847}};
+
+  const Double_t kFePar_Sim[6][5] = {{0.249113, 0.0172746, -0.00420656, 0.00431529, 0.0251379},
+				     {0.248658, 0.0185365, -0.00428943, 0.00540396, 0.0241749},
+				     {0.249016, 0.0185937, -0.00438778, 0.00417432, 0.0249617},
+				     {0.247588, 0.0196735, -0.00515405, 0.00431868, 0.0250086},
+				     {0.247964, 0.0196745, -0.00455197, 0.0038769 , 0.0251642}, 
+				     {0.246463, 0.0184054, -0.00431434, 0.00444093, 0.025143 }};
+
+  const Double_t kPbPar_Sim[6][5] = {{0.247887, 0.0188033, -0.00463279, 0.00358101, 0.0253111},
+				     {0.247159, 0.0206521, -0.00493913, 0.00417953, 0.0245174}, 
+				     {0.247663, 0.0197017, -0.00459223, 1.8082e-07, 0.0253269}, 
+				     {0.249099, 0.0173088, -0.00436998, 0.00339505, 0.0254005}, 
+				     {0.249669, 0.0175364, -0.00392209, 0.00482576, 0.0250319}, 
+				     {0.247958, 0.0165727, -0.00381158, 0.00332387, 0.0253196}};
+
+  /*** DC Fiducial Cuts ***/
   
   // For FidThetaMin calculation for electron
   const Double_t kThetaPar0[6] = { 15        , 15        , 15        , 15        ,  13       ,  13        };

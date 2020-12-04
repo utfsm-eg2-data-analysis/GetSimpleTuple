@@ -5,6 +5,7 @@
 #include "PDG.hxx"
 
 void SetElectronBranches_Data(TTree *tree, data_e& de) {
+  // electron (46)
   tree->Branch("Q2",       &de.Q2);
   tree->Branch("W",        &de.W);
   tree->Branch("Nu",       &de.Nu);
@@ -29,7 +30,8 @@ void SetElectronBranches_Data(TTree *tree, data_e& de) {
   tree->Branch("XEC",      &de.XEC);
   tree->Branch("YEC",      &de.YEC);
   tree->Branch("ZEC",      &de.ZEC);
-  // status (20)
+  tree->Branch("PhiLab",   &de.PhiLab);
+  tree->Branch("ThetaLab", &de.ThetaLab);
   tree->Branch("StatDC",   &de.StatDC);
   tree->Branch("DCStatus", &de.DCStatus);
   tree->Branch("StatEC",   &de.StatEC);
@@ -50,11 +52,12 @@ void SetElectronBranches_Data(TTree *tree, data_e& de) {
   tree->Branch("NRowsEC",  &de.NRowsEC);
   tree->Branch("NRowsSC",  &de.NRowsSC);
   tree->Branch("NRowsCC",  &de.NRowsCC);
+  // evnt (1)
   tree->Branch("evnt",     &de.evnt);
 }
 
 void SetParticleBranches_Data(TTree *tree, data_p& dp) {
-  // electron
+  // electron (46)
   tree->Branch("Q2",         &dp.Q2);
   tree->Branch("W",          &dp.W);
   tree->Branch("Nu",         &dp.Nu);
@@ -79,7 +82,8 @@ void SetParticleBranches_Data(TTree *tree, data_p& dp) {
   tree->Branch("XECe",       &dp.XECe);
   tree->Branch("YECe",       &dp.YECe);
   tree->Branch("ZECe",       &dp.ZECe);
-  // status (20)
+  tree->Branch("PhiLabEl",   &dp.PhiLabEl);
+  tree->Branch("ThetaLabEl", &dp.ThetaLabEl);
   tree->Branch("StatDCEl",   &dp.StatDCEl);
   tree->Branch("DCStatusEl", &dp.DCStatusEl);
   tree->Branch("StatECEl",   &dp.StatECEl);
@@ -100,7 +104,7 @@ void SetParticleBranches_Data(TTree *tree, data_p& dp) {
   tree->Branch("NRowsECEl",  &dp.NRowsECEl);
   tree->Branch("NRowsSCEl",  &dp.NRowsSCEl);
   tree->Branch("NRowsCCEl",  &dp.NRowsCCEl);
-  // particle
+  // particle (48)
   tree->Branch("Zh",       &dp.Zh);
   tree->Branch("ThetaPQ",  &dp.ThetaPQ);
   tree->Branch("Pt2",      &dp.Pt2);
@@ -108,6 +112,8 @@ void SetParticleBranches_Data(TTree *tree, data_p& dp) {
   tree->Branch("PhiPQ",    &dp.PhiPQ);
   tree->Branch("Mx2",      &dp.Mx2);
   tree->Branch("T",        &dp.T);
+  tree->Branch("PhiLab",   &dp.PhiLab);
+  tree->Branch("ThetaLab", &dp.ThetaLab);
   tree->Branch("vxh",      &dp.vxh);
   tree->Branch("vyh",      &dp.vyh);
   tree->Branch("vzh",      &dp.vzh);
@@ -127,7 +133,6 @@ void SetParticleBranches_Data(TTree *tree, data_p& dp) {
   tree->Branch("pid",      &dp.pid);
   tree->Branch("T4",       &dp.T4);
   tree->Branch("deltaZ",   &dp.deltaZ);
-  // status (20)
   tree->Branch("StatDC",   &dp.StatDC);
   tree->Branch("DCStatus", &dp.DCStatus);
   tree->Branch("StatEC",   &dp.StatEC);
@@ -148,11 +153,12 @@ void SetParticleBranches_Data(TTree *tree, data_p& dp) {
   tree->Branch("NRowsEC",  &dp.NRowsEC);
   tree->Branch("NRowsSC",  &dp.NRowsSC);
   tree->Branch("NRowsCC",  &dp.NRowsCC);
-  // event
+  // event (1)
   tree->Branch("evnt", &dp.evnt);
 }
 
-void AssignElectronVar_Data(TIdentificatorV2* t, data_e& de, Int_t evnt, TString targetOption) {  
+void AssignElectronVar_Data(TIdentificatorV2* t, data_e& de, Int_t evnt, TString dataKind, TString targetOption) {
+  // electron (46)
   de.Q2       = t->Q2();
   de.W        = t->W();
   de.Nu       = t->Nu();
@@ -174,10 +180,12 @@ void AssignElectronVar_Data(TIdentificatorV2* t, data_e& de, Int_t evnt, TString
   de.vxec     = vert->X();
   de.vyec     = vert->Y();
   de.vzec     = vert->Z();
-  de.TargType = t->TargType(vert, targetOption);
+  de.TargType = t->TargType(vert, dataKind, targetOption);
   de.XEC      = t->XEC(0);
   de.YEC      = t->YEC(0);
   de.ZEC      = t->ZEC(0);
+  de.PhiLab   = t->PhiLab(0);
+  de.ThetaLab = t->ThetaLab(0);
   de.StatDC   = t->StatDC(0);
   de.DCStatus = t->DCStatus(0);
   de.StatEC   = t->StatEC(0);
@@ -198,11 +206,12 @@ void AssignElectronVar_Data(TIdentificatorV2* t, data_e& de, Int_t evnt, TString
   de.NRowsEC  = t->NRowsEC();
   de.NRowsSC  = t->NRowsSC();
   de.NRowsCC  = t->NRowsCC();
+  // evnt (1)
   de.evnt     = evnt;
 }
 
-void AssignParticleVar_Data(TIdentificatorV2* t, data_p& dp, Int_t row, Int_t evnt, TString targetOption) {
-  // electron
+void AssignParticleVar_Data(TIdentificatorV2* t, data_p& dp, Int_t row, Int_t evnt, TString dataKind, TString targetOption) {
+  // electron (46)
   dp.Q2         = t->Q2();
   dp.W          = t->W();
   dp.Nu         = t->Nu();
@@ -224,10 +233,12 @@ void AssignParticleVar_Data(TIdentificatorV2* t, data_p& dp, Int_t row, Int_t ev
   dp.vxec       = vert->X();
   dp.vyec       = vert->Y();
   dp.vzec       = vert->Z();
-  dp.TargType   = t->TargType(vert, targetOption);
+  dp.TargType   = t->TargType(vert, dataKind, targetOption);
   dp.XECe       = t->XEC(0);
   dp.YECe       = t->YEC(0);
   dp.ZECe       = t->ZEC(0);
+  dp.PhiLabEl   = t->PhiLab(0);
+  dp.ThetaLabEl = t->ThetaLab(0);  
   dp.StatDCEl   = t->StatDC(0);
   dp.DCStatusEl = t->DCStatus(0);
   dp.StatECEl   = t->StatEC(0);
@@ -248,9 +259,9 @@ void AssignParticleVar_Data(TIdentificatorV2* t, data_p& dp, Int_t row, Int_t ev
   dp.NRowsECEl  = t->NRowsEC();
   dp.NRowsSCEl  = t->NRowsSC();
   dp.NRowsCCEl  = t->NRowsCC();
-  // particle
-  dp.pid        = particleID(t->GetCategorization(row, targetOption));
-  Float_t mass  = particleMass(dp.pid);
+  // particle (48)
+  dp.pid        = particleID(t->GetCategorization(row, dataKind, targetOption));
+  Float_t mass  = particleMass(ToPDG(dp.pid));
   dp.Zh         = t->Zh(row, 0, mass);
   dp.ThetaPQ    = t->ThetaPQ(row, 0);
   dp.PhiPQ      = t->PhiPQ(row, 0);
@@ -259,6 +270,8 @@ void AssignParticleVar_Data(TIdentificatorV2* t, data_p& dp, Int_t row, Int_t ev
   dp.Mx2        = t->Mx2(row, 0, mass);
   dp.T          = t->T(row, 0, mass);
   dp.T4         = t->TimeCorr4(row, mass);
+  dp.PhiLab     = t->PhiLab(row);
+  dp.ThetaLab   = t->ThetaLab(row);
   dp.vxh        = t->X(row);
   dp.vyh        = t->Y(row);
   dp.vzh        = t->Z(row);
@@ -296,5 +309,6 @@ void AssignParticleVar_Data(TIdentificatorV2* t, data_p& dp, Int_t row, Int_t ev
   dp.NRowsEC    = t->NRowsEC();
   dp.NRowsSC    = t->NRowsSC();
   dp.NRowsCC    = t->NRowsCC();
+  // evnt (1)
   dp.evnt       = evnt;
 }
