@@ -63,15 +63,9 @@ int main(int argc, char **argv) {
 
   /*** VECTORS ***/
 
-  // define sorting vectors for gsim
-  RVec<Int_t> gsimGamma_row;
-  RVec<Int_t> gsimPip_row;
-  RVec<Int_t> gsimPim_row;
-  
-  // define sorting vectors for simrec
-  RVec<Int_t> simrecGamma_row;
-  RVec<Int_t> simrecPip_row;  
-  RVec<Int_t> simrecPim_row;
+  // define sorting vectors
+  RVec<Int_t> gsim_row;
+  RVec<Int_t> simrec_row;
 
   /*** START ***/
 
@@ -91,17 +85,20 @@ int main(int argc, char **argv) {
 	    
       if (t->Id(0, 1) == gElectronID) {
 	for (Int_t q = 1; q < input->GetNRows("GSIM"); q++) {
-	  if (t->Id(q, 1) == gPiPlusID) gsimPip_row.push_back(q);
-	  else if (t->Id(q, 1) == gPiMinusID) gsimPim_row.push_back(q);
-	  else if (t->Id(q, 1) == gGammaID) gsimGamma_row.push_back(q);
+	  if (t->Id(q, 1) == gPiPlusID || t->Id(q, 1) == gPiMinusID || t->Id(q, 1) == gGammaID ||
+	      t->Id(q, 1) == gElectronID || t->Id(q, 1) == gPositronID || t->Id(q, 1) == gProtonID || t->Id(q, 1) == gNeutronID ||
+	      t->Id(q, 1) == gKaonPlusID || t->Id(q, 1) == gKaonMinusID ||
+	      t->Id(q, 1) == gKaonZeroLongID || t->Id(q, 1) == gKaonZeroShortID || t->Id(q, 1) == gKaonZeroID) {
+	    gsim_row.push_back(q);
+	  }
 	} // end of loop in gsim-particles
 
 	if (input->GetNRows("EVNT") > 0) { // prevent seg-fault
 	  if (t->GetCategorization(0, "Sim") == "electron") {
 	    for (Int_t p = 1; p < input->GetNRows("EVNT"); p++) {
-	      if (t->GetCategorization(p, "Sim") == "pi+") simrecPip_row.push_back(p);
-	      else if (t->GetCategorization(p, "Sim") == "pi-") simrecPim_row.push_back(p);
-	      else if (t->GetCategorization(p, "Sim") == "gamma") simrecGamma_row.push_back(p);
+	      if (t->GetCategorization(p, "Sim") == "pi+" || t->GetCategorization(p, "Sim") == "pi-" || t->GetCategorization(p, "Sim") == "gamma") {
+		simrec_row.push_back(p);
+	      }
 	    } // end of loop in simrec-particles
 	  } // end of electron-in-simrec condition
 	} // end of smth-in-EVNT-bank
@@ -111,23 +108,16 @@ int main(int argc, char **argv) {
 
     /*** STEP 2: SORT BY MOMENTUM ***/
     
-    gsimPip_row   = SortByMomentum(t, gsimPip_row, 1);
-    gsimPim_row   = SortByMomentum(t, gsimPim_row, 1);
-    gsimGamma_row = SortByMomentum(t, gsimGamma_row, 1);
-    
-    simrecPip_row   = SortByMomentum(t, simrecPip_row, 0);
-    simrecPim_row   = SortByMomentum(t, simrecPim_row, 0);
-    simrecGamma_row = SortByMomentum(t, simrecGamma_row, 0);
+    gsim_row   = SortByMomentum(t, gsim_row, 1);
+    simrec_row = SortByMomentum(t, simrec_row, 0);
 
     /*** STEP 3: ANGULAR MATCHING ***/
 
-    simrecPip_row   = AngularMatching(t, simrecPip_row, gsimPip_row);
-    simrecPim_row   = AngularMatching(t, simrecPim_row, gsimPim_row);
-    simrecGamma_row = AngularMatching(t, simrecGamma_row, gsimGamma_row);
+    AngularMatching(t, simrec_row, gsim_row);
 
     /*** STEP 4: FILL ***/
 
-    // electron
+    // (1) electron ntuple
     if (input->GetNRows("GSIM") > 0) { // prevent seg-fault
       if (t->Id(0, 1) == gElectronID) {
 	AssignElectronVar_GSIM(t, se, i, "Sim"); // (TIdentificatorV2, sim_e, evnt, targetOption)
@@ -139,38 +129,21 @@ int main(int argc, char **argv) {
       } // end of electorn-in-GSIM condition
     } // end of smth-in-GSIM-bank condition
     
-    // pip
-    for (Int_t pip = 0; pip < (Int_t) simrecPip_row.size(); pip++) {
-      AssignParticleVar_GSIM(t, sp, gsimPip_row[pip], i, "Sim"); // (TIdentificatorV2, sim_p, row, evnt, targetOption)
-      if (simrecPip_row[pip] == -1) NullParticleVar_SIMREC(sp);
-      else AssignParticleVar_SIMREC(t, sp, simrecPip_row[pip], i, "Sim");
+    // (2) particles ntuple
+    for (Int_t index = 0; index < (Int_t) simrec_row.size(); index++) { // simrec_row.size() == gsim_row.size()
+      // gsim
+      if (gsim_row[index] == -1) NullParticleVar_GSIM(sp);
+      else AssignParticleVar_GSIM(t, sp, gsim_row[index], i, "Sim"); // (TIdentificatorV2, sim_p, row, evnt, targetOption)
+      // simrec
+      if (simrec_row[index] == -1) NullParticleVar_SIMREC(sp);
+      else AssignParticleVar_SIMREC(t, sp, simrec_row[index], i, "Sim"); // (TIdentificatorV2, sim_p, row, evnt, targetOption)
+      // fill!
       tParticles->Fill();
     }
     
-    // pim
-    for (Int_t pim = 0; pim < (Int_t) simrecPim_row.size(); pim++) {
-      AssignParticleVar_GSIM(t, sp, gsimPim_row[pim], i, "Sim"); // (TIdentificatorV2, sim_p, row, evnt, targetOption)
-      if (simrecPim_row[pim] == -1) NullParticleVar_SIMREC(sp);
-      else AssignParticleVar_SIMREC(t, sp, simrecPim_row[pim], i, "Sim");
-      tParticles->Fill();
-    }
-
-    // gamma
-    for (Int_t gamma = 0; gamma < (Int_t) simrecGamma_row.size(); gamma++) {
-      AssignParticleVar_GSIM(t, sp, gsimGamma_row[gamma], i, "Sim"); // (TIdentificatorV2, sim_p, row, evnt, targetOption)
-      if (simrecGamma_row[gamma] == -1) NullParticleVar_SIMREC(sp);
-      else AssignParticleVar_SIMREC(t, sp, simrecGamma_row[gamma], i, "Sim");
-      tParticles->Fill();
-    }
-
     // reset memory
-    gsimPip_row.clear();
-    gsimPim_row.clear();
-    gsimGamma_row.clear();
-    
-    simrecPip_row.clear();
-    simrecPim_row.clear();
-    simrecGamma_row.clear();
+    gsim_row.clear();
+    simrec_row.clear();
     
     // next event
     input->Next();

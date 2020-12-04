@@ -11,7 +11,7 @@ using namespace ROOT::VecOps;
 #endif
 
 void SetElectronBranches_Sim(TTree *tree, sim_e& se) {
-  // simrec (41)
+  // simrec (46)
   tree->Branch("Q2",       &se.Q2);
   tree->Branch("W",        &se.W);
   tree->Branch("Nu",       &se.Nu);
@@ -36,6 +36,8 @@ void SetElectronBranches_Sim(TTree *tree, sim_e& se) {
   tree->Branch("XEC",      &se.XEC);
   tree->Branch("YEC",      &se.YEC);
   tree->Branch("ZEC",      &se.ZEC);
+  tree->Branch("ThetaLab", &se.ThetaLab);
+  tree->Branch("PhiLab",   &se.PhiLab);
   tree->Branch("StatDC",   &se.StatDC);
   tree->Branch("DCStatus", &se.DCStatus);
   tree->Branch("StatEC",   &se.StatEC);
@@ -56,8 +58,9 @@ void SetElectronBranches_Sim(TTree *tree, sim_e& se) {
   tree->Branch("NRowsEC",  &se.NRowsEC);
   tree->Branch("NRowsSC",  &se.NRowsSC);
   tree->Branch("NRowsCC",  &se.NRowsCC);
+  // event (1)
   tree->Branch("evnt",     &se.evnt);
-  // gsim (15)
+  // gsim (17)
   tree->Branch("mc_Q2",       &se.mc_Q2);
   tree->Branch("mc_W",        &se.mc_W);
   tree->Branch("mc_Nu",       &se.mc_Nu);
@@ -73,10 +76,12 @@ void SetElectronBranches_Sim(TTree *tree, sim_e& se) {
   tree->Branch("mc_Pz",       &se.mc_Pz);
   tree->Branch("mc_P",        &se.mc_P);
   tree->Branch("mc_Betta",    &se.mc_Betta);
+  tree->Branch("mc_ThetaLab", &se.mc_ThetaLab);
+  tree->Branch("mc_PhiLab",   &se.mc_PhiLab);
 }
 
 void SetParticleBranches_Sim(TTree *tree, sim_p& sp) {
-  // simrec electron (40)
+  // simrec electron (46)
   tree->Branch("Q2",         &sp.Q2);
   tree->Branch("W",          &sp.W);
   tree->Branch("Nu",         &sp.Nu);
@@ -101,6 +106,8 @@ void SetParticleBranches_Sim(TTree *tree, sim_p& sp) {
   tree->Branch("XECe",       &sp.XECe);
   tree->Branch("YECe",       &sp.YECe);
   tree->Branch("ZECe",       &sp.ZECe);
+  tree->Branch("ThetaLabEl", &sp.ThetaLabEl);
+  tree->Branch("PhiLabEl",   &sp.PhiLabEl);
   tree->Branch("StatDCEl",   &sp.StatDCEl);
   tree->Branch("DCStatusEl", &sp.DCStatusEl);
   tree->Branch("StatECEl",   &sp.StatECEl);
@@ -121,7 +128,7 @@ void SetParticleBranches_Sim(TTree *tree, sim_p& sp) {
   tree->Branch("NRowsECEl",  &sp.NRowsECEl);
   tree->Branch("NRowsSCEl",  &sp.NRowsSCEl);
   tree->Branch("NRowsCCEl",  &sp.NRowsCCEl);
-  // simrec particle (42)
+  // simrec particle (48)
   tree->Branch("Zh",       &sp.Zh);
   tree->Branch("ThetaPQ",  &sp.ThetaPQ);
   tree->Branch("Pt2",      &sp.Pt2);
@@ -129,6 +136,8 @@ void SetParticleBranches_Sim(TTree *tree, sim_p& sp) {
   tree->Branch("PhiPQ",    &sp.PhiPQ);
   tree->Branch("Mx2",      &sp.Mx2);
   tree->Branch("T",        &sp.T);
+  tree->Branch("ThetaLab", &sp.ThetaLab);
+  tree->Branch("PhiLab",   &sp.PhiLab);
   tree->Branch("vxh",      &sp.vxh);
   tree->Branch("vyh",      &sp.vyh);
   tree->Branch("vzh",      &sp.vzh);
@@ -170,23 +179,25 @@ void SetParticleBranches_Sim(TTree *tree, sim_p& sp) {
   tree->Branch("NRowsCC",  &sp.NRowsCC);
   // event-related (1)
   tree->Branch("evnt", &sp.evnt);
-  // gsim electron (15)
-  tree->Branch("mc_Q2",       &sp.mc_Q2);
-  tree->Branch("mc_W",        &sp.mc_W);
-  tree->Branch("mc_Nu",       &sp.mc_Nu);
-  tree->Branch("mc_Xb",       &sp.mc_Xb);
-  tree->Branch("mc_Yb",       &sp.mc_Yb);
-  tree->Branch("mc_vxe",      &sp.mc_vxe);
-  tree->Branch("mc_vye",      &sp.mc_vye);
-  tree->Branch("mc_vze",      &sp.mc_vze);
-  tree->Branch("mc_SectorEl", &sp.mc_SectorEl);
-  tree->Branch("mc_TargType", &sp.mc_TargType);
-  tree->Branch("mc_Pex",      &sp.mc_Pex);
-  tree->Branch("mc_Pey",      &sp.mc_Pey);
-  tree->Branch("mc_Pez",      &sp.mc_Pez);
-  tree->Branch("mc_Pe",       &sp.mc_Pe);
-  tree->Branch("mc_BettaEl",  &sp.mc_BettaEl);
-  // gsim particle (19)
+  // gsim electron (17)
+  tree->Branch("mc_Q2",         &sp.mc_Q2);
+  tree->Branch("mc_W",          &sp.mc_W);
+  tree->Branch("mc_Nu",         &sp.mc_Nu);
+  tree->Branch("mc_Xb",         &sp.mc_Xb);
+  tree->Branch("mc_Yb",         &sp.mc_Yb);
+  tree->Branch("mc_vxe",        &sp.mc_vxe);
+  tree->Branch("mc_vye",        &sp.mc_vye);
+  tree->Branch("mc_vze",        &sp.mc_vze);
+  tree->Branch("mc_SectorEl",   &sp.mc_SectorEl);
+  tree->Branch("mc_TargType",   &sp.mc_TargType);
+  tree->Branch("mc_Pex",        &sp.mc_Pex);
+  tree->Branch("mc_Pey",        &sp.mc_Pey);
+  tree->Branch("mc_Pez",        &sp.mc_Pez);
+  tree->Branch("mc_Pe",         &sp.mc_Pe);
+  tree->Branch("mc_BettaEl",    &sp.mc_BettaEl);
+  tree->Branch("mc_ThetaLabEl", &sp.mc_ThetaLabEl);
+  tree->Branch("mc_PhiLabEl",   &sp.mc_PhiLabEl);
+  // gsim particle (21)
   tree->Branch("mc_Zh",       &sp.mc_Zh);
   tree->Branch("mc_ThetaPQ",  &sp.mc_ThetaPQ);
   tree->Branch("mc_Pt2",      &sp.mc_Pt2);
@@ -194,6 +205,8 @@ void SetParticleBranches_Sim(TTree *tree, sim_p& sp) {
   tree->Branch("mc_PhiPQ",    &sp.mc_PhiPQ);
   tree->Branch("mc_Mx2",      &sp.mc_Mx2);
   tree->Branch("mc_T",        &sp.mc_T);
+  tree->Branch("mc_ThetaLab", &sp.mc_ThetaLab);
+  tree->Branch("mc_PhiLab",   &sp.mc_PhiLab);
   tree->Branch("mc_vxh",      &sp.mc_vxh);
   tree->Branch("mc_vyh",      &sp.mc_vyh);
   tree->Branch("mc_vzh",      &sp.mc_vzh);
@@ -209,7 +222,7 @@ void SetParticleBranches_Sim(TTree *tree, sim_p& sp) {
 }
 
 void NullElectronVar_SIMREC(sim_e& se) {
-  // (41)
+  // (46 variables)
   se.Q2       = INVLD;
   se.W        = INVLD;
   se.Nu       = INVLD;
@@ -234,6 +247,8 @@ void NullElectronVar_SIMREC(sim_e& se) {
   se.XEC      = INVLD;
   se.YEC      = INVLD;
   se.ZEC      = INVLD;
+  se.ThetaLab = INVLD;
+  se.PhiLab   = INVLD;
   se.StatDC   = INVLD;
   se.DCStatus = INVLD;
   se.StatEC   = INVLD;
@@ -257,7 +272,7 @@ void NullElectronVar_SIMREC(sim_e& se) {
 }
 
 void NullParticleVar_SIMREC(sim_p& sp) {
-  // electron (40)
+  // electron (46)
   sp.Q2         = INVLD;
   sp.W          = INVLD;
   sp.Nu         = INVLD;
@@ -282,6 +297,8 @@ void NullParticleVar_SIMREC(sim_p& sp) {
   sp.XECe       = INVLD;
   sp.YECe       = INVLD;
   sp.ZECe       = INVLD;
+  sp.ThetaLabEl = INVLD;
+  sp.PhiLabEl   = INVLD;
   sp.StatDCEl   = INVLD;
   sp.DCStatusEl = INVLD;
   sp.StatECEl   = INVLD;
@@ -302,7 +319,7 @@ void NullParticleVar_SIMREC(sim_p& sp) {
   sp.NRowsECEl  = INVLD;
   sp.NRowsSCEl  = INVLD;
   sp.NRowsCCEl  = INVLD;
-  // particle (42)
+  // particle (48)
   sp.pid        = INVLD;
   sp.Zh         = INVLD;
   sp.ThetaPQ    = INVLD;
@@ -311,6 +328,8 @@ void NullParticleVar_SIMREC(sim_p& sp) {
   sp.Pl2        = INVLD;
   sp.Mx2        = INVLD;
   sp.T          = INVLD;
+  sp.ThetaLab   = INVLD;
+  sp.PhiLab     = INVLD;
   sp.T4         = INVLD;
   sp.vxh        = INVLD;
   sp.vyh        = INVLD;
@@ -351,8 +370,72 @@ void NullParticleVar_SIMREC(sim_p& sp) {
   sp.NRowsCC    = INVLD;
 }
 
+void NullElectronVar_GSIM(sim_e& se) {
+  // (17 variables)
+  se.mc_Q2       = INVLD;
+  se.mc_W        = INVLD;
+  se.mc_Nu       = INVLD;
+  se.mc_Xb       = INVLD;
+  se.mc_Yb       = INVLD;
+  se.mc_vxe      = INVLD;
+  se.mc_vye      = INVLD;
+  se.mc_vze      = INVLD;
+  se.mc_Sector   = INVLD;
+  se.mc_TargType = INVLD;
+  se.mc_Px       = INVLD;
+  se.mc_Py       = INVLD;
+  se.mc_Pz       = INVLD;
+  se.mc_P        = INVLD;
+  se.mc_Betta    = INVLD;
+  se.mc_ThetaLab = INVLD;
+  se.mc_PhiLab   = INVLD;
+}
+
+void NullParticleVar_GSIM(sim_p& sp) {
+  // gsim electron (17)
+  sp.mc_Q2         = INVLD;
+  sp.mc_W          = INVLD;
+  sp.mc_Nu         = INVLD;
+  sp.mc_Xb         = INVLD;
+  sp.mc_Yb         = INVLD;
+  sp.mc_vxe        = INVLD;
+  sp.mc_vye        = INVLD;
+  sp.mc_vze        = INVLD;
+  sp.mc_SectorEl   = INVLD;
+  sp.mc_TargType   = INVLD;
+  sp.mc_Pex        = INVLD;
+  sp.mc_Pey        = INVLD;
+  sp.mc_Pez        = INVLD;
+  sp.mc_Pe         = INVLD;
+  sp.mc_BettaEl    = INVLD;
+  sp.mc_ThetaLabEl = INVLD;
+  sp.mc_PhiLabEl   = INVLD;
+  // gsim particle (21)
+  sp.mc_Zh         = INVLD;
+  sp.mc_ThetaPQ    = INVLD;
+  sp.mc_Pt2        = INVLD;
+  sp.mc_Pl2        = INVLD;
+  sp.mc_PhiPQ      = INVLD;
+  sp.mc_ThetaLab   = INVLD;
+  sp.mc_PhiLab     = INVLD;
+  sp.mc_Mx2        = INVLD;
+  sp.mc_T          = INVLD;
+  sp.mc_vxh        = INVLD;
+  sp.mc_vyh        = INVLD;
+  sp.mc_vzh        = INVLD;
+  sp.mc_Sector     = INVLD;
+  sp.mc_Px         = INVLD;
+  sp.mc_Py         = INVLD;
+  sp.mc_Pz         = INVLD;
+  sp.mc_P          = INVLD;
+  sp.mc_Betta      = INVLD;
+  sp.mc_Mass2      = INVLD;
+  sp.mc_deltaZ     = INVLD;
+  sp.mc_pid        = INVLD;
+}
+
 void AssignElectronVar_SIMREC(TIdentificatorV2* t, sim_e& se, Int_t evnt, TString targetOption) {  
-  // simrec (41)
+  // simrec (46)
   se.Q2       = t->Q2();
   se.W        = t->W();
   se.Nu       = t->Nu();
@@ -378,6 +461,8 @@ void AssignElectronVar_SIMREC(TIdentificatorV2* t, sim_e& se, Int_t evnt, TStrin
   se.XEC      = t->XEC(0);
   se.YEC      = t->YEC(0);
   se.ZEC      = t->ZEC(0);
+  se.ThetaLab = t->ThetaLab(0);
+  se.PhiLab   = t->PhiLab(0);
   se.StatDC   = t->StatDC(0);
   se.DCStatus = t->DCStatus(0);
   se.StatEC   = t->StatEC(0);
@@ -402,8 +487,8 @@ void AssignElectronVar_SIMREC(TIdentificatorV2* t, sim_e& se, Int_t evnt, TStrin
 
 void AssignElectronVar_GSIM(TIdentificatorV2* t, sim_e& se, Int_t evnt, TString targetOption) {  
   // event-related (1)
-  se.evnt     = evnt;
-  // gsim (15)
+  se.evnt = evnt;
+  // gsim (17)
   se.mc_Q2       = t->Q2(1);
   se.mc_W        = t->W(1);
   se.mc_Nu       = t->Nu(1);
@@ -418,12 +503,14 @@ void AssignElectronVar_GSIM(TIdentificatorV2* t, sim_e& se, Int_t evnt, TString 
   se.mc_Pz       = t->Pz(0,1);
   se.mc_P        = t->Momentum(0,1);
   se.mc_Betta    = t->Betta(0,1);
+  se.mc_ThetaLab = t->ThetaLab(0,1);
+  se.mc_PhiLab   = t->PhiLab(0,1);
   TVector3 *mc_vert = new TVector3(t->X(0,1), t->Y(0,1), t->Z(0,1));
   se.mc_TargType = t->TargType(mc_vert, targetOption);
 }
 
 void AssignParticleVar_SIMREC(TIdentificatorV2* t, sim_p& sp, Int_t row, Int_t evnt, TString targetOption) {
-  // simrec electron (40)
+  // simrec electron (46)
   sp.Q2         = t->Q2();
   sp.W          = t->W();
   sp.Nu         = t->Nu();
@@ -449,6 +536,8 @@ void AssignParticleVar_SIMREC(TIdentificatorV2* t, sim_p& sp, Int_t row, Int_t e
   sp.XECe       = t->XEC(0);
   sp.YECe       = t->YEC(0);
   sp.ZECe       = t->ZEC(0);
+  sp.ThetaLabEl = t->ThetaLab(0);
+  sp.PhiLabEl   = t->PhiLab(0);
   sp.StatDCEl   = t->StatDC(0);
   sp.DCStatusEl = t->DCStatus(0);
   sp.StatECEl   = t->StatEC(0);
@@ -469,7 +558,7 @@ void AssignParticleVar_SIMREC(TIdentificatorV2* t, sim_p& sp, Int_t row, Int_t e
   sp.NRowsECEl  = t->NRowsEC();
   sp.NRowsSCEl  = t->NRowsSC();
   sp.NRowsCCEl  = t->NRowsCC();
-  // simrec particle (42)
+  // simrec particle (48)
   sp.pid        = particleID(t->GetCategorization(row, targetOption));
   Float_t mass  = particleMass(ToPDG(sp.pid));
   sp.Zh         = t->Zh(row, 0, mass);
@@ -480,6 +569,8 @@ void AssignParticleVar_SIMREC(TIdentificatorV2* t, sim_p& sp, Int_t row, Int_t e
   sp.Mx2        = t->Mx2(row, 0, mass);
   sp.T          = t->T(row, 0, mass);
   sp.T4         = t->TimeCorr4(row, mass);
+  sp.ThetaLab   = t->ThetaLab(row);
+  sp.PhiLab     = t->PhiLab(row);
   sp.vxh        = t->X(row);
   sp.vyh        = t->Y(row);
   sp.vzh        = t->Z(row);
@@ -522,44 +613,48 @@ void AssignParticleVar_SIMREC(TIdentificatorV2* t, sim_p& sp, Int_t row, Int_t e
 void AssignParticleVar_GSIM(TIdentificatorV2* t, sim_p& sp, Int_t row, Int_t evnt, TString targetOption) {
   // event-related (1)
   sp.evnt        = evnt;
-  // gsim electron (15)
-  sp.mc_Q2       = t->Q2(1);
-  sp.mc_W        = t->W(1);
-  sp.mc_Nu       = t->Nu(1);
-  sp.mc_Xb       = t->Xb(1);
-  sp.mc_Yb       = t->Yb(1);
-  sp.mc_vxe      = t->X(0, 1);
-  sp.mc_vye      = t->Y(0, 1);
-  sp.mc_vze      = t->Z(0, 1);
-  sp.mc_Sector   = t->Sector(0, 1);
-  sp.mc_Pex      = t->Px(0, 1);
-  sp.mc_Pey      = t->Py(0, 1);
-  sp.mc_Pez      = t->Pz(0, 1);
-  sp.mc_Pe       = t->Momentum(0, 1);
-  sp.mc_Betta    = t->Betta(0, 1);
-  TVector3 *mc_vert = new TVector3(t->X(0, 1), t->Y(0, 1), t->Z(0, 1));
-  sp.mc_TargType = t->TargType(mc_vert, targetOption);
+  // gsim electron (17)
+  sp.mc_Q2         = t->Q2(1);
+  sp.mc_W          = t->W(1);
+  sp.mc_Nu         = t->Nu(1);
+  sp.mc_Xb         = t->Xb(1);
+  sp.mc_Yb         = t->Yb(1);
+  sp.mc_vxe        = t->X(0, 1);
+  sp.mc_vye        = t->Y(0, 1);
+  sp.mc_vze        = t->Z(0, 1);
+  sp.mc_SectorEl   = t->Sector(0, 1);
+  sp.mc_Pex        = t->Px(0, 1);
+  sp.mc_Pey        = t->Py(0, 1);
+  sp.mc_Pez        = t->Pz(0, 1);
+  sp.mc_Pe         = t->Momentum(0, 1);
+  sp.mc_BettaEl    = t->Betta(0, 1);
+  sp.mc_ThetaLabEl = t->ThetaLab(0, 1);
+  sp.mc_PhiLabEl   = t->PhiLab(0, 1);
+  TVector3 *mc_vert = new TVector3(t->X(0,1), t->Y(0,1), t->Z(0,1));
+  sp.mc_TargType    = t->TargType(mc_vert, targetOption);
   // gsim particle (19)
-  sp.mc_pid     = ToPDG(t->Id(row, 1));
+  sp.mc_pid      = ToPDG(t->Id(row, 1));
+  sp.mc_ThetaPQ  = t->ThetaPQ(row, 1);
+  sp.mc_PhiPQ    = t->PhiPQ(row, 1);
+  sp.mc_Pt2      = t->Pt2(row, 1);
+  sp.mc_Pl2      = t->Pl2(row, 1);
   Float_t mc_mass = particleMass(ToPDG(sp.mc_pid));
-  sp.mc_ThetaPQ = t->ThetaPQ(row, 1);
-  sp.mc_PhiPQ   = t->PhiPQ(row, 1);
-  sp.mc_Pt2     = t->Pt2(row, 1);
-  sp.mc_Pl2     = t->Pl2(row, 1);
-  sp.mc_Zh      = t->Zh(row, 1, mc_mass);
-  sp.mc_Mx2     = t->Mx2(row, 1, mc_mass);
-  sp.mc_T       = t->T(row, 1, mc_mass);
-  sp.mc_vxh     = t->X(row, 1);
-  sp.mc_vyh     = t->Y(row, 1);
-  sp.mc_vzh     = t->Z(row, 1);
-  sp.mc_Sector  = t->Sector(row, 1);
-  sp.mc_Px      = t->Px(row, 1);
-  sp.mc_Py      = t->Py(row, 1);
-  sp.mc_Pz      = t->Pz(row, 1);
-  sp.mc_P       = t->Momentum(row, 1);
-  sp.mc_Betta   = t->Betta(row, 1);
-  sp.mc_Mass2   = t->Mass2(row, 1);
-  sp.mc_deltaZ  = t->Z(row, 1) - mc_vert->Z();
+  sp.mc_Zh       = t->Zh(row, 1, mc_mass);
+  sp.mc_Mx2      = t->Mx2(row, 1, mc_mass);
+  sp.mc_T        = t->T(row, 1, mc_mass);
+  sp.mc_ThetaLab = t->ThetaLab(row, 1);
+  sp.mc_PhiLab   = t->PhiLab(row, 1);
+  sp.mc_vxh      = t->X(row, 1);
+  sp.mc_vyh      = t->Y(row, 1);
+  sp.mc_vzh      = t->Z(row, 1);
+  sp.mc_Sector   = t->Sector(row, 1);
+  sp.mc_Px       = t->Px(row, 1);
+  sp.mc_Py       = t->Py(row, 1);
+  sp.mc_Pz       = t->Pz(row, 1);
+  sp.mc_P        = t->Momentum(row, 1);
+  sp.mc_Betta    = t->Betta(row, 1);
+  sp.mc_Mass2    = t->Mass2(row, 1);
+  sp.mc_deltaZ   = t->Z(row, 1) - t->Z(0, 1);
 }
 
 /************************/
@@ -585,62 +680,71 @@ RVec<Int_t> SortByMomentum(TIdentificatorV2* t, RVec<Int_t> row, Int_t kind) {
   return row2;
 }
 
-RVec<Int_t> AngularMatching(TIdentificatorV2* t, RVec<Int_t> simrec_row, RVec<Int_t> gsim_row) {
+void AngularMatching(TIdentificatorV2* t, RVec<Int_t> &simrec_row, RVec<Int_t> &gsim_row) {
   // Matches the "simrec_row" vector with the "gsim_row" vector under angular matching
-  // Returns a new "simrec_row2" with the following features:
-  // - same size than the "gsim_row" vector
-  // - simrec rows in the same position than the matched gsim vector
-  // - empty rows are filled with "-1"
+  // if particles don't match, the counterpart is filled with null
 
+  // obtained from CLAS paper (it's in degrees!)
+  const Double_t fDeltaThetaLab = 0.5;// meas=0.36; // prev=0.22; // Delta_Theta = 3*sigma_Theta
+  const Double_t fDeltaPhiLab   = 2.0;// meas=0.95; // prev=0.79; // Delta_Phi = 3*sigma_Phi
+  
   // define vector sizes - loop length
-  Int_t N = (Int_t) simrec_row.size();
   Int_t M = (Int_t) gsim_row.size();
+  Int_t N = (Int_t) simrec_row.size();
   
-  // define output vector
-  RVec<Int_t> simrec_row2;
-  simrec_row2.resize(M, -1); // M ints with value -1
+  // define output vectors - initially empty
+  RVec<Int_t> simrec_new;
+  RVec<Int_t> gsim_new;
 
-  // define auxiliar vectors
-  RVec<Int_t> simrec_notused; // here we store all simrec particles that weren't able to match
-  RVec<Int_t> gsim_used;      // here we store all gsim particles that matched at least once
-
-  Bool_t wasUsed;
+  // declare PhiLab and ThetaLab
+  Double_t simrec_phi;
+  Double_t simrec_theta;
+  Double_t gsim_phi;
+  Double_t gsim_theta;
   
-  // n, m are the vectors' indices
-  for (Int_t n = 0; n < N; n++) {
-    for (Int_t m = 0; m < M; m++) {
+  // m, n are the vectors' indices
+  for (Int_t m = 0; m < M; m++) {
+    for (Int_t n = 0; n < N; n++) {
 
-      // std::find function returns an iterator to the first element in the range ["first","last"[ that compares equal to "value"
-      // if no such element is found, the function returns "last"
-      wasUsed = (std::find(gsim_used.begin(), gsim_used.end(), gsim_row[m]) != gsim_used.end());
+      // update values
+      gsim_phi     = t->PhiLab(gsim_row[m], 1);
+      gsim_theta   = t->ThetaLab(gsim_row[m], 1);
+      simrec_phi   = t->PhiLab(simrec_row[n], 0);
+      simrec_theta = t->ThetaLab(simrec_row[n], 0);
       
-      // set momentum vectors
-      TVector3 simrec_Pvec(t->Px(simrec_row[n], 0), t->Py(simrec_row[n], 0), t->Pz(simrec_row[n], 0));
-      TVector3 gsim_Pvec(t->Px(gsim_row[m], 1), t->Py(gsim_row[m], 1), t->Pz(gsim_row[m], 1));
-
-      // if angle between both vectors is less than 10° and if the GSIM particle wasn't matched before
-      if (TMath::RadToDeg()*simrec_Pvec.Angle(gsim_Pvec) < 10 && !wasUsed) {
-	simrec_row2[m] = simrec_row[n];   // assign to output vector
-	gsim_used.push_back(gsim_row[m]); // add gsim_row to gsim_used
-	m = M;                            // jump to next iteration in n, this is a break
-      } else if (m == M-1) { // last m for a certain n, and haven't found pair yet
-	simrec_notused.push_back(simrec_row[n]);
+      /*** MATCHING CONDITION ***/
+      
+      if (TMath::Abs(simrec_phi - gsim_phi) < fDeltaPhiLab && TMath::Abs(simrec_theta - gsim_theta) < fDeltaThetaLab &&
+	  std::find(gsim_new.begin(), gsim_new.end(), gsim_row[m]) == gsim_new.end() &&
+	  std::find(simrec_new.begin(), simrec_new.end(), simrec_row[n]) == simrec_new.end()) {
+	// std::find function returns an iterator to the first element in the range ["begin","end"[ that compares equal to "row"
+	// if no such element is found, the function returns "end", this is done to prevent particles that already matched
+	gsim_new.push_back(gsim_row[m]);     // add gsim_row to gsim_new
+	simrec_new.push_back(simrec_row[n]); // add simrec_row to simrec_new
       }
       
-    } // end of gsim loop
-  } // end of simrec loop
+    } // end of simrec loop
+  } // end of gsim loop
 
-  // fill output vector with not-used simrec_row
-  // in other words, it fills the output vector with the remaining simrec particles
-  if ((Int_t) simrec_notused.size() != 0) {
-    Int_t counter = 0;
-    for (Int_t q = 0; q < M; q++) {
-      if (simrec_row2[q] == -1 && counter < (Int_t) simrec_notused.size()) {
-	simrec_row2[q] = simrec_notused[counter]; // assign first element found in not-used vector
-	counter++;                                // jump to next element in not-used vector
-      }
+  /*** FILL REMAINING ***/
+
+  for (Int_t m = 0; m < M; m++) {
+    // if it's not in gsim_new
+    if (std::find(gsim_new.begin(), gsim_new.end(), gsim_row[m]) == gsim_new.end()) {
+	gsim_new.push_back(gsim_row[m]); // add gsim_row to gsim_new
+	simrec_new.push_back(-1);        // add null simrec
     }
   }
-  
-  return simrec_row2;
+
+  for (Int_t n = 0; n < N; n++) {
+    // if it's not in simrec_new
+    if (std::find(simrec_new.begin(), simrec_new.end(), simrec_row[n]) == simrec_new.end()) {
+	simrec_new.push_back(simrec_row[n]); // add simrec_row to simrec_new
+	gsim_new.push_back(-1);              // add null gsim
+    }
+  }
+
+  // assign results
+  gsim_row   = gsim_new;
+  simrec_row = simrec_new;
 }
