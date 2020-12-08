@@ -117,7 +117,7 @@ int main(int argc, char **argv) {
 
     /*** STEP 3: ANGULAR MATCHING ***/
 
-    AngularMatching(t, simrec_row, gsim_row);
+    AngularMatching(t, simrec_row, gsim_row, dataKind, targetOption);
 
     /*** STEP 4: FILL ***/
 

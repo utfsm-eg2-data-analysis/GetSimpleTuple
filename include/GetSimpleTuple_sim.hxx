@@ -707,7 +707,7 @@ RVec<Int_t> SortByMomentum(TIdentificatorV2* t, RVec<Int_t> vector_row, Int_t ki
   return vector_row2;
 }
 
-void AngularMatching(TIdentificatorV2* t, RVec<Int_t> &simrec_row, RVec<Int_t> &gsim_row) {
+void AngularMatching(TIdentificatorV2* t, RVec<Int_t> &simrec_row, RVec<Int_t> &gsim_row, TString dataKind, TString targetOption) {
   // Matches the "simrec_row" vector with the "gsim_row" vector under angular matching
   // if particles don't match, the counterpart is filled with null
 
@@ -732,16 +732,43 @@ void AngularMatching(TIdentificatorV2* t, RVec<Int_t> &simrec_row, RVec<Int_t> &
   Double_t simrec_theta;
   Double_t gsim_phi;
   Double_t gsim_theta;
-  
+
+  // gammas detection at EC
+  Float_t gammaE, gammaRt, gammaR, gammaThetaEC, gammaPhiEC, gammaPx, gammaPy, gammaPz;
+  Float_t tempPid, tempPx, tempPy, tempPz;
+
   // m, n are the vectors' indices
   for (Int_t m = 0; m < M; m++) {
     for (Int_t n = 0; n < N; n++) {
 
-      // update values
-      gsim_phi     = t->PhiLab(gsim_row[m], 1);
-      gsim_theta   = t->ThetaLab(gsim_row[m], 1);
-      simrec_phi   = t->PhiLab(simrec_row[n], 0);
-      simrec_theta = t->ThetaLab(simrec_row[n], 0);
+      // gsim angles don't need correction
+      gsim_phi   = PhiLab(t->Px(gsim_row[m], 1), t->Py(gsim_row[m], 1), t->Pz(gsim_row[m], 1));
+      gsim_theta = ThetaLab(t->Px(gsim_row[m], 1), t->Py(gsim_row[m], 1), t->Pz(gsim_row[m], 1));
+      
+      // measure gammas by detection at EC
+      if (t->GetCategorization(simrec_row[n], dataKind, targetOption) == "gamma") {
+	gammaE       = TMath::Max(t->Etot(simrec_row[n]), t->Ein(simrec_row[n]) + t->Eout(simrec_row[n]))/0.272;
+	gammaRt      = TMath::Sqrt(t->XEC(simrec_row[n])*t->XEC(simrec_row[n]) +
+				   t->YEC(simrec_row[n])*t->YEC(simrec_row[n]));
+	gammaR       = TMath::Sqrt(t->XEC(simrec_row[n])*t->XEC(simrec_row[n]) +
+				   t->YEC(simrec_row[n])*t->YEC(simrec_row[n]) +
+				   (t->ZEC(simrec_row[n]) - t->GetCorrectedVert()->Z())*(t->ZEC(simrec_row[n]) - t->GetCorrectedVert()->Z()));
+	gammaThetaEC = TMath::ASin(gammaRt/gammaR);
+	gammaPhiEC   = TMath::ATan2(t->YEC(simrec_row[n]), t->XEC(simrec_row[n]));
+	gammaPx      = gammaE*TMath::Sin(gammaThetaEC)*TMath::Cos(gammaPhiEC);
+	gammaPy      = gammaE*TMath::Sin(gammaThetaEC)*TMath::Sin(gammaPhiEC);
+	gammaPz      = gammaE*TMath::Cos(gammaThetaEC);
+	tempPid      = 22;
+      } else {
+	tempPid      = -22; // unreal value, it's only needed to be != 22
+      }
+      tempPx         = (tempPid==22)*gammaPx + (tempPid!=22)*t->Px(simrec_row[n], 0);
+      tempPy         = (tempPid==22)*gammaPy + (tempPid!=22)*t->Py(simrec_row[n], 0);
+      tempPz         = (tempPid==22)*gammaPz + (tempPid!=22)*t->Pz(simrec_row[n], 0);
+      
+      // simrec values need correction
+      simrec_phi   = PhiLab(tempPx, tempPy, tempPz);
+      simrec_theta = ThetaLab(tempPx, tempPy, tempPz);
       
       /*** MATCHING CONDITION ***/
       
