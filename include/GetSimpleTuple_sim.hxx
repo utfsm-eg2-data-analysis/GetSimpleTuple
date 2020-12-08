@@ -716,7 +716,7 @@ void AngularMatching(TIdentificatorV2* t, RVec<Int_t> &simrec_row, RVec<Int_t> &
   // arbitrary values:
   //       fDeltaThetaLab = 0.5, fDeltaPhiLab = 2.0
   // measured values: (worst from pi+ with 0 < P < 0.35 GeV)
-  const Double_t fDeltaThetaLab = 1.08; // Delta_Theta = 3*sigma_Theta
+  const Double_t fDeltaThetaLab = 0.78; // Delta_Theta = 3*sigma_Theta
   const Double_t fDeltaPhiLab   = 1.41; // Delta_Phi = 3*sigma_Phi
   
   // define vector sizes - loop length
