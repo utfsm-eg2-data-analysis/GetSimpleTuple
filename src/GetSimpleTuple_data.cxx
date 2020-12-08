@@ -71,7 +71,7 @@ int main(int argc, char **argv) {
   input->Next();
 
   // loop around events
-  for (Int_t i = 0; i < nEvents; i++) { // nEvents
+  for (Int_t i = 0; i < 1200; i++) { // nEvents or 100
     if (input->GetNRows("EVNT") > 0) { // prevent seg-fault
       if (t->GetCategorization(0, dataKind, targetOption) == "electron") {
 	AssignElectronVar_Data(t, de, i, dataKind, targetOption); // (TIdentificator, data_e, evnt, dataKind, targetOption)

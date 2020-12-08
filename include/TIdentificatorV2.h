@@ -1037,7 +1037,7 @@ public:
     if (Charge(k) == 1 &&
 	Status(k) > 0 &&
 	StatDC(k) > 0 && DCStatus(k) > 0 &&
-	Momentum(k) > 0.0005 &&
+	Momentum(k) > 0.5 &&
 	deltaBetta < (-0.00218 + 3*0.01002) &&
 	deltaBetta > (-0.00218 - 3*0.01002)) {
       return true;

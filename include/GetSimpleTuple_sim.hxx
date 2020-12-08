@@ -1,6 +1,7 @@
 #include "TIdentificatorV2.h"
 #include "GSTtree.h"
 
+#include "Constants.hxx"
 #include "Headers.hxx"
 #include "PDG.hxx"
 
@@ -9,6 +10,11 @@ using namespace ROOT::VecOps;
 #ifndef INVLD
 #define INVLD -9999
 #endif
+
+Float_t PhiPQ(Float_t fPex, Float_t fPey, Float_t fPez, Float_t fPx, Float_t fPy, Float_t fPz);
+Float_t ThetaPQ(Float_t fPex, Float_t fPey, Float_t fPez, Float_t fPx, Float_t fPy, Float_t fPz);
+Float_t PhiLab(Float_t fPx, Float_t fPy, Float_t fPz);
+Float_t ThetaLab(Float_t fPx, Float_t fPy, Float_t fPz);
 
 void SetElectronBranches_Sim(TTree *tree, sim_e& se) {
   // simrec (46)
@@ -128,7 +134,8 @@ void SetParticleBranches_Sim(TTree *tree, sim_p& sp) {
   tree->Branch("NRowsECEl",  &sp.NRowsECEl);
   tree->Branch("NRowsSCEl",  &sp.NRowsSCEl);
   tree->Branch("NRowsCCEl",  &sp.NRowsCCEl);
-  // simrec particle (48)
+  // simrec particle (49)
+  tree->Branch("Eh",       &sp.Eh);
   tree->Branch("Zh",       &sp.Zh);
   tree->Branch("ThetaPQ",  &sp.ThetaPQ);
   tree->Branch("Pt2",      &sp.Pt2);
@@ -197,7 +204,8 @@ void SetParticleBranches_Sim(TTree *tree, sim_p& sp) {
   tree->Branch("mc_BettaEl",    &sp.mc_BettaEl);
   tree->Branch("mc_ThetaLabEl", &sp.mc_ThetaLabEl);
   tree->Branch("mc_PhiLabEl",   &sp.mc_PhiLabEl);
-  // gsim particle (21)
+  // gsim particle (22)
+  tree->Branch("mc_Eh",       &sp.mc_Eh);
   tree->Branch("mc_Zh",       &sp.mc_Zh);
   tree->Branch("mc_ThetaPQ",  &sp.mc_ThetaPQ);
   tree->Branch("mc_Pt2",      &sp.mc_Pt2);
@@ -319,8 +327,9 @@ void NullParticleVar_SIMREC(sim_p& sp) {
   sp.NRowsECEl  = INVLD;
   sp.NRowsSCEl  = INVLD;
   sp.NRowsCCEl  = INVLD;
-  // particle (48)
+  // particle (49)
   sp.pid        = INVLD;
+  sp.Eh         = INVLD;
   sp.Zh         = INVLD;
   sp.ThetaPQ    = INVLD;
   sp.PhiPQ      = INVLD;
@@ -410,7 +419,8 @@ void NullParticleVar_GSIM(sim_p& sp) {
   sp.mc_BettaEl    = INVLD;
   sp.mc_ThetaLabEl = INVLD;
   sp.mc_PhiLabEl   = INVLD;
-  // gsim particle (21)
+  // gsim particle (22)
+  sp.mc_Eh         = INVLD;
   sp.mc_Zh         = INVLD;
   sp.mc_ThetaPQ    = INVLD;
   sp.mc_Pt2        = INVLD;
@@ -561,29 +571,13 @@ void AssignParticleVar_SIMREC(TIdentificatorV2* t, sim_p& sp, Int_t row, Int_t e
   sp.NRowsECEl  = t->NRowsEC();
   sp.NRowsSCEl  = t->NRowsSC();
   sp.NRowsCCEl  = t->NRowsCC();
-  // simrec particle (48)
+  // simrec particle (49)
   sp.pid        = particleID(t->GetCategorization(row, dataKind, targetOption));
   Float_t mass  = particleMass(ToPDG(sp.pid));
-  sp.Zh         = t->Zh(row, 0, mass);
-  sp.ThetaPQ    = t->ThetaPQ(row, 0);
-  sp.PhiPQ      = t->PhiPQ(row, 0);
-  sp.Pt2        = t->Pt2(row, 0);
-  sp.Pl2        = t->Pl2(row, 0);
-  sp.Mx2        = t->Mx2(row, 0, mass);
-  sp.T          = t->T(row, 0, mass);
-  sp.T4         = t->TimeCorr4(row, mass);
-  sp.ThetaLab   = t->ThetaLab(row);
-  sp.PhiLab     = t->PhiLab(row);
   sp.vxh        = t->X(row);
   sp.vyh        = t->Y(row);
   sp.vzh        = t->Z(row);
   sp.Sector     = t->Sector(row);
-  sp.Px         = t->Px(row);
-  sp.Py         = t->Py(row);
-  sp.Pz         = t->Pz(row);
-  sp.P          = t->Momentum(row);
-  sp.Betta      = t->Betta(row);
-  sp.Mass2      = t->Mass2(row);
   sp.Etot       = t->Etot(row);
   sp.Ein        = t->Ein(row);
   sp.Eout       = t->Eout(row);
@@ -591,6 +585,37 @@ void AssignParticleVar_SIMREC(TIdentificatorV2* t, sim_p& sp, Int_t row, Int_t e
   sp.YEC        = t->YEC(row);
   sp.ZEC        = t->ZEC(row);
   sp.deltaZ     = t->Z(row) - vert->Z();
+  // measure gammas by detection at EC
+  Float_t gammaE, gammaRt, gammaR, gammaThetaEC, gammaPhiEC, gammaPx, gammaPy, gammaPz;
+  if (sp.pid == 22) {
+    gammaE       = TMath::Max(sp.Etot, sp.Ein + sp.Eout)/0.272;
+    gammaRt      = TMath::Sqrt(sp.XEC*sp.XEC + sp.YEC*sp.YEC);
+    gammaR       = TMath::Sqrt(sp.XEC*sp.XEC + sp.YEC*sp.YEC + (sp.ZEC - sp.vzec)*(sp.ZEC - sp.vzec));
+    gammaThetaEC = TMath::ASin(gammaRt/gammaR);
+    gammaPhiEC   = TMath::ATan2(sp.YEC, sp.XEC);
+    gammaPx      = gammaE*TMath::Sin(gammaThetaEC)*TMath::Cos(gammaPhiEC);
+    gammaPy      = gammaE*TMath::Sin(gammaThetaEC)*TMath::Sin(gammaPhiEC);
+    gammaPz      = gammaE*TMath::Cos(gammaThetaEC);
+  }
+  sp.Px         = (sp.pid==22)*gammaPx + (sp.pid!=22)*t->Px(row);
+  sp.Py         = (sp.pid==22)*gammaPy + (sp.pid!=22)*t->Py(row);
+  sp.Pz         = (sp.pid==22)*gammaPz + (sp.pid!=22)*t->Pz(row);
+  sp.P          = TMath::Sqrt(sp.Px*sp.Px + sp.Py*sp.Py + sp.Pz*sp.Pz);
+  sp.ThetaLab   = PhiLab(sp.Px, sp.Py, sp.Pz);
+  sp.PhiLab     = ThetaLab(sp.Px, sp.Py, sp.Pz);
+  // mass and momentum dependent
+  sp.Eh         = (sp.pid==22)*gammaE + (sp.pid!=22)*TMath::Sqrt(mass*mass + sp.P*sp.P);
+  sp.Zh         = sp.Eh/sp.Nu;
+  sp.ThetaPQ    = ThetaPQ(sp.Pex, sp.Pey, sp.Pez, sp.Px, sp.Py, sp.Pz);
+  sp.PhiPQ      = PhiPQ(sp.Pex, sp.Pey, sp.Pez, sp.Px, sp.Py, sp.Pz);
+  Float_t CosThetaPQ = (sp.Pz*(kEbeam - sp.Pez) - sp.Px*sp.Pex - sp.Py*sp.Pey)/(TMath::Sqrt(sp.Nu*sp.Nu + sp.Q2)*sp.P);
+  sp.Pt2        = sp.P*sp.P*(1 - CosThetaPQ*CosThetaPQ);
+  sp.Pl2        = sp.P*sp.P*CosThetaPQ*CosThetaPQ;
+  sp.Mx2        = sp.W*sp.W + mass*mass - 2*sp.Zh*sp.Nu*sp.Nu + 2*TMath::Sqrt(sp.Pl2*(sp.Nu*sp.Nu + sp.Q2)) - 2*kMproton*sp.Zh*sp.Nu;
+  sp.T          = mass*mass - 2*sp.Zh*sp.Nu*sp.Nu + 2*TMath::Sqrt(sp.Pl2*(sp.Nu*sp.Nu + sp.Q2)) - sp.Q2;
+  sp.Betta      = t->Betta(row); // BettaMeasured
+  sp.Mass2      = sp.P*sp.P*(TMath::Power(sp.Betta, -2) - 1);
+  // status  
   sp.StatDC     = t->StatDC(row);
   sp.DCStatus   = t->DCStatus(row);
   sp.StatEC     = t->StatEC(row);
@@ -602,6 +627,7 @@ void AssignParticleVar_SIMREC(TIdentificatorV2* t, sim_p& sp, Int_t row, Int_t e
   sp.SCStatus   = t->SCStatus(row);
   sp.TimeSC     = t->TimeSC(row);
   sp.PathSC     = t->PathSC(row);
+  sp.T4         = sp.PathSCEl/30. - sp.TimeSCEl + sp.TimeSC - (sp.PathSC/30.)*TMath::Sqrt(TMath::Power(mass/sp.P, 2) + 1);
   sp.StatCC     = t->StatCC(row);
   sp.CCStatus   = t->CCStatus(row);
   sp.Nphe       = t->Nphe(row);
@@ -636,7 +662,7 @@ void AssignParticleVar_GSIM(TIdentificatorV2* t, sim_p& sp, Int_t row, Int_t evn
   TVector3 *mc_vert = new TVector3(t->X(0,1), t->Y(0,1), t->Z(0,1));
   // sp.mc_TargType    = t->TargType(mc_vert, dataKind, targetOption); // (previous)
   sp.mc_TargType    = t->TargTypeSM(dataKind, targetOption, 1);
-  // gsim particle (19)
+  // gsim particle (22)
   sp.mc_pid      = ToPDG(t->Id(row, 1));
   sp.mc_ThetaPQ  = t->ThetaPQ(row, 1);
   sp.mc_PhiPQ    = t->PhiPQ(row, 1);
@@ -644,6 +670,7 @@ void AssignParticleVar_GSIM(TIdentificatorV2* t, sim_p& sp, Int_t row, Int_t evn
   sp.mc_Pl2      = t->Pl2(row, 1);
   Float_t mc_mass = particleMass(ToPDG(sp.mc_pid));
   sp.mc_Zh       = t->Zh(row, 1, mc_mass);
+  sp.mc_Eh       = sp.mc_Zh*sp.mc_Nu;
   sp.mc_Mx2      = t->Mx2(row, 1, mc_mass);
   sp.mc_T        = t->T(row, 1, mc_mass);
   sp.mc_ThetaLab = t->ThetaLab(row, 1);
@@ -666,31 +693,31 @@ void AssignParticleVar_GSIM(TIdentificatorV2* t, sim_p& sp, Int_t row, Int_t evn
 /***                  ***/
 /************************/
 
-RVec<Int_t> SortByMomentum(TIdentificatorV2* t, RVec<Int_t> row, Int_t kind) {
-  // Returns a new "row2" where row values are sorted by their respective momentum (from lower to higher)
-  
+RVec<Int_t> SortByMomentum(TIdentificatorV2* t, RVec<Int_t> vector_row, Int_t kind) {
+  // Returns a new "vector_row2" where particle indices are sorted by their respective momentum (from lower to higher)
   // first, fill the momentum vector
   RVec<Float_t> momentum;
-  for (Int_t m = 0; m < (Int_t) row.size(); m++) {
-    momentum.push_back(t->Momentum(row[m], kind));
+  for (Int_t m = 0; m < (Int_t) vector_row.size(); m++) {
+    momentum.push_back(t->Momentum(vector_row[m], kind));
   }
-  
   // Argsort() creates an indices-vector with the indices sorted by the input-vector values
   RVec<Int_t> indices = Argsort(momentum);
-
   // Take(input-vector, indices-vector) creates a sorted-vector by moving all input-vector indices to match the order assigned by the indices-vector
-  RVec<Int_t> row2 = Take(row, indices);
-  
-  return row2;
+  RVec<Int_t> vector_row2 = Take(vector_row, indices);
+  return vector_row2;
 }
 
 void AngularMatching(TIdentificatorV2* t, RVec<Int_t> &simrec_row, RVec<Int_t> &gsim_row) {
   // Matches the "simrec_row" vector with the "gsim_row" vector under angular matching
   // if particles don't match, the counterpart is filled with null
 
-  // obtained from CLAS paper (it's in degrees!)
-  const Double_t fDeltaThetaLab = 0.5;// meas=0.36; // prev=0.22; // Delta_Theta = 3*sigma_Theta
-  const Double_t fDeltaPhiLab   = 2.0;// meas=0.95; // prev=0.79; // Delta_Phi = 3*sigma_Phi
+  // worst from electron (CLAS paper @ P = 0.75 GeV):
+  //       fDeltaThetaLab = 0.33, fDeltaPhiLab = 0.96
+  // arbitrary values:
+  //       fDeltaThetaLab = 0.5, fDeltaPhiLab = 2.0
+  // measured values: (worst from pi+ with 0 < P < 0.35 GeV)
+  const Double_t fDeltaThetaLab = 1.08; // Delta_Theta = 3*sigma_Theta
+  const Double_t fDeltaPhiLab   = 1.41; // Delta_Phi = 3*sigma_Phi
   
   // define vector sizes - loop length
   Int_t M = (Int_t) gsim_row.size();
@@ -751,4 +778,68 @@ void AngularMatching(TIdentificatorV2* t, RVec<Int_t> &simrec_row, RVec<Int_t> &
   // assign results
   gsim_row   = gsim_new;
   simrec_row = simrec_new;
+}
+
+/******************************/
+/*** MATHEMATICAL FUNCTIONS ***/
+/***                        ***/
+/******************************/
+
+Float_t PhiPQ(Float_t fPex, Float_t fPey, Float_t fPez, Float_t fPx, Float_t fPy, Float_t fPz) {
+  Float_t fPhiPQ;
+  // two 3-momentum vectors are defined
+  // one for the hadron
+  // one for the virtual photon
+  TVector3 hadr(fPx, fPy, fPz);
+  TVector3 virt(-fPex, -fPey, kEbeam - fPez);
+  // the function Phi() and Theta() converts the vector into spherical coordinates
+  // and the function RotateZ(amount) rotates the vector around z-axis a certain amount
+  // now, this paragraph turns y-component of the virtual photon vector into 0 and rotates the hadron vector the same amount
+  // to have the hadron vector in function of the virtual photon direction
+  // if its not clear, try to draw these two vectors in the xy plane
+  Float_t Phi_z = TMath::Pi() - virt.Phi();
+  virt.RotateZ(Phi_z);
+  hadr.RotateZ(Phi_z);
+  // the function Angle() returns the angle between two vectors
+  // now, take into account that the virtual photon vector is in the y=0 plane
+  // again, this paragraph turns the x-component of the virtual photon vector into 0 and rotates the hadron vector the same amount
+  // to have the hadron vector in function of the virtual photon direction
+  // if its not clear, try to draw these two vectors in the xz plane
+  TVector3 unit(0., 0., 1.);
+  Float_t Phi_y = virt.Angle(unit);
+  virt.RotateY(Phi_y);
+  hadr.RotateY(Phi_y);  
+  // finally, it obtains the phi component (in spherical coordinates) of the hadron vector (now in the virtual photon frame of reference)
+  fPhiPQ = hadr.Phi()*TMath::RadToDeg();
+  
+  return fPhiPQ;
+}
+
+Float_t ThetaPQ(Float_t fPex, Float_t fPey, Float_t fPez, Float_t fPx, Float_t fPy, Float_t fPz) {
+  // angle between virtual photon and particle
+  // (and this makes perfect sense if one draws it)
+  Float_t fThetaPQ;
+  TVector3 hadr(fPx, fPy, fPz);
+  TVector3 virt(-fPex, -fPey, kEbeam - fPez);
+  fThetaPQ = virt.Angle(hadr)*TMath::RadToDeg();
+
+  return fThetaPQ;
+}
+
+Float_t ThetaLab(Float_t fPx, Float_t fPy, Float_t fPz) {
+  // polar angle in lab frame
+  TVector3 v3p(fPx, fPy, fPz);
+  return v3p.Theta()*TMath::RadToDeg();
+}
+
+Float_t PhiLab(Float_t fPx, Float_t fPy, Float_t fPz) {
+  // azimuthal angle in lab frame
+  TVector3 v3p(fPx, fPy, fPz);
+  Double_t PhiLab_value = v3p.Phi()*TMath::RadToDeg();
+  if (PhiLab_value < -30.) {
+    return PhiLab_value + 360.;
+  } else if (PhiLab_value > 330.) {
+    return PhiLab_value - 360.;
+  } // closure
+  return PhiLab_value; // default
 }

@@ -110,7 +110,7 @@ int main(int argc, char **argv) {
       } // end of electron-in-gsim condition
     } // end of smth-in-GSIM-bank
 
-    /*** STEP 2: SORT BY MOMENTUM ***/
+    /*** STEP 2: PRELIMINARY SORT ***/
     
     gsim_row   = SortByMomentum(t, gsim_row, 1);
     simrec_row = SortByMomentum(t, simrec_row, 0);
