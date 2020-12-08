@@ -601,8 +601,8 @@ void AssignParticleVar_SIMREC(TIdentificatorV2* t, sim_p& sp, Int_t row, Int_t e
   sp.Py         = (sp.pid==22)*gammaPy + (sp.pid!=22)*t->Py(row);
   sp.Pz         = (sp.pid==22)*gammaPz + (sp.pid!=22)*t->Pz(row);
   sp.P          = TMath::Sqrt(sp.Px*sp.Px + sp.Py*sp.Py + sp.Pz*sp.Pz);
-  sp.ThetaLab   = PhiLab(sp.Px, sp.Py, sp.Pz);
-  sp.PhiLab     = ThetaLab(sp.Px, sp.Py, sp.Pz);
+  sp.ThetaLab   = ThetaLab(sp.Px, sp.Py, sp.Pz);
+  sp.PhiLab     = PhiLab(sp.Px, sp.Py, sp.Pz);
   // mass and momentum dependent
   sp.Eh         = (sp.pid==22)*gammaE + (sp.pid!=22)*TMath::Sqrt(mass*mass + sp.P*sp.P);
   sp.Zh         = sp.Eh/sp.Nu;
