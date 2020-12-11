@@ -138,7 +138,7 @@ void SetParticleBranches_Sim(TTree *tree, sim_p& sp) {
   tree->Branch("Pl2",      &sp.Pl2);
   tree->Branch("PhiPQ",    &sp.PhiPQ);
   tree->Branch("Mx2",      &sp.Mx2);
-  // tree->Branch("T",        &sp.T);
+  tree->Branch("T",        &sp.T);
   tree->Branch("ThetaLab", &sp.ThetaLab);
   tree->Branch("PhiLab",   &sp.PhiLab);
   tree->Branch("vxh",      &sp.vxh);
@@ -459,11 +459,10 @@ void AssignElectronVar_SIMREC(TIdentificatorV2* t, sim_e& se, Int_t evnt, TStrin
   se.Etot     = t->Etot(0);
   se.Ein      = t->Ein(0);
   se.Eout     = t->Eout(0);
-  TVector3 *vert = t->GetCorrectedVert();
-  se.vxec     = vert->X();
-  se.vyec     = vert->Y();
-  se.vzec     = vert->Z();
-  // se.TargType = t->TargType(dataKind, targetOption); // (previous)
+  TVector3 *fVert = t->GetCorrectedVert();
+  se.vxec     = fVert->X();
+  se.vyec     = fVert->Y();
+  se.vzec     = fVert->Z();
   se.TargType = t->TargTypeSM(dataKind, targetOption, 0);
   se.XEC      = t->XEC(0);
   se.YEC      = t->YEC(0);
@@ -512,7 +511,6 @@ void AssignElectronVar_GSIM(TIdentificatorV2* t, sim_e& se, Int_t evnt, TString 
   se.mc_Betta    = t->Betta(0,1);
   se.mc_ThetaLab = t->ThetaLab(0,1);
   se.mc_PhiLab   = t->PhiLab(0,1);
-  // se.mc_TargType = t->TargType(dataKind, targetOption); // (previous)
   se.mc_TargType = t->TargTypeSM(dataKind, targetOption, 1);
 }
 
@@ -535,17 +533,16 @@ void AssignParticleVar_SIMREC(TIdentificatorV2* t, sim_p& sp, Int_t row, Int_t e
   sp.Etote      = t->Etot(0);
   sp.Eine       = t->Ein(0);
   sp.Eoute      = t->Eout(0);
-  TVector3 *vert = t->GetCorrectedVert();
-  sp.vxec       = vert->X();
-  sp.vyec       = vert->Y();
-  sp.vzec       = vert->Z();
-  // sp.TargType   = t->TargType(dataKind, targetOption); // (previous)
+  TVector3 *fVert = t->GetCorrectedVert();
+  sp.vxec       = fVert->X();
+  sp.vyec       = fVert->Y();
+  sp.vzec       = fVert->Z();
   sp.TargType   = t->TargTypeSM(dataKind, targetOption, 0);
   sp.XECe       = t->XEC(0);
   sp.YECe       = t->YEC(0);
   sp.ZECe       = t->ZEC(0);
-  sp.ThetaLabEl = t->ThetaLab(0);
   sp.PhiLabEl   = t->PhiLab(0);
+  sp.ThetaLabEl = t->ThetaLab(0);
   sp.StatDCEl   = t->StatDC(0);
   sp.DCStatusEl = t->DCStatus(0);
   sp.StatECEl   = t->StatEC(0);
@@ -572,33 +569,43 @@ void AssignParticleVar_SIMREC(TIdentificatorV2* t, sim_p& sp, Int_t row, Int_t e
   sp.vyh        = t->Y(row);
   sp.vzh        = t->Z(row);
   sp.Sector     = t->Sector(row);
-  sp.Etot       = t->Etot(row);
-  sp.Ein        = t->Ein(row);
-  sp.Eout       = t->Eout(row);
+  sp.deltaZ     = t->Z(row) - fVert->Z();
   sp.XEC        = t->XEC(row);
   sp.YEC        = t->YEC(row);
   sp.ZEC        = t->ZEC(row);
-  sp.deltaZ     = t->Z(row) - vert->Z();
-  sp.Px         = (sp.pid==22)*t->GetCorrPhotonMomentum(row)->Px() + (sp.pid!=22)*t->Px(row);
-  sp.Py         = (sp.pid==22)*t->GetCorrPhotonMomentum(row)->Py() + (sp.pid!=22)*t->Py(row);
-  sp.Pz         = (sp.pid==22)*t->GetCorrPhotonMomentum(row)->Pz() + (sp.pid!=22)*t->Pz(row);
-  Double_t momentum = TMath::Sqrt(sp.Px*sp.Px + sp.Py*sp.Py + sp.Pz*sp.Pz);
-  sp.P          = TMath::Sqrt(sp.Px*sp.Px + sp.Py*sp.Py + sp.Pz*sp.Pz);
-  sp.ThetaLab   = ThetaLab(sp.Px, sp.Py, sp.Pz);
-  sp.PhiLab     = PhiLab(sp.Px, sp.Py, sp.Pz);
-  // mass and momentum dependent
-  Double_t mass = particleMass(sp.pid);
-  sp.Eh         = (sp.pid==22)*t->GetCorrPhotonMomentum(row)->E() + (sp.pid!=22)*TMath::Sqrt(mass*mass + momentum*momentum);
-  sp.Zh         = sp.Eh/sp.Nu;
-  sp.ThetaPQ    = ThetaPQ(sp.Pex, sp.Pey, sp.Pez, sp.Px, sp.Py, sp.Pz);
-  sp.PhiPQ      = PhiPQ(sp.Pex, sp.Pey, sp.Pez, sp.Px, sp.Py, sp.Pz);
-  Double_t CosThetaPQ = (sp.Pz*(kEbeam - sp.Pez) - sp.Px*sp.Pex - sp.Py*sp.Pey)/(TMath::Sqrt(sp.Nu*sp.Nu + sp.Q2)*momentum);
-  sp.Pt2        = momentum*momentum*(1 - CosThetaPQ*CosThetaPQ);
-  sp.Pl2        = momentum*momentum*CosThetaPQ*CosThetaPQ;
-  sp.Mx2        = sp.W*sp.W + mass*mass - 2*sp.Zh*sp.Nu*sp.Nu + 2*TMath::Sqrt(sp.Pl2*(sp.Nu*sp.Nu + sp.Q2)) - 2*kMassProton*sp.Zh*sp.Nu;
-  sp.T          = mass*mass - 2*sp.Zh*sp.Nu*sp.Nu + 2*TMath::Sqrt(sp.Pl2*(sp.Nu*sp.Nu + sp.Q2)) - sp.Q2;
+  sp.Etot       = t->Etot(row);
+  sp.Ein        = t->Ein(row);
+  sp.Eout       = t->Eout(row);
+  // let's define some auxiliary Double_t
+  Double_t fMass = particleMass(sp.pid);
+  TLorentzVector *fGamma = t->GetCorrPhotonMomentum(row);
+  Double_t fPx   = (sp.pid==22)*fGamma->Px() + (sp.pid!=22)*t->Px(row);
+  Double_t fPy   = (sp.pid==22)*fGamma->Py() + (sp.pid!=22)*t->Py(row);
+  Double_t fPz   = (sp.pid==22)*fGamma->Pz() + (sp.pid!=22)*t->Pz(row);
+  Double_t fP    = TMath::Sqrt(fPx*fPx + fPy*fPy + fPz*fPz);
+  Double_t fE    = (sp.pid==22)*fGamma->E() + (sp.pid!=22)*TMath::Sqrt(fMass*fMass + fP*fP);
+  Double_t fZ    = fE/t->Nu();
+  // continue...
+  sp.Px         = fPx;
+  sp.Py         = fPy;
+  sp.Pz         = fPz;
+  sp.P          = fP;
+  sp.PhiLab     = PhiLab(fPx, fPy, fPz);
+  sp.ThetaLab   = ThetaLab(fPx, fPy, fPz);
+  sp.Eh         = fE;
+  sp.Zh         = fZ;
+  sp.ThetaPQ    = ThetaPQ(t->Px(0), t->Py(0), t->Pz(0), fPx, fPy, fPz);
+  sp.PhiPQ      = PhiPQ(t->Px(0), t->Py(0), t->Pz(0), fPx, fPy, fPz);
+  Double_t fCosThetaPQ = (fPz*(kEbeam - t->Pz(0)) - fPx*t->Px(0) - fPy*t->Py(0))/(TMath::Sqrt(t->Nu()*t->Nu() + t->Q2())*fP);
+  Double_t fPt2 = fP*fP*(1 - fCosThetaPQ*fCosThetaPQ);
+  Double_t fPl2 = fP*fP*fCosThetaPQ*fCosThetaPQ;
+  sp.Pt2        = fPt2;
+  sp.Pl2        = fPl2;
+  sp.Mx2        = t->W()*t->W() + fMass*fMass - 2*fZ*t->Nu()*t->Nu() + 2*TMath::Sqrt(fPl2*(t->Nu()*t->Nu() + t->Q2())) - 2*kMassProton*fZ*t->Nu();
+  sp.T          = fMass*fMass - 2*fZ*t->Nu()*t->Nu() + 2*TMath::Sqrt(fPl2*(t->Nu()*t->Nu() + t->Q2())) - t->Q2();
   sp.Betta      = t->Betta(row); // BettaMeasured
-  sp.Mass2      = momentum*momentum*(TMath::Power(sp.Betta, -2) - 1);
+  sp.Mass2      = fP*fP*(TMath::Power(t->Betta(row), -2) - 1);
+  sp.T4         = t->PathSC(0)/30. - t->TimeSC(0) + t->TimeSC(row) - (t->PathSC(row)/30.)*TMath::Sqrt(TMath::Power(fMass/fP, 2) + 1);
   // status  
   sp.StatDC     = t->StatDC(row);
   sp.DCStatus   = t->DCStatus(row);
@@ -611,7 +618,6 @@ void AssignParticleVar_SIMREC(TIdentificatorV2* t, sim_p& sp, Int_t row, Int_t e
   sp.SCStatus   = t->SCStatus(row);
   sp.TimeSC     = t->TimeSC(row);
   sp.PathSC     = t->PathSC(row);
-  sp.T4         = t->PathSC(0)/30. - t->TimeSC(0) + t->TimeSC(row) - (t->PathSC(row)/30.)*TMath::Sqrt(TMath::Power(mass/momentum, 2) + 1);
   sp.StatCC     = t->StatCC(row);
   sp.CCStatus   = t->CCStatus(row);
   sp.Nphe       = t->Nphe(row);
@@ -643,20 +649,19 @@ void AssignParticleVar_GSIM(TIdentificatorV2* t, sim_p& sp, Int_t row, Int_t evn
   sp.mc_BettaEl    = t->Betta(0, 1);
   sp.mc_ThetaLabEl = t->ThetaLab(0, 1);
   sp.mc_PhiLabEl   = t->PhiLab(0, 1);
-  TVector3 *mc_vert = new TVector3(t->X(0,1), t->Y(0,1), t->Z(0,1));
-  // sp.mc_TargType    = t->TargType(dataKind, targetOption); // (previous)
-  sp.mc_TargType    = t->TargTypeSM(dataKind, targetOption, 1);
+  sp.mc_TargType   = t->TargTypeSM(dataKind, targetOption, 1);
   // gsim particle (22)
   sp.mc_pid      = ToPDG(t->Id(row, 1)); // from GEANT to PDG
   sp.mc_ThetaPQ  = t->ThetaPQ(row, 1);
   sp.mc_PhiPQ    = t->PhiPQ(row, 1);
   sp.mc_Pt2      = t->Pt2(row, 1);
   sp.mc_Pl2      = t->Pl2(row, 1);
-  Double_t mc_mass = particleMass(sp.mc_pid);
-  sp.mc_Zh       = t->Zh(row, 1, mc_mass);
-  sp.mc_Eh       = sp.mc_Zh*sp.mc_Nu;
-  sp.mc_Mx2      = t->Mx2(row, 1, mc_mass);
-  sp.mc_T        = t->T(row, 1, mc_mass);
+  Double_t fMass = particleMass(sp.mc_pid);
+  Double_t fE    = t->Zh(row, 1, fMass)*t->Nu(1);
+  sp.mc_Zh       = t->Zh(row, 1, fMass);
+  sp.mc_Eh       = fE;
+  sp.mc_Mx2      = t->Mx2(row, 1, fMass);
+  sp.mc_T        = t->T(row, 1, fMass);
   sp.mc_ThetaLab = t->ThetaLab(row, 1);
   sp.mc_PhiLab   = t->PhiLab(row, 1);
   sp.mc_vxh      = t->X(row, 1);
