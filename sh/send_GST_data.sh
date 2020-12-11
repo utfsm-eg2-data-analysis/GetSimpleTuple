@@ -23,10 +23,10 @@ TARNAME="$@"
 source ~/.bashrc
 
 # set main dirs
-GSTDIR=${HOME}/GetSimpleTuple/bin                                          # dir of the executable
+GSTDIR=${HOME}/GetSimpleTuple                                              # dir of the executable
 DATADIR=/data/jlab/mss/clas/eg2a/production/Pass2/Clas                     # dir where are located all the data files
-OUTDIR=/eos/user/${USER:0:1}/${USER}/out/GetSimpleTuple_data/${CURRENTDIR} # output dir
-TMPDIR=/eos/user/${USER:0:1}/${USER}/tmp/GetSimpleTuple_data/${CURRENTDIR} # temp dir to store logs and job scripts
+OUTDIR=/eos/user/${USER:0:1}/${USER}/out/GetSimpleTuple_data/${TARNAME}    # output dir
+TMPDIR=/eos/user/${USER:0:1}/${USER}/tmp/GetSimpleTuple_data/${TARNAME}    # temp dir to store logs and job scripts
 mkdir -p ${OUTDIR} ${TMPDIR} # just in case
 
 # obtain run numbers
@@ -57,7 +57,7 @@ for ((COUNTER=1; COUNTER <= ${TOTALRN}; COUNTER++)); do # ${nfiles} or 1
     echo "#SBATCH --mem=1GB"                                          >> ${jobfile}
     echo ""                                                           >> ${jobfile}
     echo "source ${HOME}/.bashrc"                                     >> ${jobfile}
-    echo "cd ${GSTDIR}"                                               >> ${jobfile}
+    echo "cd ${GSTDIR}/bin"                                           >> ${jobfile}
     for file in ${DATADIR}/clas_${RN}*; do # extract all run numbers
 	inputfile=$(readlink -f ${file})
 	echo "ln -s ${inputfile} ${inputfile##*/}"                    >> ${jobfile} # create symbolic link to input file with GST naming scheme
