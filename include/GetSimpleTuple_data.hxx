@@ -3,12 +3,8 @@
 
 #include "Headers.hxx"
 #include "Constants.hxx"
+#include "Math.hxx"
 #include "PDG.hxx"
-
-Float_t ThetaPQ(Float_t fPex, Float_t fPey, Float_t fPez, Float_t fPx, Float_t fPy, Float_t fPz);
-Float_t PhiPQ(Float_t fPex, Float_t fPey, Float_t fPez, Float_t fPx, Float_t fPy, Float_t fPz);
-Float_t ThetaLab(Float_t fPex, Float_t fPey, Float_t fPez);
-Float_t PhiLab(Float_t fPex, Float_t fPey, Float_t fPez);
 
 void SetElectronBranches_Data(TTree *tree, data_e& de) {
   // electron (46)
@@ -187,7 +183,7 @@ void AssignElectronVar_Data(TIdentificatorV2* t, data_e& de, Int_t evnt, TString
   de.vxec     = vert->X();
   de.vyec     = vert->Y();
   de.vzec     = vert->Z();
-  de.TargType = t->TargType(vert, dataKind, targetOption);
+  de.TargType = t->TargTypeSM(dataKind, targetOption, 0);
   de.XEC      = t->XEC(0);
   de.YEC      = t->YEC(0);
   de.ZEC      = t->ZEC(0);
@@ -240,7 +236,7 @@ void AssignParticleVar_Data(TIdentificatorV2* t, data_p& dp, Int_t row, Int_t ev
   dp.vxec       = vert->X();
   dp.vyec       = vert->Y();
   dp.vzec       = vert->Z();
-  dp.TargType   = t->TargType(vert, dataKind, targetOption);
+  dp.TargType   = t->TargTypeSM(dataKind, targetOption, 0);
   dp.XECe       = t->XEC(0);
   dp.YECe       = t->YEC(0);
   dp.ZECe       = t->ZEC(0);
@@ -268,7 +264,6 @@ void AssignParticleVar_Data(TIdentificatorV2* t, data_p& dp, Int_t row, Int_t ev
   dp.NRowsCCEl  = t->NRowsCC();
   // particle (49)
   dp.pid        = particleID(t->GetCategorization(row, dataKind, targetOption));
-  Float_t mass  = particleMass(ToPDG(dp.pid));
   dp.vxh        = t->X(row);
   dp.vyh        = t->Y(row);
   dp.vzh        = t->Z(row);
@@ -280,36 +275,26 @@ void AssignParticleVar_Data(TIdentificatorV2* t, data_p& dp, Int_t row, Int_t ev
   dp.Etot       = t->Etot(row);
   dp.Ein        = t->Ein(row);
   dp.Eout       = t->Eout(row);
-  // measure gammas by detection at EC
-  Float_t gammaE, gammaRt, gammaR, gammaThetaEC, gammaPhiEC, gammaPx, gammaPy, gammaPz;
-  if (dp.pid == 22) {
-    gammaE       = TMath::Max(dp.Etot, dp.Ein + dp.Eout)/0.272;
-    gammaRt      = TMath::Sqrt(dp.XEC*dp.XEC + dp.YEC*dp.YEC);
-    gammaR       = TMath::Sqrt(dp.XEC*dp.XEC + dp.YEC*dp.YEC + (dp.ZEC - dp.vzec)*(dp.ZEC - dp.vzec));
-    gammaThetaEC = TMath::ASin(gammaRt/gammaR);
-    gammaPhiEC   = TMath::ATan2(dp.YEC, dp.XEC);
-    gammaPx      = gammaE*TMath::Sin(gammaThetaEC)*TMath::Cos(gammaPhiEC);
-    gammaPy      = gammaE*TMath::Sin(gammaThetaEC)*TMath::Sin(gammaPhiEC);
-    gammaPz      = gammaE*TMath::Cos(gammaThetaEC);
-  }
-  dp.Px         = (dp.pid==22)*gammaPx + (dp.pid!=22)*t->Px(row);
-  dp.Py         = (dp.pid==22)*gammaPy + (dp.pid!=22)*t->Py(row);
-  dp.Pz         = (dp.pid==22)*gammaPz + (dp.pid!=22)*t->Pz(row);
+  Double_t mass = particleMass(ToPDG(dp.pid));
+  dp.Px         = (dp.pid==22)*t->GetCorrPhotonMomentum(row)->Px() + (dp.pid!=22)*t->Px(row);
+  dp.Py         = (dp.pid==22)*t->GetCorrPhotonMomentum(row)->Py() + (dp.pid!=22)*t->Py(row);
+  dp.Pz         = (dp.pid==22)*t->GetCorrPhotonMomentum(row)->Pz() + (dp.pid!=22)*t->Pz(row);
+  Double_t momentum = TMath::Sqrt(dp.Px*dp.Px + dp.Py*dp.Py + dp.Pz*dp.Pz);
   dp.P          = TMath::Sqrt(dp.Px*dp.Px + dp.Py*dp.Py + dp.Pz*dp.Pz);
   dp.PhiLab     = PhiLab(dp.Px, dp.Py, dp.Pz);
   dp.ThetaLab   = ThetaLab(dp.Px, dp.Py, dp.Pz);
   // mass and momentum dependent
-  dp.Eh         = (dp.pid==22)*gammaE + (dp.pid!=22)*TMath::Sqrt(mass*mass + dp.P*dp.P);
+  dp.Eh         = (dp.pid==22)*t->GetCorrPhotonMomentum(row)->E() + (dp.pid!=22)*TMath::Sqrt(mass*mass + momentum*momentum);
   dp.Zh         = dp.Eh/dp.Nu;
   dp.ThetaPQ    = ThetaPQ(dp.Pex, dp.Pey, dp.Pez, dp.Px, dp.Py, dp.Pz);
   dp.PhiPQ      = PhiPQ(dp.Pex, dp.Pey, dp.Pez, dp.Px, dp.Py, dp.Pz);
-  Float_t CosThetaPQ = (dp.Pz*(kEbeam - dp.Pez) - dp.Px*dp.Pex - dp.Py*dp.Pey)/(TMath::Sqrt(dp.Nu*dp.Nu + dp.Q2)*dp.P);
-  dp.Pt2        = dp.P*dp.P*(1 - CosThetaPQ*CosThetaPQ);
-  dp.Pl2        = dp.P*dp.P*CosThetaPQ*CosThetaPQ;
-  dp.Mx2        = dp.W*dp.W + mass*mass - 2*dp.Zh*dp.Nu*dp.Nu + 2*TMath::Sqrt(dp.Pl2*(dp.Nu*dp.Nu + dp.Q2)) - 2*kMproton*dp.Zh*dp.Nu;
+  Double_t CosThetaPQ = (dp.Pz*(kEbeam - dp.Pez) - dp.Px*dp.Pex - dp.Py*dp.Pey)/(TMath::Sqrt(dp.Nu*dp.Nu + dp.Q2)*momentum);
+  dp.Pt2        = momentum*momentum*(1 - CosThetaPQ*CosThetaPQ);
+  dp.Pl2        = momentum*momentum*CosThetaPQ*CosThetaPQ;
+  dp.Mx2        = dp.W*dp.W + mass*mass - 2*dp.Zh*dp.Nu*dp.Nu + 2*TMath::Sqrt(dp.Pl2*(dp.Nu*dp.Nu + dp.Q2)) - 2*kMassProton*dp.Zh*dp.Nu;
   dp.T          = mass*mass - 2*dp.Zh*dp.Nu*dp.Nu + 2*TMath::Sqrt(dp.Pl2*(dp.Nu*dp.Nu + dp.Q2)) - dp.Q2;
   dp.Betta      = t->Betta(row); // BettaMeasured
-  dp.Mass2      = dp.P*dp.P*(TMath::Power(dp.Betta, -2) - 1);
+  dp.Mass2      = momentum*momentum*(TMath::Power(dp.Betta, -2) - 1);
   // status
   dp.StatDC     = t->StatDC(row);
   dp.DCStatus   = t->DCStatus(row);
@@ -323,7 +308,7 @@ void AssignParticleVar_Data(TIdentificatorV2* t, data_p& dp, Int_t row, Int_t ev
   dp.TimeSC     = t->TimeSC(row);
   dp.PathSC     = t->PathSC(row);
   dp.StatCC     = t->StatCC(row);
-  dp.T4         = dp.PathSCEl/30. - dp.TimeSCEl + dp.TimeSC - (dp.PathSC/30.)*TMath::Sqrt(TMath::Power(mass/dp.P, 2) + 1);
+  dp.T4         = t->PathSC(0)/30. - t->TimeSC(0) + t->TimeSC(row) - (t->PathSC(row)/30.)*TMath::Sqrt(TMath::Power(mass/momentum, 2) + 1);
   dp.CCStatus   = t->CCStatus(row);
   dp.Nphe       = t->Nphe(row);
   dp.Chi2CC     = t->Chi2CC(row);
@@ -334,65 +319,4 @@ void AssignParticleVar_Data(TIdentificatorV2* t, data_p& dp, Int_t row, Int_t ev
   dp.NRowsCC    = t->NRowsCC();
   // evnt (1)
   dp.evnt       = evnt;
-}
-
-/*** Mathematical functions ***/
-
-Float_t PhiPQ(Float_t fPex, Float_t fPey, Float_t fPez, Float_t fPx, Float_t fPy, Float_t fPz) {
-  Float_t fPhiPQ;
-  // two 3-momentum vectors are defined
-  // one for the hadron
-  // one for the virtual photon
-  TVector3 hadr(fPx, fPy, fPz);
-  TVector3 virt(-fPex, -fPey, kEbeam - fPez);
-  // the function Phi() and Theta() converts the vector into spherical coordinates
-  // and the function RotateZ(amount) rotates the vector around z-axis a certain amount
-  // now, this paragraph turns y-component of the virtual photon vector into 0 and rotates the hadron vector the same amount
-  // to have the hadron vector in function of the virtual photon direction
-  // if its not clear, try to draw these two vectors in the xy plane
-  Float_t Phi_z = TMath::Pi() - virt.Phi();
-  virt.RotateZ(Phi_z);
-  hadr.RotateZ(Phi_z);
-  // the function Angle() returns the angle between two vectors
-  // now, take into account that the virtual photon vector is in the y=0 plane
-  // again, this paragraph turns the x-component of the virtual photon vector into 0 and rotates the hadron vector the same amount
-  // to have the hadron vector in function of the virtual photon direction
-  // if its not clear, try to draw these two vectors in the xz plane
-  TVector3 unit(0., 0., 1.);
-  Float_t Phi_y = virt.Angle(unit);
-  virt.RotateY(Phi_y);
-  hadr.RotateY(Phi_y);  
-  // finally, it obtains the phi component (in spherical coordinates) of the hadron vector (now in the virtual photon frame of reference)
-  fPhiPQ = hadr.Phi()*TMath::RadToDeg();
-  
-  return fPhiPQ;
-}
-
-Float_t ThetaPQ(Float_t fPex, Float_t fPey, Float_t fPez, Float_t fPx, Float_t fPy, Float_t fPz) {
-  // angle between virtual photon and particle
-  // (and this makes perfect sense if one draws it)
-  Float_t fThetaPQ;
-  TVector3 hadr(fPx, fPy, fPz);
-  TVector3 virt(-fPex, -fPey, kEbeam - fPez);
-  fThetaPQ = virt.Angle(hadr)*TMath::RadToDeg();
-
-  return fThetaPQ;
-}
-
-Float_t ThetaLab(Float_t fPx, Float_t fPy, Float_t fPz) {
-  // polar angle in lab frame
-  TVector3 v3p(fPx, fPy, fPz);
-  return v3p.Theta()*TMath::RadToDeg();
-}
-
-Float_t PhiLab(Float_t fPx, Float_t fPy, Float_t fPz) {
-  // azimuthal angle in lab frame
-  TVector3 v3p(fPx, fPy, fPz);
-  Double_t PhiLab_value = v3p.Phi()*TMath::RadToDeg();
-  if (PhiLab_value < -30.) {
-    return PhiLab_value + 360.;
-  } else if (PhiLab_value > 330.) {
-    return PhiLab_value - 360.;
-  } // closure
-  return PhiLab_value; // default
 }

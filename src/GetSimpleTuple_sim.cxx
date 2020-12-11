@@ -84,13 +84,15 @@ int main(int argc, char **argv) {
       // first, check numbering scheme
       if (t->Id(0, 1) == 11) SetNumberingScheme("PDG");
       else if (t->Id(0, 1) == 3) SetNumberingScheme("GEANT");
-	    
+      
       if (t->Id(0, 1) == gElectronID) {
 	for (Int_t q = 1; q < input->GetNRows("GSIM"); q++) {
-	  if (t->Id(q, 1) == gPiPlusID || t->Id(q, 1) == gPiMinusID || t->Id(q, 1) == gGammaID ||
-	      t->Id(q, 1) == gElectronID || t->Id(q, 1) == gPositronID || t->Id(q, 1) == gProtonID || t->Id(q, 1) == gNeutronID ||
-	      t->Id(q, 1) == gKaonPlusID || t->Id(q, 1) == gKaonMinusID ||
-	      t->Id(q, 1) == gKaonZeroLongID || t->Id(q, 1) == gKaonZeroShortID || t->Id(q, 1) == gKaonZeroID) {
+	  if (t->Id(q, 1) == gPiPlusID || t->Id(q, 1) == gPiMinusID ||
+	      t->Id(q, 1) == gGammaID || t->Id(q, 1) == gElectronID ||
+	      t->Id(q, 1) == gPositronID || t->Id(q, 1) == gProtonID ||
+	      t->Id(q, 1) == gNeutronID || t->Id(q, 1) == gKaonPlusID ||
+	      t->Id(q, 1) == gKaonMinusID || t->Id(q, 1) == gKaonZeroLongID ||
+	      t->Id(q, 1) == gKaonZeroShortID || t->Id(q, 1) == gKaonZeroID) {
 	    gsim_row.push_back(q);
 	  }
 	} // end of loop in gsim-particles
