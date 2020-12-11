@@ -21,9 +21,7 @@ CXXFLAGS := -g -O0 -Wall -fPIC $(ROOTCFLAGS) # O0
 LDFLAGS := -g -O0 $(ROOTLDFLAGS) # O0
 
 INCLUDES := -I$(CLASTOOL)/include -I./include
-LIBS := $(ROOTGLIBS) -lRooFit -lRooFitCore -lMinuit\
-               -L$(CLASTOOL)/slib/${OS_NAME} -lClasTool -lClasBanks -lVirtualReader -lDSTReader -lMathMore -lMatrix\
-	       -lSpectrum -lEG
+LIBS := $(ROOTGLIBS) -L$(CLASTOOL)/slib/${OS_NAME} -lClasTool -lClasBanks -lDSTReader -lEG
 
 PROG := GetSimpleTuple_data GetSimpleTuple_sim
 LIST := $(addprefix $(BINDIR)/, $(PROG))
