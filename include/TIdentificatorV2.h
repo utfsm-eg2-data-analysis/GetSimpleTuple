@@ -50,7 +50,7 @@ public:
     fCT = 0;
   }
 
-  Float_t NEvent() {
+  Double_t NEvent() {
     // Returns event number from HEAD bank
     return ((THEADERClass *) fCT->GetHEADER())->GetNEvent();
   }
@@ -358,7 +358,7 @@ public:
     }
   }
 
-  Float_t XEC(Int_t k) {
+  Double_t XEC(Int_t k) {
     // (?)
     fEVNT = (TEVNTClass *) fCT->GetBankRow("EVNT", k);
     if (fEVNT->Ecstat >= 1) {
@@ -370,7 +370,7 @@ public:
     }
   }
 
-  Float_t YEC(Int_t k) {
+  Double_t YEC(Int_t k) {
     // (?)
     fEVNT = (TEVNTClass *) fCT->GetBankRow("EVNT", k);
     if (fEVNT->Ecstat >= 1) {
@@ -382,7 +382,7 @@ public:
     }
   }
 
-  Float_t ZEC(Int_t k) {
+  Double_t ZEC(Int_t k) {
     // (?)
     fEVNT = (TEVNTClass *) fCT->GetBankRow("EVNT", k);
     if (fEVNT->Ecstat >= 1) {
@@ -394,7 +394,7 @@ public:
     }
   }
 
-  Float_t TimeEC(Int_t k) {
+  Double_t TimeEC(Int_t k) {
     // (?)
     fEVNT = (TEVNTClass *) fCT->GetBankRow("EVNT", k);
     if (fEVNT->Ecstat >= 1) {
@@ -406,7 +406,7 @@ public:
     }
   }
 
-  Float_t PathEC(Int_t k) {
+  Double_t PathEC(Int_t k) {
     // (?)
     fEVNT = (TEVNTClass *) fCT->GetBankRow("EVNT", k);
     if (fEVNT->Ecstat >= 1) {
@@ -584,11 +584,11 @@ public:
     TVector3 RotatedVertPos(X(0), Y(0), Z(0));
     TVector3 RotatedVertDir(Px(0), Py(0), Pz(0));
     TVector3 TargetPos(0.043, -0.33, 0);
-    Float_t sect = Sector(0); 
+    Double_t sect = Sector(0); 
     RotatedVertPos.RotateZ(-TMath::DegToRad()*60.*sect);
     RotatedVertDir.RotateZ(-TMath::DegToRad()*60.*sect);
     TargetPos.RotateZ(-TMath::DegToRad()*60.*sect);
-    Float_t ShiftLength = (TargetPos.X() - RotatedVertPos.X())/RotatedVertDir.X();
+    Double_t ShiftLength = (TargetPos.X() - RotatedVertPos.X())/RotatedVertDir.X();
     RotatedVertDir = ShiftLength*RotatedVertDir;
     RotatedVertPos = RotatedVertPos + RotatedVertDir;
     TVector3 *V_corr = new TVector3();
@@ -598,17 +598,17 @@ public:
     return V_corr;
   }
   
-  Int_t TargType(TVector3 *vertex, TString dataKind, TString targetOption) {
+  Int_t TargType(TString dataKind, TString targetOption) {
     // assigns TargType according to corrected vertex cut
     // Taisiya Mineeva & Orlando Soto cuts
     if (dataKind == "data") {
-      if (targetOption == "C" && vertex->Z() > -25.33 && vertex->Z() < -24.10) {
+      if (targetOption == "C" && GetCorrectedVert()->Z() > -25.33 && GetCorrectedVert()->Z() < -24.10) {
 	return 2;
-      } else if (targetOption == "Fe" && vertex->Z() > -25.65 && vertex->Z() < -24.26) {
+      } else if (targetOption == "Fe" && GetCorrectedVert()->Z() > -25.65 && GetCorrectedVert()->Z() < -24.26) {
 	return 2;
-      } else if (targetOption == "Pb" && vertex->Z() > -25.54 && vertex->Z() < -24.36) {
+      } else if (targetOption == "Pb" && GetCorrectedVert()->Z() > -25.54 && GetCorrectedVert()->Z() < -24.36) {
 	return 2;
-      } else if (vertex->Z() > -31.80 && vertex->Z() < -28.40) {
+      } else if (GetCorrectedVert()->Z() > -31.80 && GetCorrectedVert()->Z() < -28.40) {
 	return 1; // liquid
       }
     } else if (dataKind == "sim") {
@@ -620,8 +620,8 @@ public:
     return 0;
   }
   
-  Int_t TargTypeSM(TString dataKind, TString targetOption, Int_t kind) {
-    // assigns TargType according to corrected vertex cut
+  Int_t TargTypeSM(TString dataKind, TString targetOption, Int_t kind = 0) {
+    // assigns TargType according to vertex cut
     Int_t sector = Sector(0, kind);
     // Sebastián Morán vertex cuts
     Double_t shift[6] = {0.1, -0.4, -0.6, -0.1, 0.4, 0.6};
@@ -694,19 +694,19 @@ public:
  
   TVector3 *XYZToUVW(TVector3 *xyz) {
     // Returns (?)
-    Float_t ex = 0., wy = 0., zd = 0.;
-    Float_t yu = 0., ve = 0., wu = 0.;
-    Float_t xi = 0., yi = 0., zi = 0.;
-    Float_t ec_phy = 0.;  
-    Float_t phy = 0.;
-    Float_t rot[3][3];
+    Double_t ex = 0., wy = 0., zd = 0.;
+    Double_t yu = 0., ve = 0., wu = 0.;
+    Double_t xi = 0., yi = 0., zi = 0.;
+    Double_t ec_phy = 0.;  
+    Double_t phy = 0.;
+    Double_t rot[3][3];
     // parameters
-    const Float_t ec_the =    0.4363323;
-    const Float_t ylow   = -182.974;
-    const Float_t yhi    =  189.956;
-    const Float_t tgrho  =    1.95325; 
-    const Float_t sinrho =    0.8901256; 
-    const Float_t cosrho =    0.455715;
+    const Double_t ec_the =    0.4363323;
+    const Double_t ylow   = -182.974;
+    const Double_t yhi    =  189.956;
+    const Double_t tgrho  =    1.95325; 
+    const Double_t sinrho =    0.8901256; 
+    const Double_t cosrho =    0.455715;
     // variables
     ex = xyz->X();
     wy = xyz->Y();
@@ -783,6 +783,21 @@ public:
       return true;
     } // closure
     return false;
+  }
+
+  TLorentzVector *GetCorrPhotonMomentum(Int_t k) {
+    // measure gammas by detection at EC
+    Double_t fGammaE, fGammaRt, fGammaR, fGammaThetaEC, fGammaPhiEC, fGammaPx, fGammaPy, fGammaPz;
+    fGammaE       = TMath::Max(Etot(k), Ein(k) + Eout(k))/0.272;
+    fGammaRt      = TMath::Sqrt(XEC(k)*XEC(k) + YEC(k)*YEC(k));
+    fGammaR       = TMath::Sqrt(XEC(k)*XEC(k) + YEC(k)*YEC(k) + (ZEC(k) - GetCorrectedVert()->Z())*(ZEC(k) - GetCorrectedVert()->Z()));
+    fGammaThetaEC = TMath::ASin(fGammaRt/fGammaR);
+    fGammaPhiEC   = TMath::ATan2(YEC(k), XEC(k));
+    fGammaPx      = fGammaE*TMath::Sin(fGammaThetaEC)*TMath::Cos(fGammaPhiEC);
+    fGammaPy      = fGammaE*TMath::Sin(fGammaThetaEC)*TMath::Sin(fGammaPhiEC);
+    fGammaPz      = fGammaE*TMath::Cos(fGammaThetaEC);
+    TLorentzVector *fGammaP = new TLorentzVector(fGammaPx, fGammaPy, fGammaPz, fGammaE);
+    return fGammaP;
   }
   
   /*** Electron DC Fiducial Cuts ***/
@@ -927,8 +942,8 @@ public:
   }
 
   Bool_t PiPlusPhaseSpace_SC(Int_t k) {
-    Float_t P  = Momentum(k);
-    Float_t T4 = TimeCorr4(k, 0.13957);
+    Double_t P  = Momentum(k);
+    Double_t T4 = TimeCorr4(k, 0.13957);
     // sebastian's paramaters
     const Double_t lines_PiPlus[14][2] = {{-0.70, 0.70}, {-0.70, 0.65},
 					  {-0.70, 0.65}, {-0.70, 0.65},
@@ -959,8 +974,8 @@ public:
 
   Bool_t PiPlusPhaseSpace_CC(Int_t k) {
     // for high energy pi+
-    Float_t P  = Momentum(k);
-    Float_t T4 = TimeCorr4(k, 0.13957);
+    Double_t P  = Momentum(k);
+    Double_t T4 = TimeCorr4(k, 0.13957);
     if (NRowsCC() != 0 && StatCC(k) > 0 && Nphe(k) > 25 && Chi2CC(k) < 5/57.3 &&
 	P >= 2.7 && T4 > -0.35 && T4 < 0.35) {
       return true;
@@ -979,8 +994,8 @@ public:
   }
 
   Bool_t PiMinusPhaseSpace_SC(Int_t k) {
-    Float_t P  = Momentum(k);
-    Float_t T4 = TimeCorr4(k, 0.13957);
+    Double_t P  = Momentum(k);
+    Double_t T4 = TimeCorr4(k, 0.13957);
     // sebastian's parameters
     const Double_t lines_PiMinus[5][2]= {{-0.75, 0.80},  
 					 {-0.55, 0.55},
@@ -999,8 +1014,8 @@ public:
 
   Bool_t PiMinusPhaseSpace_CC(Int_t k) {
     // for high energy pi+
-    Float_t P  = Momentum(k);
-    Float_t T4 = TimeCorr4(k, 0.13957);
+    Double_t P  = Momentum(k);
+    Double_t T4 = TimeCorr4(k, 0.13957);
     if (StatCC(k) > 0 && Nphe(k) > 25 &&
 	P > 2.5 && T4 > -1.50 && T4 < 1.50) {
       return true;
@@ -1009,7 +1024,7 @@ public:
   }
   
   Bool_t IsPiMinus(Int_t k, TVector3 *ECuvw) {
-    Float_t deltaBetta = Betta(k) - (Momentum(k)/TMath::Sqrt(Momentum(k)*Momentum(k) + 0.13957*0.13957));
+    Double_t deltaBetta = Betta(k) - (Momentum(k)/TMath::Sqrt(Momentum(k)*Momentum(k) + 0.13957*0.13957));
     if (Charge(k) == -1 &&
 	Status(k) > 0 &&
 	NRowsDC() != 0 && DCStatus(k) > 0 && StatDC(k) > 0 &&
@@ -1033,7 +1048,7 @@ public:
   }
 
   Bool_t IsProton(Int_t k) {
-    Float_t deltaBetta = Betta(k) - (Momentum(k)/TMath::Sqrt(Momentum(k)*Momentum(k) + 0.938272*0.938272));
+    Double_t deltaBetta = Betta(k) - (Momentum(k)/TMath::Sqrt(Momentum(k)*Momentum(k) + 0.938272*0.938272));
     if (Charge(k) == 1 &&
 	Status(k) > 0 &&
 	StatDC(k) > 0 && DCStatus(k) > 0 &&
