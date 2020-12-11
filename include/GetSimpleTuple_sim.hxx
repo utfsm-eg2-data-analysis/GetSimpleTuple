@@ -1,8 +1,8 @@
-#include "TIdentificatorV2.h"
 #include "GSTtree.h"
+#include "TIdentificatorV2.h"
 
-#include "Headers.hxx"
 #include "Constants.hxx"
+#include "Headers.hxx"
 #include "Math.hxx"
 #include "PDG.hxx"
 
@@ -710,10 +710,6 @@ void AngularMatching(TIdentificatorV2* t, RVec<Int_t>& simrec_row, RVec<Int_t>& 
   const Double_t fDeltaThetaLab = 2.40;  // Delta_Theta = 3*sigma_Theta
   const Double_t fDeltaPhiLab = 5.43;    // Delta_Phi = 3*sigma_Phi
 
-  // define vector sizes - loop length
-  Int_t M = (Int_t)gsim_row.size();
-  Int_t N = (Int_t)simrec_row.size();
-
   // define output vectors - initially empty
   RVec<Int_t> simrec_new;
   RVec<Int_t> gsim_new;
@@ -724,9 +720,9 @@ void AngularMatching(TIdentificatorV2* t, RVec<Int_t>& simrec_row, RVec<Int_t>& 
   Double_t gsim_phi;
   Double_t gsim_theta;
 
-  // gammas detection at EC
-  Double_t gammaE, gammaRt, gammaR, gammaThetaEC, gammaPhiEC, gammaPx, gammaPy, gammaPz;
-  Double_t tempPid, tempPx, tempPy, tempPz;
+  // define vector sizes - loop length
+  Int_t M = (Int_t)gsim_row.size();
+  Int_t N = (Int_t)simrec_row.size();
 
   // m, n are the vectors' indices
   for (Int_t m = 0; m < M; m++) {
@@ -736,33 +732,21 @@ void AngularMatching(TIdentificatorV2* t, RVec<Int_t>& simrec_row, RVec<Int_t>& 
       gsim_phi = PhiLab(t->Px(gsim_row[m], 1), t->Py(gsim_row[m], 1), t->Pz(gsim_row[m], 1));
       gsim_theta = ThetaLab(t->Px(gsim_row[m], 1), t->Py(gsim_row[m], 1), t->Pz(gsim_row[m], 1));
 
-      // measure gammas by detection at EC
-      if (t->GetCategorization(simrec_row[n], dataKind, targetOption) == "gamma") {
-        gammaE = TMath::Max(t->Etot(simrec_row[n]), t->Ein(simrec_row[n]) + t->Eout(simrec_row[n])) / 0.272;
-        gammaRt = TMath::Sqrt(t->XEC(simrec_row[n]) * t->XEC(simrec_row[n]) + t->YEC(simrec_row[n]) * t->YEC(simrec_row[n]));
-        gammaR = TMath::Sqrt(t->XEC(simrec_row[n]) * t->XEC(simrec_row[n]) + t->YEC(simrec_row[n]) * t->YEC(simrec_row[n]) +
-                             (t->ZEC(simrec_row[n]) - t->GetCorrectedVert()->Z()) * (t->ZEC(simrec_row[n]) - t->GetCorrectedVert()->Z()));
-        gammaThetaEC = TMath::ASin(gammaRt / gammaR);
-        gammaPhiEC = TMath::ATan2(t->YEC(simrec_row[n]), t->XEC(simrec_row[n]));
-        gammaPx = gammaE * TMath::Sin(gammaThetaEC) * TMath::Cos(gammaPhiEC);
-        gammaPy = gammaE * TMath::Sin(gammaThetaEC) * TMath::Sin(gammaPhiEC);
-        gammaPz = gammaE * TMath::Cos(gammaThetaEC);
-        tempPid = 22;
-      } else {
-        tempPid = -22;  // unreal value, it's only needed to be != 22
-      }
-      tempPx = (tempPid == 22) * gammaPx + (tempPid != 22) * t->Px(simrec_row[n], 0);
-      tempPy = (tempPid == 22) * gammaPy + (tempPid != 22) * t->Py(simrec_row[n], 0);
-      tempPz = (tempPid == 22) * gammaPz + (tempPid != 22) * t->Pz(simrec_row[n], 0);
+      // for reconstructed photons
+      TLorentzVector* fGamma = t->GetCorrPhotonMomentum(simrec_row[n]);
+      TString fParticleName = t->GetCategorization(simrec_row[n], dataKind, targetOption);
+      Double_t fPx = (fParticleName == "gamma") * fGamma->Px() + (fParticleName != "gamma") * t->Px(simrec_row[n], 0);
+      Double_t fPy = (fParticleName == "gamma") * fGamma->Py() + (fParticleName != "gamma") * t->Py(simrec_row[n], 0);
+      Double_t fPz = (fParticleName == "gamma") * fGamma->Pz() + (fParticleName != "gamma") * t->Pz(simrec_row[n], 0);
 
-      // simrec values need correction
-      simrec_phi = PhiLab(tempPx, tempPy, tempPz);
-      simrec_theta = ThetaLab(tempPx, tempPy, tempPz);
+      simrec_phi = PhiLab(fPx, fPy, fPz);
+      simrec_theta = ThetaLab(fPx, fPy, fPz);
 
       /*** MATCHING CONDITION ***/
 
-      if (TMath::Abs(simrec_phi - gsim_phi) < fDeltaPhiLab && TMath::Abs(simrec_theta - gsim_theta) < fDeltaThetaLab &&
-          std::find(gsim_new.begin(), gsim_new.end(), gsim_row[m]) == gsim_new.end() && std::find(simrec_new.begin(), simrec_new.end(), simrec_row[n]) == simrec_new.end()) {
+      Bool_t fAngularMatching = TMath::Abs(simrec_phi - gsim_phi) < fDeltaPhiLab && TMath::Abs(simrec_theta - gsim_theta) < fDeltaThetaLab;
+      if (fAngularMatching && std::find(gsim_new.begin(), gsim_new.end(), gsim_row[m]) == gsim_new.end() &&
+          std::find(simrec_new.begin(), simrec_new.end(), simrec_row[n]) == simrec_new.end()) {
         // std::find function returns an iterator to the first element in the range ["begin","end"[ that compares equal to "row"
         // if no such element is found, the function returns "end", this is done to prevent particles that already matched
         gsim_new.push_back(gsim_row[m]);      // add gsim_row to gsim_new
