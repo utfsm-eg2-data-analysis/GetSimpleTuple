@@ -1,5 +1,9 @@
-#ifndef __CONSTANTS__HXX
-#define __CONSTANTS__HXX
+#ifndef CONSTANTS_HXX
+#define CONSTANTS_HXX
+
+#ifndef HEADERS_HXX
+#include "Headers.hxx"
+#endif
 
 #ifndef INVLD
 #define INVLD -9999

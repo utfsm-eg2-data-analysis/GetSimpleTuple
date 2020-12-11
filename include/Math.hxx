@@ -1,5 +1,5 @@
-#ifndef __MATH__HXX
-#define __MATH__HXX
+#ifndef MATH_HXX
+#define MATH_HXX
 
 /*** MATHEMATICAL FUNCTIONS ***/
 

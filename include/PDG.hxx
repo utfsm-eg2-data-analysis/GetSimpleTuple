@@ -1,3 +1,6 @@
+#ifndef PDG_HXX
+#define PDG_HXX
+
 #ifndef INVLD
 #define INVLD -9999
 #endif
@@ -203,3 +206,5 @@ Double_t particleMass(Double_t fPid) {
   else
     return INVLD;  // closure
 }
+
+#endif

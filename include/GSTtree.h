@@ -1,5 +1,9 @@
-#ifndef __GSTTREE__H
-#define __GSTTREE__H
+#ifndef GSTTREE_H
+#define GSTTREE_H
+
+#ifndef HEADERS_HXX
+#include "Headers.hxx"
+#endif
 
 /*
    NAMING CONVENTIONS
