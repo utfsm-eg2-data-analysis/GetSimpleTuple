@@ -2,6 +2,8 @@
 #define INVLD -9999
 #endif
 
+#include "Constants.hxx"
+
 /*** Global variables ***/
 
 TString gNumberingScheme;
@@ -24,8 +26,6 @@ Int_t gKaonZeroShortID;
 Int_t gEtaID;
 Int_t gOmegaID;
 Int_t gKaonZeroID;
-
-TDatabasePDG pdg;
 
 void UpdateNumberingScheme() {
   if (gNumberingScheme == "PDG") {
@@ -74,7 +74,9 @@ void SetNumberingScheme(TString fOption) {
   UpdateNumberingScheme();
 }
 
-Int_t ToPDG(Int_t fID) {
+Double_t ToPDG(Double_t fID) {
+  // ISSUE: one's gotta be careful with this function
+  // in gNumberingScheme == "GEANT", if you put a fID in PDG format, it wil collapse!
   if (gNumberingScheme == "PDG") {
     return fID; // if detected numbering scheme was PDG, then there's no problem
   } else if (gNumberingScheme == "GEANT") {
@@ -121,7 +123,26 @@ Int_t particleID(TString particleName) {
   else return 0;
 }
 
-Float_t particleMass(Float_t fPid) {
-  if (fPid == INVLD) return INVLD; // closure
-  return pdg.GetParticle((Int_t) fPid)->Mass();
+Double_t particleMass(Double_t fPid) {
+  // only receives PDG
+  if (fPid == INVLD) return INVLD;
+  else if (fPid ==   22) return kMassGamma;
+  else if (fPid ==  -11) return kMassPositron;
+  else if (fPid ==   11) return kMassElectron;
+  else if (fPid ==   12) return kMassNeutrino;
+  else if (fPid ==  -13) return kMassMuonPlus;
+  else if (fPid ==   13) return kMassMuonMinus;
+  else if (fPid ==  111) return kMassPiZero;
+  else if (fPid ==  211) return kMassPiPlus;
+  else if (fPid == -211) return kMassPiMinus;
+  else if (fPid ==  130) return kMassKaonZeroLong;
+  else if (fPid ==  321) return kMassKaonPlus;
+  else if (fPid == -321) return kMassKaonMinus;
+  else if (fPid == 2112) return kMassNeutron;
+  else if (fPid == 2212) return kMassProton;
+  else if (fPid ==  310) return kMassKaonZeroShort;
+  else if (fPid ==  221) return kMassEta;
+  else if (fPid ==  223) return kMassOmega;
+  else if (fPid ==  311) return kMassKaonZero;
+  else return INVLD; // closure
 }
