@@ -30,9 +30,9 @@ int main(int argc, char **argv) {
   SetNumberingScheme("PDG");
 
   // assign options
-  TString inputFiles = "clas_" + rnOption + "_*.pass2.root"; // *: all rn files, node dir
-  TString outputFile = "pruned" + targetOption + "_" + rnOption + ".root"; // node dir
-  TString outTitle   = "Data of particles";
+  TString inputFiles = "clas_" + rnOption + "_*.pass2.root";                // *: all rn files, node dir
+  TString outputFile = "pruned" + targetOption + "_" + rnOption + ".root";  // node dir
+  TString outTitle = "Data of particles";
 
   /*** DATA STRUCTURES ***/
 
@@ -70,27 +70,26 @@ int main(int argc, char **argv) {
   input->Next();
 
   // loop around events
-  for (Int_t i = 0; i < nEvents; i++) { // nEvents or 2000
-    if (input->GetNRows("EVNT") > 0) {  // prevent seg-fault
+  for (Int_t i = 0; i < nEvents; i++) {  // nEvents or 2000
+    if (input->GetNRows("EVNT") > 0) {   // prevent seg-fault
       if (t->GetCategorization(0, dataKind, targetOption) == "electron") {
-        AssignElectronVar_Data(t, de, i, dataKind, targetOption); // (TIdentificator, data_e, evnt, dataKind, targetOption)
+        AssignElectronVar_Data(t, de, i, dataKind, targetOption);  // (TIdentificator, data_e, evnt, dataKind, targetOption)
         tElectrons->Fill();
         // loop in detected particles
         for (Int_t p = 1; p < input->GetNRows("EVNT"); p++) {
           // rest of particles
-          if (t->GetCategorization(p, dataKind, targetOption) == "gamma" ||
-              t->GetCategorization(p, dataKind, targetOption) == "pi+" ||
+          if (t->GetCategorization(p, dataKind, targetOption) == "gamma" || t->GetCategorization(p, dataKind, targetOption) == "pi+" ||
               t->GetCategorization(p, dataKind, targetOption) == "pi-") {
-            AssignParticleVar_Data(t, dp, p, i, dataKind, targetOption); // (TIdentificator, data_p, row, evnt, dataKind, targetOption)
+            AssignParticleVar_Data(t, dp, p, i, dataKind, targetOption);  // (TIdentificator, data_p, row, evnt, dataKind, targetOption)
             tParticles->Fill();
           }
-        } // end of loop in rest of particles
-      }   // end of electron condition
-    }     // end of smth-in-EVNT-bank condition
+        }  // end of loop in rest of particles
+      }    // end of electron condition
+    }      // end of smth-in-EVNT-bank condition
 
     // next event!
     input->Next();
-  } // end of loop in events
+  }  // end of loop in events
 
   // write and close output file
   rootFile->Write();
@@ -123,15 +122,21 @@ int parseCommandLine(int argc, char *argv[]) {
     std::cerr << "Empty command line. Execute ./bin/GetSimpleTuple_data -h to print usage." << std::endl;
     exit(1);
   }
-  while ((c = getopt(argc, argv, "ht:r:")) != -1)
-    switch (c) {
-    case 'h': printUsage(); exit(0); break;
-    case 't': targetOption = optarg; break;
-    case 'r': rnOption = optarg; break;
-    default:
-      std::cerr << "Unrecognized argument. Execute ./bin/GetSimpleTuple_data -h to print usage." << std::endl;
-      exit(0);
-      break;
+  while ((c = getopt(argc, argv, "ht:r:")) != -1) switch (c) {
+      case 'h':
+        printUsage();
+        exit(0);
+        break;
+      case 't':
+        targetOption = optarg;
+        break;
+      case 'r':
+        rnOption = optarg;
+        break;
+      default:
+        std::cerr << "Unrecognized argument. Execute ./bin/GetSimpleTuple_data -h to print usage." << std::endl;
+        exit(0);
+        break;
     }
 }
 

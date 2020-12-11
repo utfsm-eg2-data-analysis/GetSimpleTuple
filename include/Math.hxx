@@ -26,10 +26,10 @@ Double_t PhiPQ(Double_t fPex, Double_t fPey, Double_t fPez, Double_t fPx, Double
   TVector3 unit(0., 0., 1.);
   Double_t Phi_y = virt.Angle(unit);
   virt.RotateY(Phi_y);
-  hadr.RotateY(Phi_y);  
+  hadr.RotateY(Phi_y);
   // finally, it obtains the phi component (in spherical coordinates) of the hadron vector (now in the virtual photon frame of reference)
-  fPhiPQ = hadr.Phi()*TMath::RadToDeg();
-  
+  fPhiPQ = hadr.Phi() * TMath::RadToDeg();
+
   return fPhiPQ;
 }
 
@@ -39,7 +39,7 @@ Double_t ThetaPQ(Double_t fPex, Double_t fPey, Double_t fPez, Double_t fPx, Doub
   Double_t fThetaPQ;
   TVector3 hadr(fPx, fPy, fPz);
   TVector3 virt(-fPex, -fPey, kEbeam - fPez);
-  fThetaPQ = virt.Angle(hadr)*TMath::RadToDeg();
+  fThetaPQ = virt.Angle(hadr) * TMath::RadToDeg();
 
   return fThetaPQ;
 }
@@ -47,19 +47,19 @@ Double_t ThetaPQ(Double_t fPex, Double_t fPey, Double_t fPez, Double_t fPx, Doub
 Double_t ThetaLab(Double_t fPx, Double_t fPy, Double_t fPz) {
   // polar angle in lab frame
   TVector3 v3p(fPx, fPy, fPz);
-  return v3p.Theta()*TMath::RadToDeg();
+  return v3p.Theta() * TMath::RadToDeg();
 }
 
 Double_t PhiLab(Double_t fPx, Double_t fPy, Double_t fPz) {
   // azimuthal angle in lab frame, range: (-30, 330)
   TVector3 v3p(fPx, fPy, fPz);
-  Double_t PhiLab_value = v3p.Phi()*TMath::RadToDeg();
+  Double_t PhiLab_value = v3p.Phi() * TMath::RadToDeg();
   if (PhiLab_value < -30.) {
     return PhiLab_value + 360.;
   } else if (PhiLab_value > 330.) {
     return PhiLab_value - 360.;
-  } // closure
-  return PhiLab_value; // default
+  }                     // closure
+  return PhiLab_value;  // default
 }
 
 #endif
