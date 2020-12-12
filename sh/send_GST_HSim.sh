@@ -41,7 +41,7 @@ if [[ "$TARNAME" == "D" ]]; then SUFIX="${TARNAME}2_Pb"; fi # except for D
 source ~/.bashrc
 
 # set main dirs
-GSTDIR=${HOME}/GetSimpleTuple/bin                                          # dir of the executable
+GSTDIR=${HOME}/GetSimpleTuple                                              # dir of the executable
 SIMDIR=/eos/user/o/orsosa/HSim/${CURRENTDIR}/ROOT                          # dir where are located all the HSims
 OUTDIR=/eos/user/${USER:0:1}/${USER}/out/GetSimpleTuple_HSim/${CURRENTDIR} # output dir
 TMPDIR=/eos/user/${USER:0:1}/${USER}/tmp/GetSimpleTuple_HSim/${CURRENTDIR} # temp dir to store logs and job scripts
@@ -61,15 +61,17 @@ echo "#SBATCH --time=4:00:00"                                     >> ${jobfile} 
 echo "#SBATCH --mem=1GB"                                          >> ${jobfile}
 echo ""                                                           >> ${jobfile}
 echo "source ${HOME}/.bashrc"                                     >> ${jobfile}
-echo "cd ${GSTDIR}"                                               >> ${jobfile}
+echo "cp ${GSTDIR}/bin/GetSimpleTuple_sim ${TMPDIR}"              >> ${jobfile} # retrieve executable
+echo "cd ${TMPDIR}"                                               >> ${jobfile}
 NFILES=$(ls -1 ${SIMDIR} | wc -l)
 for ((RN=1; RN <= ${NFILES}; RN++)); do # ${NFILES} or 10 for test
     inputfile=$(readlink -f ${SIMDIR}/simul_${SUFIX}${RN}.root)                 # retrieve full path of input file (with $SUFIX)
     echo "ln -s ${inputfile} recsis${TARNAME}_${RN}.root"         >> ${jobfile} # create symbolic link to input file with GST naming scheme
     echo "./GetSimpleTuple_sim -t${TARNAME} -r${RN}"              >> ${jobfile} # execute program
     echo "mv -v pruned${TARNAME}_${RN}.root ${OUTDIR}/"           >> ${jobfile} # move outfile to outdir
-    echo "rm -v recsis${TARNAME}_${RN}.root"                      >> ${jobfile} # removing symbolic link
+    echo "rm -v recsis${TARNAME}_${RN}.root"                      >> ${jobfile} # removing symbolic link from temp dir
     echo ""                                                       >> ${jobfile}
 done
+echo "rm GetSimpleTuple_sim"                                      >> ${jobfile} # remove binary from temp dir
 echo "Submitting job: ${jobfile}"
 sbatch ${jobfile} # submit job!
