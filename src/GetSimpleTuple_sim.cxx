@@ -10,27 +10,16 @@
 
 #include "GetSimpleTuple_sim.hxx"
 
-/*** Options ***/
-
-TString targetOption;
-TString rnOption;
-
-TString dataKind = "sim";
-
-/*** Declaration of functions ***/
-
-int parseCommandLine(int argc, char *argv[]);
-void printOptions();
-void printUsage();
-
 int main(int argc, char **argv) {
 
+  gDataKind = "sim";
+  
   parseCommandLine(argc, argv);
   printOptions();
 
   // assign options
-  TString inputFiles = "recsis" + targetOption + "_" + rnOption + ".root";  // node dir
-  TString outputFile = "pruned" + targetOption + "_" + rnOption + ".root";  // node dir
+  TString gInputFile = "recsis" + gTargetOption + "_" + gRunNumber + ".root";  // node dir
+  TString gOutputFile = "pruned" + gTargetOption + "_" + gRunNumber + ".root";  // node dir
   TString outTitle = "Simulation of particles";
 
   /*** DATA STRUCTURES ***/
@@ -45,7 +34,7 @@ int main(int argc, char **argv) {
   TClasTool *input = new TClasTool();
   input->InitDSTReader("ROOTDSTR");
 
-  input->Add(inputFiles);
+  input->Add(gInputFile);
 
   // define TIdentificatorV2
   TIdentificatorV2 *t = new TIdentificatorV2(input);
@@ -54,7 +43,7 @@ int main(int argc, char **argv) {
   /*** OUTPUT ***/
 
   // define output file
-  TFile *rootFile = new TFile(outputFile, "RECREATE", outTitle);
+  TFile *rootFile = new TFile(gOutputFile, "RECREATE", outTitle);
 
   // define output ntuples
   TTree *tElectrons = new TTree("ntuple_e", "All electrons");
@@ -97,10 +86,10 @@ int main(int argc, char **argv) {
         }  // end of loop in gsim-particles
 
         if (input->GetNRows("EVNT") > 0) {  // prevent seg-fault
-          if (t->GetCategorization(0, dataKind, targetOption) == "electron") {
+          if (t->GetCategorization(0, gDataKind, gTargetOption) == "electron") {
             for (Int_t p = 1; p < input->GetNRows("EVNT"); p++) {
-              if (t->GetCategorization(p, dataKind, targetOption) == "pi+" || t->GetCategorization(p, dataKind, targetOption) == "pi-" ||
-                  t->GetCategorization(p, dataKind, targetOption) == "gamma") {
+              if (t->GetCategorization(p, gDataKind, gTargetOption) == "pi+" || t->GetCategorization(p, gDataKind, gTargetOption) == "pi-" ||
+                  t->GetCategorization(p, gDataKind, gTargetOption) == "gamma") {
                 simrec_row.push_back(p);
               }
             }  // end of loop in simrec-particles
@@ -117,19 +106,19 @@ int main(int argc, char **argv) {
 
     /*** STEP 3: ANGULAR MATCHING ***/
 
-    AngularMatching(t, simrec_row, gsim_row, dataKind, targetOption);
+    AngularMatching(t, simrec_row, gsim_row, gDataKind, gTargetOption);
 
     /*** STEP 4: FILL ***/
 
     // (1) electron ntuple
     if (input->GetNRows("GSIM") > 0) {  // prevent seg-fault
       if (t->Id(0, 1) == gElectronID) {
-        AssignElectronVar_GSIM(t, se, i, dataKind, targetOption);  // (TIdentificatorV2, sim_e, evnt, dataKind, targetOption)
+        AssignElectronVar_GSIM(t, se, i, gDataKind, gTargetOption);  // (TIdentificatorV2, sim_e, evnt, gDataKind, gTargetOption)
         if (input->GetNRows("EVNT") > 0) {                         // prevent seg-fault
-          if (t->GetCategorization(0, dataKind, targetOption) != "electron")
+          if (t->GetCategorization(0, gDataKind, gTargetOption) != "electron")
             NullElectronVar_SIMREC(se);
           else
-            AssignElectronVar_SIMREC(t, se, i, dataKind, targetOption);
+            AssignElectronVar_SIMREC(t, se, i, gDataKind, gTargetOption);
         }  // end of smth-in-EVNT-bank condition
         tElectrons->Fill();
       }  // end of electorn-in-GSIM condition
@@ -141,12 +130,12 @@ int main(int argc, char **argv) {
       if (gsim_row[index] == -1)
         NullParticleVar_GSIM(sp);
       else
-        AssignParticleVar_GSIM(t, sp, gsim_row[index], i, dataKind, targetOption);  // (TIdentificatorV2, sim_p, row, evnt, dataKind, targetOption)
+        AssignParticleVar_GSIM(t, sp, gsim_row[index], i, gDataKind, gTargetOption);  // (TIdentificatorV2, sim_p, row, evnt, gDataKind, gTargetOption)
       // simrec
       if (simrec_row[index] == -1)
         NullParticleVar_SIMREC(sp);
       else
-        AssignParticleVar_SIMREC(t, sp, simrec_row[index], i, dataKind, targetOption);  // (TIdentificatorV2, sim_p, row, evnt, dataKind, targetOption)
+        AssignParticleVar_SIMREC(t, sp, simrec_row[index], i, gDataKind, gTargetOption);  // (TIdentificatorV2, sim_p, row, evnt, gDataKind, gTargetOption)
       // fill!
       tParticles->Fill();
     }
@@ -163,57 +152,7 @@ int main(int argc, char **argv) {
   rootFile->Write();
   rootFile->Close();
 
-  std::cout << "File " << outputFile << " has been created!" << std::endl;
+  std::cout << "File " << gOutputFile << " has been created!" << std::endl;
 
   return 0;
-}
-
-/*** Input/output functions ***/
-
-void printUsage() {
-  std::cout << "GetSimpleTuple_sim program. Usage is:" << std::endl;
-  std::cout << std::endl;
-  std::cout << "./GetSimpleTuple_sim -h" << std::endl;
-  std::cout << "    prints usage and exit program" << std::endl;
-  std::cout << std::endl;
-  std::cout << "./GetSimpleTuple_sim -t[target]" << std::endl;
-  std::cout << "    selects target, which can be: D, C, Fe, Pb" << std::endl;
-  std::cout << std::endl;
-  std::cout << "./GetSimpleTuple_sim -r[run number]" << std::endl;
-  std::cout << "    selects run number" << std::endl;
-  std::cout << "    numbering scheme for sim files = recsis<target>_<run number>.root" << std::endl;
-  std::cout << std::endl;
-}
-
-int parseCommandLine(int argc, char *argv[]) {
-  int c;
-  if (argc == 1) {
-    std::cerr << "Empty command line. Execute ./bin/GetSimpleTuple_sim -h to print usage." << std::endl;
-    exit(1);
-  }
-  while ((c = getopt(argc, argv, "ht:r:")) != -1) {
-    switch (c) {
-      case 'h':
-        printUsage();
-        exit(0);
-        break;
-      case 't':
-        targetOption = optarg;
-        break;
-      case 'r':
-        rnOption = optarg;
-        break;
-      default:
-        std::cerr << "Unrecognized argument. Execute ./bin/GetSimpleTuple_sim -h to print usage." << std::endl;
-        exit(0);
-        break;
-    }
-  }
-}
-
-void printOptions() {
-  std::cout << "Executing GetSimpleTuple_sim program. The chosen parameters are: " << std::endl;
-  std::cout << "  targetOption   = " << targetOption << std::endl;
-  std::cout << "  rnOption       = " << rnOption << std::endl;
-  std::cout << std::endl;
 }
