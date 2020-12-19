@@ -13,20 +13,22 @@
 int main(int argc, char **argv) {
 
   gDataKind = "sim";
-  
+
   parseCommandLine(argc, argv);
   printOptions();
 
   // assign options
-  TString gInputFile = "recsis" + gTargetOption + "_" + gRunNumber + ".root";  // node dir
+  TString gInputFile = "recsis" + gTargetOption + "_" + gRunNumber + ".root";   // node dir
   TString gOutputFile = "pruned" + gTargetOption + "_" + gRunNumber + ".root";  // node dir
   TString outTitle = "Simulation of particles";
 
   /*** DATA STRUCTURES ***/
 
   // output
-  sim_e se;
-  sim_p sp;
+  rec_e re;
+  rec_p rp;
+  gen_e ge;
+  gen_p gp;
 
   /*** INPUT ***/
 
@@ -47,10 +49,12 @@ int main(int argc, char **argv) {
 
   // define output ntuples
   TTree *tElectrons = new TTree("ntuple_e", "All electrons");
-  SetElectronBranches_Sim(tElectrons, se);
+  SetElectronBranches_REC(tElectrons, re);
+  SetElectronBranches_GEN(tElectrons, ge);
 
   TTree *tParticles = new TTree("ntuple_sim", "Stable particles");
-  SetParticleBranches_Sim(tParticles, sp);
+  SetParticleBranches_REC(tParticles, rp);
+  SetParticleBranches_GEN(tParticles, gp);
 
   /*** VECTORS ***/
 
@@ -113,29 +117,29 @@ int main(int argc, char **argv) {
     // (1) electron ntuple
     if (input->GetNRows("GSIM") > 0) {  // prevent seg-fault
       if (t->Id(0, 1) == gElectronID) {
-        AssignElectronVar_GSIM(t, se, i, gDataKind, gTargetOption);  // (TIdentificatorV2, sim_e, evnt, gDataKind, gTargetOption)
-        if (input->GetNRows("EVNT") > 0) {                         // prevent seg-fault
+        AssignElectronVar_GEN(t, ge, i, gDataKind, gTargetOption);  // (TIdentificatorV2, gen_e, evnt, gDataKind, gTargetOption)
+        if (input->GetNRows("EVNT") > 0) {                          // prevent seg-fault
           if (t->GetCategorization(0, gDataKind, gTargetOption) != "electron")
-            NullElectronVar_SIMREC(se);
+            NullElectronVar_REC(re);
           else
-            AssignElectronVar_SIMREC(t, se, i, gDataKind, gTargetOption);
+            AssignElectronVar_REC(t, re, i, gDataKind, gTargetOption);
         }  // end of smth-in-EVNT-bank condition
         tElectrons->Fill();
       }  // end of electorn-in-GSIM condition
     }    // end of smth-in-GSIM-bank condition
 
     // (2) particles ntuple
-    for (Int_t index = 0; index < (Int_t)simrec_row.size(); index++) {  // simrec_row.size() == gsim_row.size()
+    for (Size_t index = 0; index < simrec_row.size(); index++) {  // simrec_row.size() == gsim_row.size()
       // gsim
       if (gsim_row[index] == -1)
-        NullParticleVar_GSIM(sp);
+        NullParticleVar_GEN(gp);
       else
-        AssignParticleVar_GSIM(t, sp, gsim_row[index], i, gDataKind, gTargetOption);  // (TIdentificatorV2, sim_p, row, evnt, gDataKind, gTargetOption)
+        AssignParticleVar_GEN(t, gp, gsim_row[index], i, gDataKind, gTargetOption);  // (TIdentificatorV2, rec_p, row, evnt, gDataKind, gTargetOption)
       // simrec
       if (simrec_row[index] == -1)
-        NullParticleVar_SIMREC(sp);
+        NullParticleVar_REC(rp);
       else
-        AssignParticleVar_SIMREC(t, sp, simrec_row[index], i, gDataKind, gTargetOption);  // (TIdentificatorV2, sim_p, row, evnt, gDataKind, gTargetOption)
+        AssignParticleVar_REC(t, rp, simrec_row[index], i, gDataKind, gTargetOption);  // (TIdentificatorV2, rec_p, row, evnt, gDataKind, gTargetOption)
       // fill!
       tParticles->Fill();
     }

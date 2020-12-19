@@ -27,8 +27,8 @@ int main(int argc, char **argv) {
   /*** DATA STRUCTURES ***/
 
   // output
-  data_e de;
-  data_p dp;
+  rec_e re;
+  rec_p rp;
 
   /*** INPUT ***/
 
@@ -49,10 +49,10 @@ int main(int argc, char **argv) {
 
   // define output ntuples
   TTree *tElectrons = new TTree("ntuple_e", "All electrons");
-  SetElectronBranches_Data(tElectrons, de);
+  SetElectronBranches_REC(tElectrons, re);
 
   TTree *tParticles = new TTree("ntuple_data", "Stable particles");
-  SetParticleBranches_Data(tParticles, dp);
+  SetParticleBranches_REC(tParticles, rp);
 
   /*** START ***/
 
@@ -63,14 +63,14 @@ int main(int argc, char **argv) {
   for (Int_t i = 0; i < nEvents; i++) {  // nEvents or 2000
     if (input->GetNRows("EVNT") > 0) {   // prevent seg-fault
       if (t->GetCategorization(0, gDataKind, gTargetOption) == "electron") {
-        AssignElectronVar_Data(t, de, i, gDataKind, gTargetOption);  // (TIdentificator, data_e, evnt, gDataKind, gTargetOption)
+        AssignElectronVar_REC(t, re, i, gDataKind, gTargetOption);  // (TIdentificator, rec_e, evnt, gDataKind, gTargetOption)
         tElectrons->Fill();
         // loop in detected particles
         for (Int_t p = 1; p < input->GetNRows("EVNT"); p++) {
           // rest of particles
           if (t->GetCategorization(p, gDataKind, gTargetOption) == "gamma" || t->GetCategorization(p, gDataKind, gTargetOption) == "pi+" ||
               t->GetCategorization(p, gDataKind, gTargetOption) == "pi-") {
-            AssignParticleVar_Data(t, dp, p, i, gDataKind, gTargetOption);  // (TIdentificator, data_p, row, evnt, gDataKind, gTargetOption)
+            AssignParticleVar_REC(t, rp, p, i, gDataKind, gTargetOption);  // (TIdentificator, rec_p, row, evnt, gDataKind, gTargetOption)
             tParticles->Fill();
           }
         }  // end of loop in rest of particles
