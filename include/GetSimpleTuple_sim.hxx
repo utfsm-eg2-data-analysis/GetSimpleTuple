@@ -1,19 +1,48 @@
-#include "GSTtree.h"
 #include "Headers.hxx"
-#include "UI.hxx"
+
+#include "GSTtree.h"
 #include "TreeOps.hxx"
+#include "UI.hxx"
 
 using namespace ROOT::VecOps;
 
-#ifndef INVLD
-#define INVLD -9999
-#endif
+void FindParticles(TClasTool* input, TIdentificatorV2* t, RVec<Int_t>& gsim_row, RVec<Int_t>& simrec_row) {
+  if (input->GetNRows("GSIM") > 0) {  // prevent seg-fault
+    // first, check numbering scheme
+    if (t->Id(0, 1) == 11)
+      SetNumberingScheme("PDG");
+    else if (t->Id(0, 1) == 3)
+      SetNumberingScheme("GEANT");
+
+    if (t->Id(0, 1) == gElectronID) {
+      for (Int_t q = 1; q < input->GetNRows("GSIM"); q++) {
+        if (t->Id(q, 1) == gPiPlusID || t->Id(q, 1) == gPiMinusID || t->Id(q, 1) == gGammaID || t->Id(q, 1) == gElectronID || t->Id(q, 1) == gPositronID ||
+            t->Id(q, 1) == gProtonID || t->Id(q, 1) == gNeutronID || t->Id(q, 1) == gKaonPlusID || t->Id(q, 1) == gKaonMinusID || t->Id(q, 1) == gKaonZeroLongID ||
+            t->Id(q, 1) == gKaonZeroShortID || t->Id(q, 1) == gKaonZeroID) {
+          gsim_row.push_back(q);
+        }
+      }  // end of loop in gsim-particles
+
+      if (input->GetNRows("EVNT") > 0) {  // prevent seg-fault
+        if (t->GetCategorization(0, gDataKind, gTargetOption) == "electron") {
+          for (Int_t p = 1; p < input->GetNRows("EVNT"); p++) {
+            if (t->GetCategorization(p, gDataKind, gTargetOption) == "pi+" || t->GetCategorization(p, gDataKind, gTargetOption) == "pi-" ||
+                t->GetCategorization(p, gDataKind, gTargetOption) == "gamma") {
+              simrec_row.push_back(p);
+            }
+          }  // end of loop in simrec-particles
+        }    // end of electron-in-simrec condition
+      }      // end of smth-in-EVNT-bank
+
+    }  // end of electron-in-gsim condition
+  }    // end of smth-in-GSIM-bank
+}
 
 RVec<Int_t> SortByMomentum(TIdentificatorV2* t, RVec<Int_t> vector_row, Int_t kind) {
   // Returns a new "vector_row2" where particle indices are sorted by their respective momentum (from lower to higher)
   // first, fill the momentum vector
   RVec<Double_t> momentum;
-  for (Int_t m = 0; m < (Int_t)vector_row.size(); m++) {
+  for (Size_t m = 0; m < vector_row.size(); m++) {
     momentum.push_back(t->Momentum(vector_row[m], kind));
   }
   // Argsort() creates an indices-vector with the indices sorted by the input-vector values
@@ -23,7 +52,7 @@ RVec<Int_t> SortByMomentum(TIdentificatorV2* t, RVec<Int_t> vector_row, Int_t ki
   return vector_row2;
 }
 
-void AngularMatching(TIdentificatorV2* t, RVec<Int_t>& simrec_row, RVec<Int_t>& gsim_row, TString dataKind, TString targetOption) {
+void AngularMatching(TIdentificatorV2* t, RVec<Int_t>& simrec_row, RVec<Int_t>& gsim_row) {
   // Matches the "simrec_row" vector with the "gsim_row" vector under angular matching
   // if particles don't match, the counterpart is filled with null
 
@@ -47,13 +76,9 @@ void AngularMatching(TIdentificatorV2* t, RVec<Int_t>& simrec_row, RVec<Int_t>& 
   Double_t gsim_phi;
   Double_t gsim_theta;
 
-  // define vector sizes - loop length
-  Int_t M = (Int_t)gsim_row.size();
-  Int_t N = (Int_t)simrec_row.size();
-
   // m, n are the vectors' indices
-  for (Int_t m = 0; m < M; m++) {
-    for (Int_t n = 0; n < N; n++) {
+  for (Size_t m = 0; m < gsim_row.size(); m++) {
+    for (Size_t n = 0; n < simrec_row.size(); n++) {
 
       // gsim angles don't need correction
       gsim_phi = PhiLab(t->Px(gsim_row[m], 1), t->Py(gsim_row[m], 1), t->Pz(gsim_row[m], 1));
@@ -61,7 +86,7 @@ void AngularMatching(TIdentificatorV2* t, RVec<Int_t>& simrec_row, RVec<Int_t>& 
 
       // for reconstructed photons
       TLorentzVector* fGamma = t->GetCorrPhotonMomentum(simrec_row[n]);
-      TString fParticleName = t->GetCategorization(simrec_row[n], dataKind, targetOption);
+      TString fParticleName = t->GetCategorization(simrec_row[n], gDataKind, gTargetOption);
       Double_t fPx = (fParticleName == "gamma") * fGamma->Px() + (fParticleName != "gamma") * t->Px(simrec_row[n], 0);
       Double_t fPy = (fParticleName == "gamma") * fGamma->Py() + (fParticleName != "gamma") * t->Py(simrec_row[n], 0);
       Double_t fPz = (fParticleName == "gamma") * fGamma->Pz() + (fParticleName != "gamma") * t->Pz(simrec_row[n], 0);
@@ -85,7 +110,7 @@ void AngularMatching(TIdentificatorV2* t, RVec<Int_t>& simrec_row, RVec<Int_t>& 
 
   /*** FILL REMAINING ***/
 
-  for (Int_t m = 0; m < M; m++) {
+  for (Size_t m = 0; m < gsim_row.size(); m++) {
     // if it's not in gsim_new
     if (std::find(gsim_new.begin(), gsim_new.end(), gsim_row[m]) == gsim_new.end()) {
       gsim_new.push_back(gsim_row[m]);  // add gsim_row to gsim_new
@@ -93,7 +118,7 @@ void AngularMatching(TIdentificatorV2* t, RVec<Int_t>& simrec_row, RVec<Int_t>& 
     }
   }
 
-  for (Int_t n = 0; n < N; n++) {
+  for (Size_t n = 0; n < simrec_row.size(); n++) {
     // if it's not in simrec_new
     if (std::find(simrec_new.begin(), simrec_new.end(), simrec_row[n]) == simrec_new.end()) {
       simrec_new.push_back(simrec_row[n]);  // add simrec_row to simrec_new
@@ -104,4 +129,38 @@ void AngularMatching(TIdentificatorV2* t, RVec<Int_t>& simrec_row, RVec<Int_t>& 
   // assign results
   gsim_row = gsim_new;
   simrec_row = simrec_new;
+}
+
+void FillElectrons(TTree* tElectrons, TClasTool* input, TIdentificatorV2* t, Int_t i, gen_e& ge, rec_e& re) {
+  // (1) electron ntuple
+  if (input->GetNRows("GSIM") > 0) {  // prevent seg-fault
+    if (t->Id(0, 1) == gElectronID) {
+      AssignElectronVar_GEN(t, ge, i, gDataKind, gTargetOption);  // (TIdentificatorV2, gen_e, evnt, gDataKind, gTargetOption)
+      if (input->GetNRows("EVNT") > 0) {                          // prevent seg-fault
+        if (t->GetCategorization(0, gDataKind, gTargetOption) != "electron")
+          NullElectronVar_REC(re);
+        else
+          AssignElectronVar_REC(t, re, i, gDataKind, gTargetOption);
+      }  // end of smth-in-EVNT-bank condition
+      tElectrons->Fill();
+    }  // end of electorn-in-GSIM condition
+  }    // end of smth-in-GSIM-bank condition
+}
+
+void FillParticles(TTree* tParticles, RVec<Int_t>& gsim_row, RVec<Int_t>& simrec_row, TIdentificatorV2* t, Int_t i, gen_p& gp, rec_p& rp) {
+  // (2) particles ntuple
+  for (Size_t index = 0; index < simrec_row.size(); index++) {  // simrec_row.size() == gsim_row.size()
+    // gsim
+    if (gsim_row[index] == -1)
+      NullParticleVar_GEN(gp);
+    else
+      AssignParticleVar_GEN(t, gp, gsim_row[index], i, gDataKind, gTargetOption);  // (TIdentificatorV2, rec_p, row, evnt, gDataKind, gTargetOption)
+    // simrec
+    if (simrec_row[index] == -1)
+      NullParticleVar_REC(rp);
+    else
+      AssignParticleVar_REC(t, rp, simrec_row[index], i, gDataKind, gTargetOption);  // (TIdentificatorV2, rec_p, row, evnt, gDataKind, gTargetOption)
+    // fill!
+    tParticles->Fill();
+  }
 }

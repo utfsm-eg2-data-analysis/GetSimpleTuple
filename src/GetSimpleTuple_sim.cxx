@@ -72,36 +72,7 @@ int main(int argc, char **argv) {
 
     /*** STEP 1: FIND PARTICLES ***/
 
-    if (input->GetNRows("GSIM") > 0) {  // prevent seg-fault
-
-      // first, check numbering scheme
-      if (t->Id(0, 1) == 11)
-        SetNumberingScheme("PDG");
-      else if (t->Id(0, 1) == 3)
-        SetNumberingScheme("GEANT");
-
-      if (t->Id(0, 1) == gElectronID) {
-        for (Int_t q = 1; q < input->GetNRows("GSIM"); q++) {
-          if (t->Id(q, 1) == gPiPlusID || t->Id(q, 1) == gPiMinusID || t->Id(q, 1) == gGammaID || t->Id(q, 1) == gElectronID || t->Id(q, 1) == gPositronID ||
-              t->Id(q, 1) == gProtonID || t->Id(q, 1) == gNeutronID || t->Id(q, 1) == gKaonPlusID || t->Id(q, 1) == gKaonMinusID || t->Id(q, 1) == gKaonZeroLongID ||
-              t->Id(q, 1) == gKaonZeroShortID || t->Id(q, 1) == gKaonZeroID) {
-            gsim_row.push_back(q);
-          }
-        }  // end of loop in gsim-particles
-
-        if (input->GetNRows("EVNT") > 0) {  // prevent seg-fault
-          if (t->GetCategorization(0, gDataKind, gTargetOption) == "electron") {
-            for (Int_t p = 1; p < input->GetNRows("EVNT"); p++) {
-              if (t->GetCategorization(p, gDataKind, gTargetOption) == "pi+" || t->GetCategorization(p, gDataKind, gTargetOption) == "pi-" ||
-                  t->GetCategorization(p, gDataKind, gTargetOption) == "gamma") {
-                simrec_row.push_back(p);
-              }
-            }  // end of loop in simrec-particles
-          }    // end of electron-in-simrec condition
-        }      // end of smth-in-EVNT-bank
-
-      }  // end of electron-in-gsim condition
-    }    // end of smth-in-GSIM-bank
+    FindParticles(input, t, gsim_row, simrec_row);
 
     /*** STEP 2: PRELIMINARY SORT ***/
 
@@ -110,39 +81,12 @@ int main(int argc, char **argv) {
 
     /*** STEP 3: ANGULAR MATCHING ***/
 
-    AngularMatching(t, simrec_row, gsim_row, gDataKind, gTargetOption);
+    AngularMatching(t, simrec_row, gsim_row);
 
     /*** STEP 4: FILL ***/
 
-    // (1) electron ntuple
-    if (input->GetNRows("GSIM") > 0) {  // prevent seg-fault
-      if (t->Id(0, 1) == gElectronID) {
-        AssignElectronVar_GEN(t, ge, i, gDataKind, gTargetOption);  // (TIdentificatorV2, gen_e, evnt, gDataKind, gTargetOption)
-        if (input->GetNRows("EVNT") > 0) {                          // prevent seg-fault
-          if (t->GetCategorization(0, gDataKind, gTargetOption) != "electron")
-            NullElectronVar_REC(re);
-          else
-            AssignElectronVar_REC(t, re, i, gDataKind, gTargetOption);
-        }  // end of smth-in-EVNT-bank condition
-        tElectrons->Fill();
-      }  // end of electorn-in-GSIM condition
-    }    // end of smth-in-GSIM-bank condition
-
-    // (2) particles ntuple
-    for (Size_t index = 0; index < simrec_row.size(); index++) {  // simrec_row.size() == gsim_row.size()
-      // gsim
-      if (gsim_row[index] == -1)
-        NullParticleVar_GEN(gp);
-      else
-        AssignParticleVar_GEN(t, gp, gsim_row[index], i, gDataKind, gTargetOption);  // (TIdentificatorV2, rec_p, row, evnt, gDataKind, gTargetOption)
-      // simrec
-      if (simrec_row[index] == -1)
-        NullParticleVar_REC(rp);
-      else
-        AssignParticleVar_REC(t, rp, simrec_row[index], i, gDataKind, gTargetOption);  // (TIdentificatorV2, rec_p, row, evnt, gDataKind, gTargetOption)
-      // fill!
-      tParticles->Fill();
-    }
+    FillElectrons(tElectrons, input, t, i, ge, re);
+    FillParticles(tParticles, gsim_row, simrec_row, t, i, gp, rp);
 
     // reset memory
     gsim_row.clear();
