@@ -61,22 +61,7 @@ int main(int argc, char **argv) {
 
   // loop around events
   for (Int_t i = 0; i < nEvents; i++) {  // nEvents or 2000
-    if (input->GetNRows("EVNT") > 0) {   // prevent seg-fault
-      if (t->GetCategorization(0, gDataKind, gTargetOption) == "electron") {
-        AssignElectronVar_REC(t, re, i, gDataKind, gTargetOption);  // (TIdentificator, rec_e, evnt, gDataKind, gTargetOption)
-        tElectrons->Fill();
-        // loop in detected particles
-        for (Int_t p = 1; p < input->GetNRows("EVNT"); p++) {
-          // rest of particles
-          if (t->GetCategorization(p, gDataKind, gTargetOption) == "gamma" || t->GetCategorization(p, gDataKind, gTargetOption) == "pi+" ||
-              t->GetCategorization(p, gDataKind, gTargetOption) == "pi-") {
-            AssignParticleVar_REC(t, rp, p, i, gDataKind, gTargetOption);  // (TIdentificator, rec_p, row, evnt, gDataKind, gTargetOption)
-            tParticles->Fill();
-          }
-        }  // end of loop in rest of particles
-      }    // end of electron condition
-    }      // end of smth-in-EVNT-bank condition
-
+    FindNFillParticles(tElectrons, tParticles, t, input, i, re, rp);
     // next event!
     input->Next();
   }  // end of loop in events
