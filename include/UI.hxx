@@ -1,9 +1,9 @@
-#ifndef UI_HXX
-#define UI_HXX
-
 #ifndef HEADERS_HXX
 #include "Headers.hxx"
 #endif
+
+#ifndef UI_HXX
+#define UI_HXX
 
 /*** Global Variables ***/
 
@@ -28,7 +28,7 @@ void printUsage() {
   if (gDataKind == "data")
     std::cout << "    selects target, which can be: C, Fe, Pb" << std::endl;
   else
-      std::cout << "    selects target, which can be: D, C, Fe, Pb" << std::endl;
+    std::cout << "    selects target, which can be: D, C, Fe, Pb" << std::endl;
   std::cout << std::endl;
   std::cout << "./GetSimpleTuple_" << gDataKind << " -r[run number]" << std::endl;
   std::cout << "    selects run number" << std::endl;
@@ -45,7 +45,8 @@ void parseCommandLine(int argc, char *argv[]) {
     std::cerr << "Empty command line. Execute ./bin/GetSimpleTuple_" << gDataKind << " -h to print usage." << std::endl;
     exit(1);
   }
-  while ((c = getopt(argc, argv, "ht:r:")) != -1) switch (c) {
+  while ((c = getopt(argc, argv, "ht:r:")) != -1) {
+    switch (c) {
       case 'h':
         printUsage();
         exit(0);
@@ -61,6 +62,7 @@ void parseCommandLine(int argc, char *argv[]) {
         exit(0);
         break;
     }
+  }
 }
 
 void printOptions() {

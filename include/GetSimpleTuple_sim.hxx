@@ -114,7 +114,7 @@ void AngularMatching(TIdentificatorV2* t, RVec<Int_t>& simrec_row, RVec<Int_t>& 
     // if it's not in gsim_new
     if (std::find(gsim_new.begin(), gsim_new.end(), gsim_row[m]) == gsim_new.end()) {
       gsim_new.push_back(gsim_row[m]);  // add gsim_row to gsim_new
-      simrec_new.push_back(-1);         // add null simrec
+      simrec_new.push_back(-9999);         // add null simrec
     }
   }
 
@@ -122,7 +122,7 @@ void AngularMatching(TIdentificatorV2* t, RVec<Int_t>& simrec_row, RVec<Int_t>& 
     // if it's not in simrec_new
     if (std::find(simrec_new.begin(), simrec_new.end(), simrec_row[n]) == simrec_new.end()) {
       simrec_new.push_back(simrec_row[n]);  // add simrec_row to simrec_new
-      gsim_new.push_back(-1);               // add null gsim
+      gsim_new.push_back(-9999);               // add null gsim
     }
   }
 
@@ -131,36 +131,41 @@ void AngularMatching(TIdentificatorV2* t, RVec<Int_t>& simrec_row, RVec<Int_t>& 
   simrec_row = simrec_new;
 }
 
-void FillElectrons(TTree* tElectrons, TClasTool* input, TIdentificatorV2* t, Int_t i, gen_e& ge, rec_e& re) {
-  // (1) electron ntuple
+void FillElectronNParticles(TIdentificatorV2* t, TClasTool* input, TTree* tParticles, RVec<Int_t>& gsim_row, RVec<Int_t>& simrec_row, gen_p& mc, rec_p& rec, Int_t i) {
+
+  /*** Electron ***/
+
   if (input->GetNRows("GSIM") > 0) {  // prevent seg-fault
     if (t->Id(0, 1) == gElectronID) {
-      AssignElectronVar_GEN(t, ge, i, gDataKind, gTargetOption);  // (TIdentificatorV2, gen_e, evnt, gDataKind, gTargetOption)
-      if (input->GetNRows("EVNT") > 0) {                          // prevent seg-fault
+      AssignElectronVar_GEN(t, mc);       // (TIdentificatorV2, gen_e)
+      rec.evnt = i;
+      if (input->GetNRows("EVNT") > 0) {  // prevent seg-fault
         if (t->GetCategorization(0, gDataKind, gTargetOption) != "electron")
-          NullElectronVar_REC(re);
+          NullElectronVar_REC(rec);
         else
-          AssignElectronVar_REC(t, re, i, gDataKind, gTargetOption);
+          AssignElectronVar_REC(t, rec, i);
       }  // end of smth-in-EVNT-bank condition
-      tElectrons->Fill();
-    }  // end of electorn-in-GSIM condition
-  }    // end of smth-in-GSIM-bank condition
-}
+    }    // end of electron-in-GSIM condition
+  }      // end of smth-in-GSIM-bank condition
 
-void FillParticles(TTree* tParticles, RVec<Int_t>& gsim_row, RVec<Int_t>& simrec_row, TIdentificatorV2* t, Int_t i, gen_p& gp, rec_p& rp) {
-  // (2) particles ntuple
+  /*** Particles ***/
+
   for (Size_t index = 0; index < simrec_row.size(); index++) {  // simrec_row.size() == gsim_row.size()
     // gsim
-    if (gsim_row[index] == -1)
-      NullParticleVar_GEN(gp);
+    if (gsim_row[index] == -9999)
+      NullParticleVar_GEN(mc);
     else
-      AssignParticleVar_GEN(t, gp, gsim_row[index], i, gDataKind, gTargetOption);  // (TIdentificatorV2, rec_p, row, evnt, gDataKind, gTargetOption)
+      AssignParticleVar_GEN(t, mc, gsim_row[index]);  // (TIdentificatorV2, gen_p, row)
     // simrec
-    if (simrec_row[index] == -1)
-      NullParticleVar_REC(rp);
+    if (simrec_row[index] == -9999)
+      NullParticleVar_REC(rec);
     else
-      AssignParticleVar_REC(t, rp, simrec_row[index], i, gDataKind, gTargetOption);  // (TIdentificatorV2, rec_p, row, evnt, gDataKind, gTargetOption)
-    // fill!
-    tParticles->Fill();
+      AssignParticleVar_REC(t, rec, simrec_row[index]);  // (TIdentificatorV2, rec_p, row)
   }
+
+  /*** Fill! ***/
+
+  tParticles->Fill();
+  ClearParticleVar_GEN(mc);
+  ClearParticleVar_REC(rec);  
 }

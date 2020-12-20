@@ -27,8 +27,7 @@ int main(int argc, char **argv) {
   /*** DATA STRUCTURES ***/
 
   // output
-  rec_e re;
-  rec_p rp;
+  rec_p rec;
 
   /*** INPUT ***/
 
@@ -40,19 +39,16 @@ int main(int argc, char **argv) {
 
   // define TIdentificatorV2
   TIdentificatorV2 *t = new TIdentificatorV2(input);
-  Int_t nEvents = (Int_t)input->GetEntries();
+  Int_t nEvents = input->GetEntries();
 
   /*** OUTPUT ***/
 
   // define output file
-  TFile *rootFile = new TFile(gOutputFile, "RECREATE", outTitle);
+  TFile *rootFile = new TFile(gOutputFile, "RECREATE", outTitle, 505);
 
-  // define output ntuples
-  TTree *tElectrons = new TTree("ntuple_e", "All electrons");
-  SetElectronBranches_REC(tElectrons, re);
-
+  // define output ntuple
   TTree *tParticles = new TTree("ntuple_data", "Stable particles");
-  SetParticleBranches_REC(tParticles, rp);
+  SetOutputBranches_REC(tParticles, rec);
 
   /*** START ***/
 
@@ -61,7 +57,7 @@ int main(int argc, char **argv) {
 
   // loop around events
   for (Int_t i = 0; i < nEvents; i++) {  // nEvents or 2000
-    FindNFillParticles(tElectrons, tParticles, t, input, i, re, rp);
+    FindNFillParticles(tParticles, t, input, i, rec);
     // next event!
     input->Next();
   }  // end of loop in events

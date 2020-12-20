@@ -25,10 +25,8 @@ int main(int argc, char **argv) {
   /*** DATA STRUCTURES ***/
 
   // output
-  rec_e re;
-  rec_p rp;
-  gen_e ge;
-  gen_p gp;
+  rec_p rec;
+  gen_p mc;
 
   /*** INPUT ***/
 
@@ -40,21 +38,17 @@ int main(int argc, char **argv) {
 
   // define TIdentificatorV2
   TIdentificatorV2 *t = new TIdentificatorV2(input);
-  Int_t nEvents = (Int_t)input->GetEntries();
+  Int_t nEvents = input->GetEntries();
 
   /*** OUTPUT ***/
 
   // define output file
   TFile *rootFile = new TFile(gOutputFile, "RECREATE", outTitle);
 
-  // define output ntuples
-  TTree *tElectrons = new TTree("ntuple_e", "All electrons");
-  SetElectronBranches_REC(tElectrons, re);
-  SetElectronBranches_GEN(tElectrons, ge);
-
+  // define output ntuple
   TTree *tParticles = new TTree("ntuple_sim", "Stable particles");
-  SetParticleBranches_REC(tParticles, rp);
-  SetParticleBranches_GEN(tParticles, gp);
+  SetOutputBranches_REC(tParticles, rec);
+  SetOutputBranches_GEN(tParticles, mc);
 
   /*** VECTORS ***/
 
@@ -85,8 +79,7 @@ int main(int argc, char **argv) {
 
     /*** STEP 4: FILL ***/
 
-    FillElectrons(tElectrons, input, t, i, ge, re);
-    FillParticles(tParticles, gsim_row, simrec_row, t, i, gp, rp);
+    FillElectronNParticles(t, input, tParticles, gsim_row, simrec_row, mc, rec, i);
 
     // reset memory
     gsim_row.clear();

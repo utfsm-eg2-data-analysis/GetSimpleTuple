@@ -8,89 +8,154 @@
 /*
    NAMING CONVENTIONS
 
-   rec_e : output variables for reconstructed electrons (data or simulations)
    rec_p : output variables for reconstructed particles (data or simulations)
-
-   gen_e : output variables for generated particles (simulations)
    gen_p : output variables for generated particles (simulations)
 */
 
-struct rec_e {
-  // electron (46)
-  Float_t Q2, W, Nu, Xb, Yb;
-  Float_t vxe, vye, vze;
-  Float_t Sector;
-  Float_t Px, Py, Pz, P;
-  Float_t Betta, Etot, Ein, Eout;
-  Float_t vxec, vyec, vzec;
-  Float_t TargType;
-  Float_t XEC, YEC, ZEC;
-  Float_t ThetaLab, PhiLab;
-  Float_t StatDC, DCStatus, StatEC, ECStatus, TimeEC, PathEC, Chi2EC, StatSC, SCStatus, TimeSC, PathSC, StatCC, CCStatus, Nphe, Chi2CC, Status;
-  Float_t NRowsDC, NRowsEC, NRowsSC, NRowsCC;
-  // evnt (1)
-  Float_t evnt;
-};
-
 struct rec_p {
   // electron (46)
-  Float_t Q2, W, Nu, Xb, Yb;
-  Float_t vxe, vye, vze;
-  Float_t SectorEl;
-  Float_t Pex, Pey, Pez, Pe;
-  Float_t BettaEl, Etote, Eine, Eoute;
-  Float_t vxec, vyec, vzec;
-  Float_t TargType;
-  Float_t XECe, YECe, ZECe;
-  Float_t ThetaLabEl, PhiLabEl;
-  Float_t StatDCEl, DCStatusEl, StatECEl, ECStatusEl, TimeECEl, PathECEl, Chi2ECEl, StatSCEl, SCStatusEl, TimeSCEl, PathSCEl, StatCCEl, CCStatusEl, NpheEl, Chi2CCEl, StatusEl;
-  Float_t NRowsDCEl, NRowsECEl, NRowsSCEl, NRowsCCEl;
+  Float_t Q2;          // Q^2 = -q^2 = -((electron's initial four-momentum) - (electron's final four-momentum))^2, in (GeV^2), more info in TIdentificatorV2.h/Q2()
+  Float_t W;           //
+  Float_t Nu;          // virtual photon's energy, Nu = (electron's initial energy) - (electron's final energy), in (GeV)
+  Float_t Xb;          //
+  Float_t Yb;          //
+  Float_t vxe;         // x-vertex of electron, in (cm)
+  Float_t vye;         // y-vertex of electron, in (cm)
+  Float_t vze;         // z-vertex of electron, in (cm)
+  Int_t SectorEl;      //
+  Float_t Pex;         // x-component of electron's momentum, in (GeV)
+  Float_t Pey;         // y-component of electron's momentum, in (GeV)
+  Float_t Pez;         // z-component of electron's momentum, in (GeV)
+  Float_t Pe;          // electron's momentum, in (GeV)
+  Float_t BettaEl;     //
+  Float_t Etote;       //
+  Float_t Eine;        //
+  Float_t Eoute;       //
+  Float_t vxec;        // corrected x-vertex of electron, in (cm)
+  Float_t vyec;        // corrected y-vertex of electron, in (cm)
+  Float_t vzec;        // corrected z-vertex of electron, in (cm)
+  Int_t TargType;      // 1 for liquid target, 2 for solid target, criteria written in TIdentificatorV2.h/TargType()
+  Float_t XECe;        //
+  Float_t YECe;        //
+  Float_t ZECe;        //
+  Float_t ThetaLabEl;  //
+  Float_t PhiLabEl;    //
+  Float_t StatDCEl;    //
+  Float_t DCStatusEl;  //
+  Float_t StatECEl;    //
+  Float_t ECStatusEl;  //
+  Float_t TimeECEl;    //
+  Float_t PathECEl;    //
+  Float_t Chi2ECEl;    //
+  Float_t StatSCEl;    //
+  Float_t SCStatusEl;  //
+  Float_t TimeSCEl;    //
+  Float_t PathSCEl;    //
+  Float_t StatCCEl;    //
+  Float_t CCStatusEl;  //
+  Float_t NpheEl;      //
+  Float_t Chi2CCEl;    //
+  Float_t StatusEl;    //
+  Float_t NRowsDCEl;   //
+  Float_t NRowsECEl;   //
+  Float_t NRowsSCEl;   //
+  Float_t NRowsCCEl;   //
   // particle (49)
-  Float_t Eh, Zh, ThetaPQ, Pt2, Pl2, PhiPQ, Mx2, T;
-  Float_t ThetaLab, PhiLab;
-  Float_t vxh, vyh, vzh;
-  Float_t Sector;
-  Float_t Px, Py, Pz, P;
-  Float_t Betta, Mass2, Etot, Ein, Eout;
-  Float_t XEC, YEC, ZEC;
-  Float_t pid, T4, deltaZ;
-  Float_t StatDC, DCStatus, StatEC, ECStatus, TimeEC, PathEC, Chi2EC, StatSC, SCStatus, TimeSC, PathSC, StatCC, CCStatus, Nphe, Chi2CC, Status;
-  Float_t NRowsDC, NRowsEC, NRowsSC, NRowsCC;
+  std::vector<Float_t> Eh;        // energy of the outgoing particle, in (GeV)
+  std::vector<Float_t> Zh;        // fraction energy of the outgoing particle, Zh = Eh/Nu
+  std::vector<Float_t> ThetaPQ;   //
+  std::vector<Float_t> Pt2;       //
+  std::vector<Float_t> Pl2;       //
+  std::vector<Float_t> PhiPQ;     //
+  std::vector<Float_t> Mx2;       //
+  std::vector<Float_t> T;         //
+  std::vector<Float_t> ThetaLab;  //
+  std::vector<Float_t> PhiLab;    //
+  std::vector<Float_t> vxh;       // x-vertex of particle, in (cm)
+  std::vector<Float_t> vyh;       // y-vertex of particle, in (cm)
+  std::vector<Float_t> vzh;       // z-vertex of particle, in (cm)
+  std::vector<Int_t> Sector;      //
+  std::vector<Float_t> Px;        // x-component of particle's momentum, in (GeV)
+  std::vector<Float_t> Py;        // y-component of particle's momentum, in (GeV)
+  std::vector<Float_t> Pz;        // z-component of particle's momentum, in (GeV)
+  std::vector<Float_t> P;         // particle's momentum, in (GeV)
+  std::vector<Float_t> Betta;     //
+  std::vector<Float_t> Mass2;     //
+  std::vector<Float_t> Etot;      //
+  std::vector<Float_t> Ein;       //
+  std::vector<Float_t> Eout;      //
+  std::vector<Float_t> XEC;       //
+  std::vector<Float_t> YEC;       //
+  std::vector<Float_t> ZEC;       //
+  std::vector<Int_t> pid;         // particle ID number (according to PDG)
+  std::vector<Float_t> T4;        //
+  std::vector<Float_t> deltaZ;    //
+  std::vector<Float_t> StatDC;    //
+  std::vector<Float_t> DCStatus;  //
+  std::vector<Float_t> StatEC;    //
+  std::vector<Float_t> ECStatus;  //
+  std::vector<Float_t> TimeEC;    //
+  std::vector<Float_t> PathEC;    //
+  std::vector<Float_t> Chi2EC;    //
+  std::vector<Float_t> StatSC;    //
+  std::vector<Float_t> SCStatus;  //
+  std::vector<Float_t> TimeSC;    //
+  std::vector<Float_t> PathSC;    //
+  std::vector<Float_t> StatCC;    //
+  std::vector<Float_t> CCStatus;  //
+  std::vector<Float_t> Nphe;      //
+  std::vector<Float_t> Chi2CC;    //
+  std::vector<Float_t> Status;    //
+  std::vector<Float_t> NRowsDC;   //
+  std::vector<Float_t> NRowsEC;   //
+  std::vector<Float_t> NRowsSC;   //
+  std::vector<Float_t> NRowsCC;   //
   // event (1)
-  Float_t evnt;
-};
-
-struct gen_e {
-  // electron (10)
-  Float_t mc_Q2, mc_W, mc_Nu, mc_Xb, mc_Yb;
-  Float_t mc_vxe, mc_vye, mc_vze;
-  Float_t mc_Sector;
-  Float_t mc_TargType;
-  // particle (7)
-  Float_t mc_Px, mc_Py, mc_Pz, mc_P;
-  Float_t mc_Betta;
-  Float_t mc_ThetaLab, mc_PhiLab;
+  Float_t evnt;  // event number
 };
 
 struct gen_p {
   // electron (17)
-  Float_t mc_Q2, mc_W, mc_Nu, mc_Xb, mc_Yb;
-  Float_t mc_vxe, mc_vye, mc_vze;
-  Float_t mc_SectorEl;
-  Float_t mc_TargType;
-  Float_t mc_Pex, mc_Pey, mc_Pez, mc_Pe;
-  Float_t mc_BettaEl;
-  Float_t mc_ThetaLabEl, mc_PhiLabEl;
+  Float_t Q2;          // Q^2 = -q^2 = -((electron's initial four-momentum) - (electron's final four-momentum))^2, in (GeV^2), more info in TIdentificatorV2.h/Q2()
+  Float_t W;           //
+  Float_t Nu;          // virtual photon's energy, Nu = (electron's initial energy) - (electron's final energy), in (GeV)
+  Float_t Xb;          //
+  Float_t Yb;          //
+  Float_t vxe;         // x-vertex of electron, in (cm)
+  Float_t vye;         // y-vertex of electron, in (cm)
+  Float_t vze;         // z-vertex of electron, in (cm)
+  Int_t SectorEl;      //
+  Int_t TargType;      // 1 for liquid target, 2 for solid target, criteria written in TIdentificatorV2.h/TargType()
+  Float_t Pex;         // x-component of electron's momentum, in (GeV)
+  Float_t Pey;         // y-component of electron's momentum, in (GeV)
+  Float_t Pez;         // z-component of electron's momentum, in (GeV)
+  Float_t Pe;          // electron's momentum, in (GeV)
+  Float_t BettaEl;     //
+  Float_t ThetaLabEl;  //
+  Float_t PhiLabEl;    //
   // particle (22)
-  Float_t mc_Eh, mc_Zh, mc_ThetaPQ, mc_Pt2, mc_Pl2, mc_PhiPQ;
-  Float_t mc_ThetaLab, mc_PhiLab;
-  Float_t mc_Mx2, mc_T;
-  Float_t mc_vxh, mc_vyh, mc_vzh;
-  Float_t mc_Sector;
-  Float_t mc_Px, mc_Py, mc_Pz, mc_P;
-  Float_t mc_Betta;
-  Float_t mc_Mass2, mc_deltaZ;
-  Float_t mc_pid;
+  std::vector<Float_t> Eh;        // energy of the outgoing particle, in (GeV)
+  std::vector<Float_t> Zh;        // fraction energy of the outgoing particle, Zh = Eh/Nu
+  std::vector<Float_t> ThetaPQ;   //
+  std::vector<Float_t> Pt2;       //
+  std::vector<Float_t> Pl2;       //
+  std::vector<Float_t> PhiPQ;     //
+  std::vector<Float_t> ThetaLab;  //
+  std::vector<Float_t> PhiLab;    //
+  std::vector<Float_t> Mx2;       //
+  std::vector<Float_t> T;         //
+  std::vector<Float_t> vxh;       // x-vertex of electron, in (cm)
+  std::vector<Float_t> vyh;       // y-vertex of electron, in (cm)
+  std::vector<Float_t> vzh;       // z-vertex of electron, in (cm)
+  std::vector<Int_t> Sector;      //
+  std::vector<Float_t> Px;        // x-component of particle's momentum, in (GeV)
+  std::vector<Float_t> Py;        // y-component of particle's momentum, in (GeV)
+  std::vector<Float_t> Pz;        // z-component of particle's momentum, in (GeV)
+  std::vector<Float_t> P;         // particle's momentum, in (GeV)
+  std::vector<Float_t> Betta;     //
+  std::vector<Float_t> Mass2;     //
+  std::vector<Float_t> deltaZ;    //
+  std::vector<Int_t> pid;         //
 };
 
 #endif
