@@ -463,7 +463,7 @@ void AssignElectronVar_SIMREC(TIdentificatorV2* t, sim_e& se, Int_t evnt, TStrin
   se.vxec = fVert->X();
   se.vyec = fVert->Y();
   se.vzec = fVert->Z();
-  se.TargType = t->TargTypeSM(dataKind, targetOption, 0);
+  se.TargType = t->TargType(dataKind, targetOption);
   se.XEC = t->XEC(0);
   se.YEC = t->YEC(0);
   se.ZEC = t->ZEC(0);
@@ -511,7 +511,7 @@ void AssignElectronVar_GSIM(TIdentificatorV2* t, sim_e& se, Int_t evnt, TString 
   se.mc_Betta = t->Betta(0, 1);
   se.mc_ThetaLab = t->ThetaLab(0, 1);
   se.mc_PhiLab = t->PhiLab(0, 1);
-  se.mc_TargType = t->TargTypeSM(dataKind, targetOption, 1);
+  se.mc_TargType = t->TargType(dataKind, targetOption);
 }
 
 void AssignParticleVar_SIMREC(TIdentificatorV2* t, sim_p& sp, Int_t row, Int_t evnt, TString dataKind, TString targetOption) {
@@ -537,7 +537,7 @@ void AssignParticleVar_SIMREC(TIdentificatorV2* t, sim_p& sp, Int_t row, Int_t e
   sp.vxec = fVert->X();
   sp.vyec = fVert->Y();
   sp.vzec = fVert->Z();
-  sp.TargType = t->TargTypeSM(dataKind, targetOption, 0);
+  sp.TargType = t->TargType(dataKind, targetOption);
   sp.XECe = t->XEC(0);
   sp.YECe = t->YEC(0);
   sp.ZECe = t->ZEC(0);
@@ -649,7 +649,7 @@ void AssignParticleVar_GSIM(TIdentificatorV2* t, sim_p& sp, Int_t row, Int_t evn
   sp.mc_BettaEl = t->Betta(0, 1);
   sp.mc_ThetaLabEl = t->ThetaLab(0, 1);
   sp.mc_PhiLabEl = t->PhiLab(0, 1);
-  sp.mc_TargType = t->TargTypeSM(dataKind, targetOption, 1);
+  sp.mc_TargType = t->TargType(dataKind, targetOption);
   // gsim particle (22)
   sp.mc_pid = ToPDG(t->Id(row, 1));  // from GEANT to PDG
   sp.mc_ThetaPQ = t->ThetaPQ(row, 1);

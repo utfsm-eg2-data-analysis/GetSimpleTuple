@@ -929,7 +929,7 @@ public:
 	NRowsEC() != 0 && StatEC(k) > 0 &&
 	NRowsSC() != 0 && SCStatus(k) == 33 &&
 	NRowsCC() != 0 && Nphe(k) > (Sector(k)==0||Sector(k)==1)*25 + (Sector(k)==2)*26 + (Sector(k)==3)*21 + (Sector(k)==4||Sector(k)==5)*28 &&
-	Charge(k) == 1 && // only difference
+	Charge(k) == 1 && // only difference w.r.t. electron
 	(TimeEC(k) - TimeSC(k) - (PathEC(k) - PathSC(k))/30) < 5*0.35 && (TimeEC(k) - TimeSC(k) - (PathEC(k) - PathSC(k))/30) > -5*0.35 &&
 	Eout(k) != 0 && Ein(k) > 0.06 &&
 	ECuvw->X() > 40 && ECuvw->X() < 410 && ECuvw->Y() < 370 && ECuvw->Z() < 405 &&
@@ -997,23 +997,25 @@ public:
     Double_t P  = Momentum(k);
     Double_t T4 = TimeCorr4(k, 0.13957);
     // sebastian's parameters
-    const Double_t lines_PiMinus[5][2]= {{-0.75, 0.80},  
+    const Double_t lines_PiMinus[6][2]= {{-0.75, 0.80},  
 					 {-0.55, 0.55},
 					 {-0.55, 0.55},   
 					 {-0.50, 0.44},
-					 {-0.50, 0.45}};	
+					 {-0.50, 0.45},
+					 {-0.50, 0.50}};	
     if (StatSC(k) > 0 && ((0 < P && P <= 0.5 && T4 >= lines_PiMinus[0][0] && T4 <= lines_PiMinus[0][1]) ||
 			  (0.5 < P && P <= 1.0 && T4 >= lines_PiMinus[1][0] && T4 <= lines_PiMinus[1][1]) ||
 			  (1.0 < P && P <= 1.5 && T4 >= lines_PiMinus[2][0] && T4 <= lines_PiMinus[2][1]) ||
 			  (1.5 < P && P <= 2.0 && T4 >= lines_PiMinus[3][0] && T4 <= lines_PiMinus[3][1]) ||
-			  (2.0 < P && P <= 2.5 && T4 >= lines_PiMinus[4][0] && T4 <= lines_PiMinus[4][1]))) {
+			  (2.0 < P && P <= 2.5 && T4 >= lines_PiMinus[4][0] && T4 <= lines_PiMinus[4][1]) ||
+			  (2.5 < P && P <= 5.0 && T4 >= lines_PiMinus[5][0] && T4 <= lines_PiMinus[5][1]))) {
       return true;
     } // closure
     return false;
   }
 
   Bool_t PiMinusPhaseSpace_CC(Int_t k) {
-    // for high energy pi+
+    // DEPRECATED
     Double_t P  = Momentum(k);
     Double_t T4 = TimeCorr4(k, 0.13957);
     if (StatCC(k) > 0 && Nphe(k) > 25 &&
@@ -1024,14 +1026,11 @@ public:
   }
   
   Bool_t IsPiMinus(Int_t k, TVector3 *ECuvw) {
-    Double_t deltaBetta = Betta(k) - (Momentum(k)/TMath::Sqrt(Momentum(k)*Momentum(k) + 0.13957*0.13957));
     if (Charge(k) == -1 &&
 	Status(k) > 0 &&
 	NRowsDC() != 0 && DCStatus(k) > 0 && StatDC(k) > 0 &&
 	Etot(k) < 0.15 && (Ein(k) < 0.085 - 0.5*Eout(k)) &&
-	deltaBetta >= -0.03 && deltaBetta <= 0.03 &&
-	Momentum(k) < 5.0 &&
-	(PiMinusPhaseSpace_SC(k) || PiMinusPhaseSpace_CC(k))) { // high energy pi-
+	PiMinusPhaseSpace_SC(k)) {
       return true;
     } // closure
     return false;
@@ -1039,7 +1038,7 @@ public:
   
   Bool_t IsGamma(Int_t k, TVector3* ECuvw) {
     if (Charge(k) == 0 &&
-	ECuvw->X() > 40 && ECuvw->X() < 410 && ECuvw->Y() < 370 && ECuvw->Z() < 410 && 
+	ECuvw->X() > 40 && ECuvw->X() < 410 && ECuvw->Y() < 370 && ECuvw->Z() < 410 &&
 	((PathEC(k)/(Betta(k)*30) - PathEC(k)/30) > -2.2) && ((PathEC(k)/(Betta(k)*30) - PathEC(k)/30) < 1.3) &&
 	TMath::Max(Etot(k), Ein(k) + Eout(k))/0.272 > 0.1) {
       return true;
