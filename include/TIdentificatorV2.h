@@ -942,7 +942,7 @@ public:
   }
 
   Bool_t PiPlusPhaseSpace_SC(Int_t k) {
-    Double_t P  = Momentum(k);
+    Double_t P = Momentum(k);
     Double_t T4 = TimeCorr4(k, 0.13957);
     // sebastian's paramaters
     const Double_t lines_PiPlus[14][2] = {{-0.70, 0.70}, {-0.70, 0.65},
@@ -953,22 +953,22 @@ public:
 					  {-0.50, 0.40}, {-0.50, 0.40},
 					  {-0.32, 0.32}, {-0.30, 0.37}};
     if (P < 2.7 && NRowsSC() != 0 && StatSC(k) > 0 &&
-	((P > 0.00 && P <= 0.25 && T4 >= lines_PiPlus[0][0] && T4 <= lines_PiPlus[0][1]) ||
+        ((P > 0.00 && P <= 0.25 && T4 >= lines_PiPlus[0][0] && T4 <= lines_PiPlus[0][1]) ||
 	 (P > 0.25 && P <= 0.50 && T4 >= lines_PiPlus[1][0] && T4 <= lines_PiPlus[1][1]) ||
-	 (P > 0.50 && P <= 0.75 && T4 >= lines_PiPlus[2][0] && T4 <= lines_PiPlus[2][1]) ||
+         (P > 0.50 && P <= 0.75 && T4 >= lines_PiPlus[2][0] && T4 <= lines_PiPlus[2][1]) ||
 	 (P > 0.75 && P <= 1.00 && T4 >= lines_PiPlus[3][0] && T4 <= lines_PiPlus[3][1]) ||
-	 (P > 1.00 && P <= 1.25 && T4 >= lines_PiPlus[4][0] && T4 <= lines_PiPlus[4][1]) ||
+         (P > 1.00 && P <= 1.25 && T4 >= lines_PiPlus[4][0] && T4 <= lines_PiPlus[4][1]) ||
 	 (P > 1.25 && P <= 1.50 && T4 >= lines_PiPlus[5][0] && T4 <= lines_PiPlus[5][1]) ||
-	 (P > 1.50 && P <= 1.75 && T4 >= lines_PiPlus[6][0] && T4 <= lines_PiPlus[6][1]) ||
+         (P > 1.50 && P <= 1.75 && T4 >= lines_PiPlus[6][0] && T4 <= lines_PiPlus[6][1]) ||
 	 (P > 1.75 && P <= 2.00 && T4 >= lines_PiPlus[7][0] && T4 <= lines_PiPlus[7][1]) ||
-	 (P > 2.00 && P <= 2.25 && T4 >= lines_PiPlus[8][0] && T4 <= lines_PiPlus[8][1]) ||
-	 (P > 2.25 && P <= 2.50 && T4 >= lines_PiPlus[9][0] && T4 <= lines_PiPlus[9][1] && Mass2(k) < 0.5) ||  
-	 (P > 2.50 && P < 2.70 && T4 >= lines_PiPlus[10][0] && T4 <= lines_PiPlus[10][1] && Mass2(k) < 0.4) || 
-	 (P > 2.7 && P <= 3.3 && T4 >= -0.5 && T4 <= 0.4 && Mass2(k) < 0.4) || 
-	 (P > 3.3 && P <= 3.7 && T4 >= -0.32 && T4 <= 0.32 && Mass2(k) < 0.37) || 
+         (P > 2.00 && P <= 2.25 && T4 >= lines_PiPlus[8][0] && T4 <= lines_PiPlus[8][1]) ||
+         (P > 2.25 && P <= 2.50 && T4 >= lines_PiPlus[9][0] && T4 <= lines_PiPlus[9][1] && Mass2(k) < 0.5) ||
+         (P > 2.50 && P < 2.70 && T4 >= lines_PiPlus[10][0] && T4 <= lines_PiPlus[10][1] && Mass2(k) < 0.4) ||
+	 (P > 2.7 && P <= 3.3 && T4 >= -0.5 && T4 <= 0.4 && Mass2(k) < 0.4) ||
+         (P > 3.3 && P <= 3.7 && T4 >= -0.32 && T4 <= 0.32 && Mass2(k) < 0.37) ||
 	 (P > 3.7 && T4 >= -0.3 && T4 <= 0.3 && Mass2(k) < 0.37))) {
       return true;
-    } // closure
+    }  // closure
     return false;
   }
 
@@ -982,7 +982,7 @@ public:
     } // closure
     return false;
   }
-  
+
   Bool_t IsPiPlus(Int_t k, TVector3* ECuvw) {
     if (Charge(k) == 1 &&
 	Status(k) > 0 &&
@@ -992,45 +992,49 @@ public:
     } // closure
     return false;
   }
-
-  Bool_t PiMinusPhaseSpace_SC(Int_t k) {
-    Double_t P  = Momentum(k);
+  
+  Bool_t PiMinusPhaseSpace_SC(Int_t k, TString dataKind) {
+    Double_t P = Momentum(k);
     Double_t T4 = TimeCorr4(k, 0.13957);
     // sebastian's parameters
-    const Double_t lines_PiMinus[6][2]= {{-0.75, 0.80},  
-					 {-0.55, 0.55},
-					 {-0.55, 0.55},   
-					 {-0.50, 0.44},
-					 {-0.50, 0.45},
-					 {-0.50, 0.50}};	
-    if (StatSC(k) > 0 && ((0 < P && P <= 0.5 && T4 >= lines_PiMinus[0][0] && T4 <= lines_PiMinus[0][1]) ||
-			  (0.5 < P && P <= 1.0 && T4 >= lines_PiMinus[1][0] && T4 <= lines_PiMinus[1][1]) ||
-			  (1.0 < P && P <= 1.5 && T4 >= lines_PiMinus[2][0] && T4 <= lines_PiMinus[2][1]) ||
-			  (1.5 < P && P <= 2.0 && T4 >= lines_PiMinus[3][0] && T4 <= lines_PiMinus[3][1]) ||
-			  (2.0 < P && P <= 2.5 && T4 >= lines_PiMinus[4][0] && T4 <= lines_PiMinus[4][1]) ||
-			  (2.5 < P && P <= 5.0 && T4 >= lines_PiMinus[5][0] && T4 <= lines_PiMinus[5][1]))) {
-      return true;
-    } // closure
+    const Double_t lines_PiMinus[5][2] = {{-0.75, 0.80},
+					  {-0.55, 0.55},
+					  {-0.55, 0.55},
+					  {-0.50, 0.44},
+					  {-0.50, 0.45}};
+    const Double_t lines_PiMinus_sim[5][2] = {{-0.75, 0.80},
+					      {-0.55, 0.60},
+					      {-0.55, 0.65},
+					      {-0.50, 0.54},
+					      {-0.50, 0.45}};
+    if (dataKind == "data") {
+      // data
+      if (StatSC(k) > 0 &&
+          ((0 < P && P <= 0.5 && T4 >= lines_PiMinus[0][0] && T4 <= lines_PiMinus[0][1]) || (0.5 < P && P <= 1.0 && T4 >= lines_PiMinus[1][0] && T4 <= lines_PiMinus[1][1]) ||
+           (1.0 < P && P <= 1.5 && T4 >= lines_PiMinus[2][0] && T4 <= lines_PiMinus[2][1]) || (1.5 < P && P <= 2.0 && T4 >= lines_PiMinus[3][0] && T4 <= lines_PiMinus[3][1]) ||
+           (2.0 < P && P <= 2.5 && T4 >= lines_PiMinus[4][0] && T4 <= lines_PiMinus[4][1]) || (P > 2.5 && T4 < 0.50 && T4 > -0.50))) {
+        return true;
+      }
+    } else if (dataKind == "sim") {
+      // sim
+      if (StatSC(k) > 0 && ((0 < P && P <= 0.5 && T4 >= lines_PiMinus_sim[0][0] && T4 <= lines_PiMinus_sim[0][1]) ||
+                            (0.5 < P && P <= 1.0 && T4 >= lines_PiMinus_sim[1][0] && T4 <= lines_PiMinus_sim[1][1]) ||
+                            (1.0 < P && P <= 1.5 && T4 >= lines_PiMinus_sim[2][0] && T4 <= lines_PiMinus_sim[2][1]) ||
+                            (1.5 < P && P <= 2.0 && T4 >= lines_PiMinus_sim[3][0] && T4 <= lines_PiMinus_sim[3][1]) ||
+                            (2.0 < P && P <= 2.5 && T4 >= lines_PiMinus_sim[4][0] && T4 <= lines_PiMinus_sim[4][1]) || (P > 2.5 && T4 < 0.50 && T4 > -0.50))) {
+        return true;
+      }
+    }
     return false;
   }
 
-  Bool_t PiMinusPhaseSpace_CC(Int_t k) {
-    // DEPRECATED
-    Double_t P  = Momentum(k);
-    Double_t T4 = TimeCorr4(k, 0.13957);
-    if (StatCC(k) > 0 && Nphe(k) > 25 &&
-	P > 2.5 && T4 > -1.50 && T4 < 1.50) {
-      return true;
-    } // closure
-    return false;
-  }
-  
-  Bool_t IsPiMinus(Int_t k, TVector3 *ECuvw) {
+  Bool_t IsPiMinus(Int_t k, TVector3 *ECuvw, TString dataKind) {
     if (Charge(k) == -1 &&
 	Status(k) > 0 &&
 	NRowsDC() != 0 && DCStatus(k) > 0 && StatDC(k) > 0 &&
 	Etot(k) < 0.15 && (Ein(k) < 0.085 - 0.5*Eout(k)) &&
-	PiMinusPhaseSpace_SC(k)) {
+	Momentum(k) < 5.0 &&
+	PiMinusPhaseSpace_SC(k, dataKind)) {
       return true;
     } // closure
     return false;
@@ -1066,7 +1070,7 @@ public:
     TVector3 *ECuvw = XYZToUVW(ECxyz);
     if (IsElectron(k, dataKind, targetOption, ECuvw)) {
       return "electron";
-    } else if (IsPiMinus(k, ECuvw)) {
+    } else if (IsPiMinus(k, ECuvw, dataKind)) {
       return "pi-";
     } else if (IsPositron(k, dataKind, targetOption, ECuvw)) {
       return "positron";
