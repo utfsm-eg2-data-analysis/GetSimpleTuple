@@ -183,7 +183,7 @@ void AssignElectronVar_Data(TIdentificatorV2* t, data_e& de, Int_t evnt, TString
   de.vxec = fVert->X();
   de.vyec = fVert->Y();
   de.vzec = fVert->Z();
-  de.TargType = t->TargTypeSM(dataKind, targetOption, 0);
+  de.TargType = t->TargType(dataKind, targetOption);
   de.XEC = t->XEC(0);
   de.YEC = t->YEC(0);
   de.ZEC = t->ZEC(0);
@@ -236,7 +236,7 @@ void AssignParticleVar_Data(TIdentificatorV2* t, data_p& dp, Int_t row, Int_t ev
   dp.vxec = fVert->X();
   dp.vyec = fVert->Y();
   dp.vzec = fVert->Z();
-  dp.TargType = t->TargTypeSM(dataKind, targetOption, 0);
+  dp.TargType = t->TargType(dataKind, targetOption);
   dp.XECe = t->XEC(0);
   dp.YECe = t->YEC(0);
   dp.ZECe = t->ZEC(0);

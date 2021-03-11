@@ -19,7 +19,7 @@ TString dataKind = "sim";
 
 /*** Declaration of functions ***/
 
-int parseCommandLine(int argc, char *argv[]);
+void parseCommandLine(int argc, char *argv[]);
 void printOptions();
 void printUsage();
 
@@ -185,7 +185,7 @@ void printUsage() {
   std::cout << std::endl;
 }
 
-int parseCommandLine(int argc, char *argv[]) {
+void parseCommandLine(int argc, char *argv[]) {
   int c;
   if (argc == 1) {
     std::cerr << "Empty command line. Execute ./bin/GetSimpleTuple_sim -h to print usage." << std::endl;

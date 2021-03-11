@@ -620,44 +620,6 @@ public:
     return 0;
   }
   
-  Int_t TargTypeSM(TString dataKind, TString targetOption, Int_t kind = 0) {
-    // assigns TargType according to vertex cut
-    Int_t sector = Sector(0, kind);
-    // Sebastián Morán vertex cuts
-    Double_t shift[6] = {0.1, -0.4, -0.6, -0.1, 0.4, 0.6};
-    if (dataKind == "data") {
-      // Raphael Dupré cuts
-      if (targetOption == "C") {
-	if (TMath::Abs(-30.1 - Z(0) + shift[sector]) < 2.0)      return 1;
-	else if (TMath::Abs(-24.7 - Z(0) + shift[sector]) < 1.5) return 2;
-      } else if (targetOption == "Fe") {
-	if (TMath::Abs(-30.2 - Z(0) + shift[sector]) < 2.0)      return 1;
-	else if (TMath::Abs(-24.9 - Z(0) + shift[sector]) < 1.5) return 2;
-      } else if (targetOption == "Pb") {
-	if (TMath::Abs(-30.1 - Z(0) + shift[sector]) < 2.0)      return 1;
-	else if (TMath::Abs(-24.9 - Z(0) + shift[sector]) < 1.5) return 2;
-      }
-    } else if (dataKind == "sim") {
-      // Hayk Hakobyan cuts
-      if ((sector == 0)*(-32.50 < Z(0, kind) && Z(0, kind) < -28.00) +
-	  (sector == 1)*(-32.50 < Z(0, kind) && Z(0, kind) < -27.50) +
-	  (sector == 2)*(-32.00 < Z(0, kind) && Z(0, kind) < -27.25) +
-	  (sector == 3)*(-32.00 < Z(0, kind) && Z(0, kind) < -27.75) +
-	  (sector == 4)*(-32.50 < Z(0, kind) && Z(0, kind) < -28.35) +
-	  (sector == 5)*(-33.50 < Z(0, kind) && Z(0, kind) < -28.75)) {
-	return 1; // liquid
-      } else if ((sector == 0)*(-26.50 < Z(0, kind) && Z(0, kind) < -20.00) +
-		 (sector == 1)*(-26.00 < Z(0, kind) && Z(0, kind) < -20.00) +
-		 (sector == 2)*(-25.65 < Z(0, kind) && Z(0, kind) < -20.00) +
-		 (sector == 3)*(-25.85 < Z(0, kind) && Z(0, kind) < -20.00) +
-		 (sector == 4)*(-26.65 < Z(0, kind) && Z(0, kind) < -20.00) +
-		 (sector == 5)*(-27.15 < Z(0, kind) && Z(0, kind) < -20.00)) {
-	return 2; // solid
-      }
-    } // closure
-    return 0; // default value
-  }
-
   /*** Hadron variables ***/
   
   Double_t Zh(Int_t k, Bool_t kind = 0, Double_t mass = 0.13957) {
@@ -976,8 +938,10 @@ public:
     // for high energy pi+
     Double_t P  = Momentum(k);
     Double_t T4 = TimeCorr4(k, 0.13957);
-    if (NRowsCC() != 0 && StatCC(k) > 0 && Nphe(k) > 25 && Chi2CC(k) < 5/57.3 &&
-	P >= 2.7 && T4 > -0.35 && T4 < 0.35) {
+    if (NRowsCC() != 0 && StatCC(k) > 0 && Nphe(k) > 15 && Chi2CC(k) < 5/57.3 &&
+	P >= 2.7 &&
+	T4 > -0.6 &&
+	T4 < (0.45*(P > 2.7 && P < 3.3) + 0.5*(P > 3.3 && P < 3.7) + 0.5*(P > 3.7 && P < 6.))) {
       return true;
     } // closure
     return false;
@@ -1010,9 +974,12 @@ public:
     if (dataKind == "data") {
       // data
       if (StatSC(k) > 0 &&
-          ((0 < P && P <= 0.5 && T4 >= lines_PiMinus[0][0] && T4 <= lines_PiMinus[0][1]) || (0.5 < P && P <= 1.0 && T4 >= lines_PiMinus[1][0] && T4 <= lines_PiMinus[1][1]) ||
-           (1.0 < P && P <= 1.5 && T4 >= lines_PiMinus[2][0] && T4 <= lines_PiMinus[2][1]) || (1.5 < P && P <= 2.0 && T4 >= lines_PiMinus[3][0] && T4 <= lines_PiMinus[3][1]) ||
-           (2.0 < P && P <= 2.5 && T4 >= lines_PiMinus[4][0] && T4 <= lines_PiMinus[4][1]) || (P > 2.5 && T4 < 0.50 && T4 > -0.50))) {
+          ((0 < P && P <= 0.5 && T4 >= lines_PiMinus[0][0] && T4 <= lines_PiMinus[0][1]) ||
+	   (0.5 < P && P <= 1.0 && T4 >= lines_PiMinus[1][0] && T4 <= lines_PiMinus[1][1]) ||
+           (1.0 < P && P <= 1.5 && T4 >= lines_PiMinus[2][0] && T4 <= lines_PiMinus[2][1]) ||
+	   (1.5 < P && P <= 2.0 && T4 >= lines_PiMinus[3][0] && T4 <= lines_PiMinus[3][1]) ||
+           (2.0 < P && P <= 2.5 && T4 >= lines_PiMinus[4][0] && T4 <= lines_PiMinus[4][1]) ||
+	   (P > 2.5 && T4 < 0.50 && T4 > -0.50))) {
         return true;
       }
     } else if (dataKind == "sim") {
@@ -1021,7 +988,8 @@ public:
                             (0.5 < P && P <= 1.0 && T4 >= lines_PiMinus_sim[1][0] && T4 <= lines_PiMinus_sim[1][1]) ||
                             (1.0 < P && P <= 1.5 && T4 >= lines_PiMinus_sim[2][0] && T4 <= lines_PiMinus_sim[2][1]) ||
                             (1.5 < P && P <= 2.0 && T4 >= lines_PiMinus_sim[3][0] && T4 <= lines_PiMinus_sim[3][1]) ||
-                            (2.0 < P && P <= 2.5 && T4 >= lines_PiMinus_sim[4][0] && T4 <= lines_PiMinus_sim[4][1]) || (P > 2.5 && T4 < 0.50 && T4 > -0.50))) {
+                            (2.0 < P && P <= 2.5 && T4 >= lines_PiMinus_sim[4][0] && T4 <= lines_PiMinus_sim[4][1]) ||
+			    (P > 2.5 && T4 < 0.50 && T4 > -0.50))) {
         return true;
       }
     }
@@ -1032,7 +1000,6 @@ public:
     if (Charge(k) == -1 &&
 	Status(k) > 0 &&
 	NRowsDC() != 0 && DCStatus(k) > 0 && StatDC(k) > 0 &&
-	Etot(k) < 0.15 && (Ein(k) < 0.085 - 0.5*Eout(k)) &&
 	Momentum(k) < 5.0 &&
 	PiMinusPhaseSpace_SC(k, dataKind)) {
       return true;
@@ -1062,7 +1029,6 @@ public:
     } // closure
     return false;
   }
-
   
   TString GetCategorization(Int_t k, TString dataKind, TString targetOption) {
     // transformation vectors
