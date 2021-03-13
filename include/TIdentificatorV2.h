@@ -819,48 +819,12 @@ public:
   /*** PID cuts ***/
 
   Bool_t ElectronPhaseSpace(Int_t k, TString dataKind) {
-    if (dataKind == "sim") {
-      if ((Etot(k)/0.27 >
-	   (Sector(k)==0||Sector(k)==1)*(1.03*Momentum(k) - 0.42) +
-	   (Sector(k)==2)*(1.05*Momentum(k) - 0.46) + 
-	   (Sector(k)==3)*(1.03*Momentum(k) - 0.44) + 
-	   (Sector(k)==4)*(1.06*Momentum(k) - 0.46) +
-	   (Sector(k)==5)*(1.04*Momentum(k) - 0.47)) &&
-	  (Etot(k)/0.27 <
-	   (Sector(k)==0||Sector(k)==1||Sector(k)==2)*(1.05*Momentum(k) + 0.21) +
-	   (Sector(k)==3)*(1.03*Momentum(k) + 0.23) + 
-	   (Sector(k)==4)*(1.06*Momentum(k) + 0.20) +
-	   (Sector(k)==5)*(1.04*Momentum(k) + 0.22)) &&
-	  ((Ein(k)/0.27 + Eout(k)/0.27) <
-	   (Sector(k)==0||Sector(k)==1)*(1.13*Momentum(k)) +
-	   (Sector(k)==2||Sector(k)==3||Sector(k)==5)*(1.14*Momentum(k)) +
-	   (Sector(k)==4)*(1.15*Momentum(k))) &&
-	  ((Ein(k)/0.27 + Eout(k)/0.27) >
-	   (Sector(k)==0||Sector(k)==1)*(0.79*Momentum(k)) +
-	   (Sector(k)==2||Sector(k)==5)*(0.79*Momentum(k)) +
-	   (Sector(k)==3)*(0.79*Momentum(k)) +
-	   (Sector(k)==4)*(0.79*Momentum(k)))) {
-	return true;
-      }
-    } else if (dataKind == "data") {
-      if ((Etot(k)/0.27 >
-	   (Sector(k)==0||Sector(k)==1)*(1.05*Momentum(k) - 0.46) +
-	   (Sector(k)==2||Sector(k)==4||Sector(k)==5)*(1.11*Momentum(k) - 0.43) +
-	   (Sector(k)==3)*(1.07*Momentum(k) - 0.43)) &&
-	  (Etot(k)/0.27 <
-	   (Sector(k)==0||Sector(k)==1)*(1.05*Momentum(k) + 0.18) +
-	   (Sector(k)==2||Sector(k)==4||Sector(k)==5)*(1.11*Momentum(k) + 0.18) +
-	   (Sector(k)==3)*(1.07*Momentum(k) + 0.18)) &&
-	  ((Ein(k)/0.27 + Eout(k)/0.27) <
-	   (Sector(k)==0||Sector(k)==1)*(1.11*Momentum(k)) +
-	   (Sector(k)==2||Sector(k)==5)*(1.19*Momentum(k)) +
-	   (Sector(k)==3)*(1.15*Momentum(k)) +
-	   (Sector(k)==4)*(1.22*Momentum(k))) &&
-	  ((Ein(k)/0.27 + Eout(k)/0.27) >
-	   (Sector(k)==0||Sector(k)==1)*(0.75*Momentum(k)) +
-	   (Sector(k)==2||Sector(k)==5)*(0.84*Momentum(k)) +
-	   (Sector(k)==3)*(0.83*Momentum(k)) +
-	   (Sector(k)==4)*(0.85*Momentum(k)))) {
+    // OS cuts
+    if (dataKind == "sim" || dataKind == "data") {
+      if ((Etot(k)/0.27/1.15 + 0.4 > Momentum(k)) && 
+	  (Etot(k)/0.27/1.15 - 0.2 < Momentum(k)) && 
+	  (Ein(k)/0.27 + Eout(k)/0.27 > 0.8*Momentum(k)) &&
+	  (Ein(k)/0.27 + Eout(k)/0.27 < 1.2*Momentum(k))) {
 	return true;
       }
     } // closure
