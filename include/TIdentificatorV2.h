@@ -750,7 +750,7 @@ public:
   TLorentzVector *GetCorrPhotonMomentum(Int_t k) {
     // measure gammas by detection at EC
     Double_t fGammaE, fGammaRt, fGammaR, fGammaThetaEC, fGammaPhiEC, fGammaPx, fGammaPy, fGammaPz;
-    fGammaE       = TMath::Max(Etot(k), Ein(k) + Eout(k))/0.272;
+    fGammaE       = TMath::Max(Etot(k), Ein(k) + Eout(k))/0.273;
     fGammaRt      = TMath::Sqrt(XEC(k)*XEC(k) + YEC(k)*YEC(k));
     fGammaR       = TMath::Sqrt(XEC(k)*XEC(k) + YEC(k)*YEC(k) + (ZEC(k) - GetCorrectedVert()->Z())*(ZEC(k) - GetCorrectedVert()->Z()));
     fGammaThetaEC = TMath::ASin(fGammaRt/fGammaR);
@@ -1011,7 +1011,7 @@ public:
     if (Charge(k) == 0 &&
 	ECuvw->X() > 40 && ECuvw->X() < 410 && ECuvw->Y() < 370 && ECuvw->Z() < 410 &&
 	((PathEC(k)/(Betta(k)*30) - PathEC(k)/30) > -2.2) && ((PathEC(k)/(Betta(k)*30) - PathEC(k)/30) < 1.3) &&
-	TMath::Max(Etot(k), Ein(k) + Eout(k))/0.272 > 0.1) {
+	TMath::Max(Etot(k), Ein(k) + Eout(k))/0.273 > 0.2) {
       return true;
     } // closure
     return false;
