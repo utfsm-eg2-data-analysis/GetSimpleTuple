@@ -89,6 +89,7 @@ struct rec_p {
   std::vector<Float_t> ZEC;       //
   std::vector<Int_t> pid;         // particle ID number (according to PDG)
   std::vector<Float_t> T4;        //
+  std::vector<Float_t> Xf;        // x-feynman
   std::vector<Float_t> deltaZ;    //
   std::vector<Float_t> StatDC;    //
   std::vector<Float_t> DCStatus;  //
@@ -156,6 +157,7 @@ struct gen_p {
   std::vector<Float_t> Mass2;     //
   std::vector<Float_t> deltaZ;    //
   std::vector<Int_t> pid;         //
+  std::vector<Float_t> Xf;        // x-feynman
 };
 
 #endif

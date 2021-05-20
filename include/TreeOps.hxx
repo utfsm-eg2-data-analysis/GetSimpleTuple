@@ -61,7 +61,7 @@ void SetOutputBranches_REC(TTree* tree, rec_p& rec) {
   tree->Branch("NRowsECEl", &rec.NRowsECEl);
   tree->Branch("NRowsSCEl", &rec.NRowsSCEl);
   tree->Branch("NRowsCCEl", &rec.NRowsCCEl);
-  // reconstructed particle (49 variables)
+  // reconstructed particle (50 variables)
   tree->Branch("Eh", &rec.Eh);
   tree->Branch("Zh", &rec.Zh);
   tree->Branch("ThetaPQ", &rec.ThetaPQ);
@@ -90,6 +90,7 @@ void SetOutputBranches_REC(TTree* tree, rec_p& rec) {
   tree->Branch("ZEC", &rec.ZEC);
   tree->Branch("pid", &rec.pid);
   tree->Branch("T4", &rec.T4);
+  tree->Branch("Xf", &rec.Xf);
   tree->Branch("deltaZ", &rec.deltaZ);
   tree->Branch("StatDC", &rec.StatDC);
   tree->Branch("DCStatus", &rec.DCStatus);
@@ -134,7 +135,7 @@ void SetOutputBranches_GEN(TTree* tree, gen_p& mc) {
   tree->Branch("mc_BettaEl", &mc.BettaEl);
   tree->Branch("mc_ThetaLabEl", &mc.ThetaLabEl);
   tree->Branch("mc_PhiLabEl", &mc.PhiLabEl);
-  // generated particle (22 variables)
+  // generated particle (23 variables)
   tree->Branch("mc_Eh", &mc.Eh);
   tree->Branch("mc_Zh", &mc.Zh);
   tree->Branch("mc_ThetaPQ", &mc.ThetaPQ);
@@ -156,6 +157,7 @@ void SetOutputBranches_GEN(TTree* tree, gen_p& mc) {
   tree->Branch("mc_Betta", &mc.Betta);
   tree->Branch("mc_Mass2", &mc.Mass2);
   tree->Branch("mc_pid", &mc.pid);
+  tree->Branch("mc_Xf", &mc.Xf);
   tree->Branch("mc_deltaZ", &mc.deltaZ);
 }
 
@@ -213,7 +215,7 @@ void AssignElectronVar_REC(TIdentificatorV2* t, rec_p& rec, Int_t evnt) {
 }
 
 void AssignParticleVar_REC(TIdentificatorV2* t, rec_p& rec, Int_t row) {
-  // reconstructed particles (49 variables)
+  // reconstructed particles (50 variables)
   Int_t fPid = particleID(t->GetCategorization(row, gDataKind, gTargetOption));
   rec.pid.push_back(fPid);
   rec.vxh.push_back(t->X(row));
@@ -256,6 +258,7 @@ void AssignParticleVar_REC(TIdentificatorV2* t, rec_p& rec, Int_t row) {
   rec.Betta.push_back(t->Betta(row));  // BettaMeasured
   rec.Mass2.push_back(fP * fP * (TMath::Power(t->Betta(row), -2) - 1));
   rec.T4.push_back(t->PathSC(0) / 30. - t->TimeSC(0) + t->TimeSC(row) - (t->PathSC(row) / 30.) * TMath::Sqrt(TMath::Power(fMass / fP, 2) + 1));
+  rec.Xf.push_back(t->Xf(row));
   rec.StatDC.push_back(t->StatDC(row));
   rec.DCStatus.push_back(t->DCStatus(row));
   rec.StatEC.push_back(t->StatEC(row));
@@ -279,7 +282,7 @@ void AssignParticleVar_REC(TIdentificatorV2* t, rec_p& rec, Int_t row) {
 }
 
 void ClearParticleVar_REC(rec_p& rec) {
-  // reconstructed particles (49 variables)
+  // reconstructed particles (50 variables)
   rec.pid.clear();
   rec.vxh.clear();
   rec.vyh.clear();
@@ -309,6 +312,7 @@ void ClearParticleVar_REC(rec_p& rec) {
   rec.Betta.clear();
   rec.Mass2.clear();
   rec.T4.clear();
+  rec.Xf.clear();
   rec.StatDC.clear();
   rec.DCStatus.clear();
   rec.StatEC.clear();
@@ -353,7 +357,7 @@ void AssignElectronVar_GEN(TIdentificatorV2* t, gen_p& mc) {
 }
 
 void AssignParticleVar_GEN(TIdentificatorV2* t, gen_p& mc, Int_t row) {
-  // generated particles (22 variables)
+  // generated particles (23 variables)
   Int_t fPid = ToPDG(t->Id(row, 1));  // from GEANT to PDG
   mc.pid.push_back(fPid);
   mc.ThetaPQ.push_back(t->ThetaPQ(row, 1));
@@ -378,11 +382,12 @@ void AssignParticleVar_GEN(TIdentificatorV2* t, gen_p& mc, Int_t row) {
   mc.P.push_back(t->Momentum(row, 1));
   mc.Betta.push_back(t->Betta(row, 1));
   mc.Mass2.push_back(t->Mass2(row, 1));
+  mc.Xf.push_back(t->Xf(row, 1));
   mc.deltaZ.push_back(t->Z(row, 1) - t->Z(0, 1));
 }
 
 void ClearParticleVar_GEN(gen_p& mc) {
-  // generated particle (22 variables)
+  // generated particle (23 variables)
   mc.pid.clear();
   mc.ThetaPQ.clear();
   mc.PhiPQ.clear();
@@ -404,6 +409,7 @@ void ClearParticleVar_GEN(gen_p& mc) {
   mc.P.clear();
   mc.Betta.clear();
   mc.Mass2.clear();
+  mc.Xf.clear();
   mc.deltaZ.clear();
 }
 
@@ -458,7 +464,7 @@ void NullElectronVar_REC(rec_p& rec) {
 }
 
 void NullParticleVar_REC(rec_p& rec) {
-  // reconstructed particles (49 variables)
+  // reconstructed particles (50 variables)
   rec.pid.push_back(INVLD);
   rec.Eh.push_back(INVLD);
   rec.Zh.push_back(INVLD);
@@ -471,6 +477,7 @@ void NullParticleVar_REC(rec_p& rec) {
   rec.ThetaLab.push_back(INVLD);
   rec.PhiLab.push_back(INVLD);
   rec.T4.push_back(INVLD);
+  rec.Xf.push_back(INVLD);
   rec.vxh.push_back(INVLD);
   rec.vyh.push_back(INVLD);
   rec.vzh.push_back(INVLD);
@@ -532,7 +539,7 @@ void NullElectronVar_GEN(gen_p& mc) {
 }
 
 void NullParticleVar_GEN(gen_p& mc) {
-  // gsim particle (22 variables)
+  // gsim particle (23 variables)
   mc.Eh.push_back(INVLD);
   mc.Zh.push_back(INVLD);
   mc.ThetaPQ.push_back(INVLD);
@@ -553,6 +560,7 @@ void NullParticleVar_GEN(gen_p& mc) {
   mc.P.push_back(INVLD);
   mc.Betta.push_back(INVLD);
   mc.Mass2.push_back(INVLD);
+  mc.Xf.push_back(INVLD);
   mc.deltaZ.push_back(INVLD);
   mc.pid.push_back(INVLD);
 }

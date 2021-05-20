@@ -1,6 +1,10 @@
 #ifndef TIDENTIFICATORV2_H
 #define TIDENTIFICATORV2_H
 
+#ifndef CONSTANTS_HXX
+#include "Constants.hxx"
+#endif
+
 #include "TClasTool.h"
 
 #ifndef CLASTOOL_THEADERClass
@@ -683,6 +687,16 @@ public:
   Double_t T(Int_t k, Bool_t kind = 0, Double_t mass = 0.13957) {
     // (?)
     return 2.*TMath::Sqrt((Nu(kind)*Nu(kind) + Q2(kind))*Pl2(k, kind)) + mass*mass - Q2(kind) - 2.*Nu(kind)*Nu(kind)*Zh(k, kind, mass);
+  }
+
+  Double_t Xf(Int_t k, Bool_t kind = 0) {
+    // Returns the Feynman X scaling variable for the particle in the row k
+    // (only valid for charged pions!)
+    Double_t PlCM; // PlCM: Longitudinal momentum of the hadron in the Center of Mass frame
+    Double_t PlCMmax; // Max PlCM's value expected (according to S.Moran thesis)
+    PlCM = (TMath::Sqrt(Pl2(k, kind)) - Zh(k, kind)*Nu(kind)*TMath::Sqrt(Q2(kind) + Nu(kind)*Nu(kind))/(Nu(kind) + kMassProton))*(Nu(kind) + kMassProton)/W(kind);
+    PlCMmax = TMath::Sqrt(TMath::Power(W(kind), 4) + TMath::Power(kMassPiPlus*kMassPiPlus - kMassNeutron*kMassNeutron, 2) - 2*W(kind)*W(kind)*(kMassPiPlus*kMassPiPlus + kMassNeutron*kMassNeutron))/(2*W(kind));
+    return PlCM/PlCMmax;
   }
 
   /*** Corrections ***/
