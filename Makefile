@@ -17,8 +17,8 @@ ROOTGLIBS := $(shell $(ROOTCONFIG) --glibs)
 CXX := c++
 LD := c++
 
-CXXFLAGS := -g -O0 -Wall -fPIC $(ROOTCFLAGS) # O0
-LDFLAGS := -g -O0 $(ROOTLDFLAGS) # O0
+CXXFLAGS := -g -O2 -Wall -fPIC $(ROOTCFLAGS)
+LDFLAGS := -g -O2 $(ROOTLDFLAGS)
 
 INCLUDES := -I$(CLASTOOL)/include -I./include
 LIBS := $(ROOTGLIBS) -L$(CLASTOOL)/slib/${OS_NAME} -lClasTool -lClasBanks -lDSTReader -lEG
