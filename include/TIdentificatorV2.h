@@ -816,6 +816,55 @@ public:
     return 0;
   }
 
+  /*** PiPlus DC Fiducial Cuts ***/
+
+  Double_t FidThetaMinPiPlus(Int_t k) {
+    Int_t sector = Sector(k);
+    Double_t theta_min_val = kThetaPar0PiPlus[sector] + kThetaPar1PiPlus[sector] / TMath::Power(Momentum(k), 2) + kThetaPar2PiPlus[sector] * Momentum(k) +
+                             kThetaPar3PiPlus[sector] / Momentum(k) + kThetaPar4PiPlus[sector] * TMath::Exp(kThetaPar5PiPlus[sector] * Momentum(k));
+    return theta_min_val;
+  }
+
+  Double_t FidFuncPiPlus(Int_t k, Int_t side, Int_t param) {
+    Int_t sector = Sector(k);
+    if (side == 0 && param == 0) {
+      return kFidPar0Low0PiPlus[sector] + kFidPar0Low1PiPlus[sector] * TMath::Exp(kFidPar0Low2PiPlus[sector] * (Momentum(k) - kFidPar0Low3PiPlus[sector]));
+    } else if (side == 1 && param == 0) {
+      return kFidPar0High0PiPlus[sector] + kFidPar0High1PiPlus[sector] * TMath::Exp(kFidPar0High2PiPlus[sector] * (Momentum(k) - kFidPar0High3PiPlus[sector]));
+    } else if (side == 0 && param == 1) {
+      return kFidPar1Low0PiPlus[sector] +
+             kFidPar1Low1PiPlus[sector] * Momentum(k) * TMath::Exp(kFidPar1Low2PiPlus[sector] * TMath::Power((Momentum(k) - kFidPar1Low3PiPlus[sector]), 2));
+    } else if (side == 1 && param == 1) {
+      return kFidPar1High0PiPlus[sector] +
+             kFidPar1High1PiPlus[sector] * Momentum(k) * TMath::Exp(kFidPar1High2PiPlus[sector] * TMath::Power((Momentum(k) - kFidPar1High3PiPlus[sector]), 2));
+    }  // closure
+    return 0.0;
+  }
+
+  Double_t FidPhiMinPiPlus(Int_t k) {
+    Int_t sector = Sector(k);
+    if (ThetaLab(k) > FidThetaMinPiPlus(k)) {
+      return 60. * sector - FidFuncPiPlus(k, 0, 0) * (1 - 1 / (1 + (ThetaLab(k) - FidThetaMinPiPlus(k)) / FidFuncPiPlus(k, 0, 1)));
+    }  // closure
+    return 60. * sector;
+  }
+
+  Double_t FidPhiMaxPiPlus(Int_t k) {
+    Int_t sector = Sector(k);
+    if (ThetaLab(k) > FidThetaMinPiPlus(k)) {
+      return 60. * sector + FidFuncPiPlus(k, 1, 0) * (1 - 1 / (1 + (ThetaLab(k) - FidThetaMinPiPlus(k)) / FidFuncPiPlus(k, 1, 1)));
+    }  // closure
+    return 60. * sector;
+  }
+
+  Bool_t FidCheckCutPiPlus(Int_t k) {
+    // checks DC fiducial cut for pi+
+    if (ThetaLab(k) > FidThetaMinPiPlus(k) && PhiLab(k) > FidPhiMinPiPlus(k) && PhiLab(k) < FidPhiMaxPiPlus(k)) {
+      return 1;
+    }  // closure
+    return 0;
+  }
+
   /*** PID cuts ***/
 
   Bool_t ElectronPhaseSpace(Int_t k, TString dataKind) {
@@ -915,7 +964,7 @@ public:
     if (Charge(k) == 1 &&
 	Status(k) > 0 &&
 	NRowsDC() != 0 && StatDC(k) > 0 && DCStatus(k) > 0 && 
-	(PiPlusPhaseSpace_CC(k) || PiPlusPhaseSpace_SC(k))) {
+	(PiPlusPhaseSpace_CC(k) || PiPlusPhaseSpace_SC(k)) && FidCheckCutPiPlus(k)) {
       return true;
     } // closure
     return false;
@@ -1126,6 +1175,38 @@ public:
   const Double_t kFidPar1High1[6] = {  2       ,  0.966175 ,  2       ,  0.192701 ,  0.821726 ,  2       };
   const Double_t kFidPar1High2[6] = { -2       , -2        , -1.70021 , -1.27578  , -0.233492 , -2       };
   const Double_t kFidPar1High3[6] = {  0.5     ,  0.527823 ,  0.68655 ,  1.6      ,  1.6      ,  0.70261 };
+
+  // For FidThetaMinPiPlus calculation for pi+
+  const Double_t kThetaPar0PiPlus[6] = {7.00823, 5.5, 7.06596, 6.32763, 5.5, 5.5};
+  const Double_t kThetaPar1PiPlus[6] = {0.207249, 0.1, 0.127764, 0.1, 0.211012, 0.281549};
+  const Double_t kThetaPar2PiPlus[6] = {0.169287, 0.506354, -0.0663754, 0.221727, 0.640963, 0.358452};
+  const Double_t kThetaPar3PiPlus[6] = {0.1, 0.1, 0.100003, 0.1, 0.1, 0.1};
+  const Double_t kThetaPar4PiPlus[6] = {0.1, 3.30779, 4.499, 5.30981, 3.20347, 0.776161};
+  const Double_t kThetaPar5PiPlus[6] = {-0.1, -0.651811, -3.1793, -3.3461, -1.10808, -0.462045};
+
+  // For parameter 0 of the FidPhiMinPiPlus calculation for pi+
+  const Double_t kFidPar0Low0PiPlus[6] = {25., 25., 25., 25., 25., 25.};
+  const Double_t kFidPar0Low1PiPlus[6] = {-12., -12., -12., -12, -12, -12};
+  const Double_t kFidPar0Low2PiPlus[6] = {1.64476, 1.51915, 1.1095, 0.977829, 0.955366, 0.969146};
+  const Double_t kFidPar0Low3PiPlus[6] = {4.4, 4.4, 4.4, 4.4, 4.4, 4.4};
+
+  // For parameter 1 of the FidPhiMinPiPlus calculation for pi+
+  const Double_t kFidPar1Low0PiPlus[6] = {4., 4., 2.78427, 3.58539, 3.32277, 4.};
+  const Double_t kFidPar1Low1PiPlus[6] = {2., 2., 2., 1.38233, 0.0410601, 2.};
+  const Double_t kFidPar1Low2PiPlus[6] = {-0.978469, -2., -1.73543, -2., -0.953828, -2.};
+  const Double_t kFidPar1Low3PiPlus[6] = {0.5, 0.5, 0.5, 0.5, 0.5, 1.08576};
+
+  // For parameter 0 of the FidPhiMaxPiPlus calculation for pi+
+  const Double_t kFidPar0High0PiPlus[6] = {25., 24.8096, 24.8758, 25., 25., 25.};
+  const Double_t kFidPar0High1PiPlus[6] = {-11.9735, -8., -8., -12., -8.52574, -8.};
+  const Double_t kFidPar0High2PiPlus[6] = {0.803484, 0.85143, 1.01249, 0.910994, 0.682825, 0.88846};
+  const Double_t kFidPar0High3PiPlus[6] = {4.40024, 4.8, 4.8, 4.4, 4.79866, 4.8};
+
+  // For parameter 1 of the FidPhiMaxPiPlus calculation for pi+
+  const Double_t kFidPar1High0PiPlus[6] = {2.53606, 2.65468, 3.17084, 2.47156, 2.42349, 2.64394};
+  const Double_t kFidPar1High1PiPlus[6] = {0.442034, 0.201149, 1.27519, 1.76076, 1.25399, 0.15892};
+  const Double_t kFidPar1High2PiPlus[6] = {-2., -0.179631, -2., -1.89436, -2., -2.};
+  const Double_t kFidPar1High3PiPlus[6] = {1.02806, 1.6, 0.5, 1.03961, 0.815707, 1.31013};
 };
 
 #endif
