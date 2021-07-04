@@ -89,9 +89,10 @@ int main(int argc, char **argv) {
 
       if (t->Id(0, 1) == gElectronID) {
         for (Int_t q = 1; q < input->GetNRows("GSIM"); q++) {
-          if (t->Id(q, 1) == gPiPlusID || t->Id(q, 1) == gPiMinusID || t->Id(q, 1) == gGammaID || t->Id(q, 1) == gElectronID || t->Id(q, 1) == gPositronID ||
-              t->Id(q, 1) == gProtonID || t->Id(q, 1) == gNeutronID || t->Id(q, 1) == gKaonPlusID || t->Id(q, 1) == gKaonMinusID || t->Id(q, 1) == gKaonZeroLongID ||
-              t->Id(q, 1) == gKaonZeroShortID || t->Id(q, 1) == gKaonZeroID) {
+          if (t->Id(q, 1) == gPiPlusID || t->Id(q, 1) == gPiMinusID || t->Id(q, 1) == gGammaID || t->Id(q, 1) == gElectronID ||
+              t->Id(q, 1) == gPositronID || t->Id(q, 1) == gProtonID || t->Id(q, 1) == gNeutronID || t->Id(q, 1) == gKaonPlusID ||
+              t->Id(q, 1) == gKaonMinusID || t->Id(q, 1) == gKaonZeroLongID || t->Id(q, 1) == gKaonZeroShortID ||
+              t->Id(q, 1) == gKaonZeroID) {
             gsim_row.push_back(q);
           }
         }  // end of loop in gsim-particles
@@ -141,12 +142,14 @@ int main(int argc, char **argv) {
       if (gsim_row[index] == -1)
         NullParticleVar_GSIM(sp);
       else
-        AssignParticleVar_GSIM(t, sp, gsim_row[index], i, dataKind, targetOption);  // (TIdentificatorV2, sim_p, row, evnt, dataKind, targetOption)
+        AssignParticleVar_GSIM(t, sp, gsim_row[index], i, dataKind,
+                               targetOption);  // (TIdentificatorV2, sim_p, row, evnt, dataKind, targetOption)
       // simrec
       if (simrec_row[index] == -1)
         NullParticleVar_SIMREC(sp);
       else
-        AssignParticleVar_SIMREC(t, sp, simrec_row[index], i, dataKind, targetOption);  // (TIdentificatorV2, sim_p, row, evnt, dataKind, targetOption)
+        AssignParticleVar_SIMREC(t, sp, simrec_row[index], i, dataKind,
+                                 targetOption);  // (TIdentificatorV2, sim_p, row, evnt, dataKind, targetOption)
       // fill!
       tParticles->Fill();
     }

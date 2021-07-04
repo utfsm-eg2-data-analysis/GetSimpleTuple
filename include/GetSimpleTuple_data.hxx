@@ -1,8 +1,8 @@
-#include "TIdentificatorV2.h"
 #include "GSTtree.h"
+#include "TIdentificatorV2.h"
 
-#include "Headers.hxx"
 #include "Constants.hxx"
+#include "Headers.hxx"
 #include "Math.hxx"
 #include "PDG.hxx"
 
@@ -300,7 +300,8 @@ void AssignParticleVar_Data(TIdentificatorV2* t, data_p& dp, Int_t row, Int_t ev
   Double_t fPl2 = fP * fP * fCosThetaPQ * fCosThetaPQ;
   dp.Pt2 = fPt2;
   dp.Pl2 = fPl2;
-  dp.Mx2 = t->W() * t->W() + fMass * fMass - 2 * fZ * t->Nu() * t->Nu() + 2 * TMath::Sqrt(fPl2 * (t->Nu() * t->Nu() + t->Q2())) - 2 * kMassProton * fZ * t->Nu();
+  dp.Mx2 = t->W() * t->W() + fMass * fMass - 2 * fZ * t->Nu() * t->Nu() + 2 * TMath::Sqrt(fPl2 * (t->Nu() * t->Nu() + t->Q2())) -
+           2 * kMassProton * fZ * t->Nu();
   dp.T = fMass * fMass - 2 * fZ * t->Nu() * t->Nu() + 2 * TMath::Sqrt(fPl2 * (t->Nu() * t->Nu() + t->Q2())) - t->Q2();
   dp.Betta = t->Betta(row);  // BettaMeasured
   dp.Mass2 = fP * fP * (TMath::Power(t->Betta(row), -2) - 1);

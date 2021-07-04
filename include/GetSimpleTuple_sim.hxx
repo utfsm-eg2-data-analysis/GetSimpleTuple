@@ -601,7 +601,8 @@ void AssignParticleVar_SIMREC(TIdentificatorV2* t, sim_p& sp, Int_t row, Int_t e
   Double_t fPl2 = fP * fP * fCosThetaPQ * fCosThetaPQ;
   sp.Pt2 = fPt2;
   sp.Pl2 = fPl2;
-  sp.Mx2 = t->W() * t->W() + fMass * fMass - 2 * fZ * t->Nu() * t->Nu() + 2 * TMath::Sqrt(fPl2 * (t->Nu() * t->Nu() + t->Q2())) - 2 * kMassProton * fZ * t->Nu();
+  sp.Mx2 = t->W() * t->W() + fMass * fMass - 2 * fZ * t->Nu() * t->Nu() + 2 * TMath::Sqrt(fPl2 * (t->Nu() * t->Nu() + t->Q2())) -
+           2 * kMassProton * fZ * t->Nu();
   sp.T = fMass * fMass - 2 * fZ * t->Nu() * t->Nu() + 2 * TMath::Sqrt(fPl2 * (t->Nu() * t->Nu() + t->Q2())) - t->Q2();
   sp.Betta = t->Betta(row);  // BettaMeasured
   sp.Mass2 = fP * fP * (TMath::Power(t->Betta(row), -2) - 1);
@@ -691,7 +692,8 @@ RVec<Int_t> SortByMomentum(TIdentificatorV2* t, RVec<Int_t> vector_row, Int_t ki
   }
   // Argsort() creates an indices-vector with the indices sorted by the input-vector values
   RVec<Int_t> indices = Argsort(momentum);
-  // Take(input-vector, indices-vector) creates a sorted-vector by moving all input-vector indices to match the order assigned by the indices-vector
+  // Take(input-vector, indices-vector) creates a sorted-vector by moving all input-vector indices to match the order assigned by the
+  // indices-vector
   RVec<Int_t> vector_row2 = Take(vector_row, indices);
   return vector_row2;
 }

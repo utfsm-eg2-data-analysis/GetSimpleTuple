@@ -27,7 +27,8 @@ struct data_e {
   Float_t TargType;
   Float_t XEC, YEC, ZEC;
   Float_t ThetaLab, PhiLab;
-  Float_t StatDC, DCStatus, StatEC, ECStatus, TimeEC, PathEC, Chi2EC, StatSC, SCStatus, TimeSC, PathSC, StatCC, CCStatus, Nphe, Chi2CC, Status;
+  Float_t StatDC, DCStatus, StatEC, ECStatus, TimeEC, PathEC, Chi2EC, StatSC, SCStatus, TimeSC, PathSC, StatCC, CCStatus, Nphe, Chi2CC,
+      Status;
   Float_t NRowsDC, NRowsEC, NRowsSC, NRowsCC;
   // evnt (1)
   Float_t evnt;
@@ -45,7 +46,8 @@ struct data_p {
   Float_t TargType;
   Float_t XECe, YECe, ZECe;
   Float_t ThetaLabEl, PhiLabEl;
-  Float_t StatDCEl, DCStatusEl, StatECEl, ECStatusEl, TimeECEl, PathECEl, Chi2ECEl, StatSCEl, SCStatusEl, TimeSCEl, PathSCEl, StatCCEl, CCStatusEl, NpheEl, Chi2CCEl, StatusEl;
+  Float_t StatDCEl, DCStatusEl, StatECEl, ECStatusEl, TimeECEl, PathECEl, Chi2ECEl, StatSCEl, SCStatusEl, TimeSCEl, PathSCEl, StatCCEl,
+      CCStatusEl, NpheEl, Chi2CCEl, StatusEl;
   Float_t NRowsDCEl, NRowsECEl, NRowsSCEl, NRowsCCEl;
   // particle (49)
   Float_t Eh, Zh, ThetaPQ, Pt2, Pl2, PhiPQ, Mx2, T;
@@ -56,7 +58,8 @@ struct data_p {
   Float_t Betta, Mass2, Etot, Ein, Eout;
   Float_t XEC, YEC, ZEC;
   Float_t pid, T4, deltaZ;
-  Float_t StatDC, DCStatus, StatEC, ECStatus, TimeEC, PathEC, Chi2EC, StatSC, SCStatus, TimeSC, PathSC, StatCC, CCStatus, Nphe, Chi2CC, Status;
+  Float_t StatDC, DCStatus, StatEC, ECStatus, TimeEC, PathEC, Chi2EC, StatSC, SCStatus, TimeSC, PathSC, StatCC, CCStatus, Nphe, Chi2CC,
+      Status;
   Float_t NRowsDC, NRowsEC, NRowsSC, NRowsCC;
   // event (1)
   Float_t evnt;
@@ -74,7 +77,8 @@ struct sim_e {
   Float_t vxec, vyec, vzec;
   Float_t XEC, YEC, ZEC;
   Float_t ThetaLab, PhiLab;
-  Float_t StatDC, DCStatus, StatEC, ECStatus, TimeEC, PathEC, Chi2EC, StatSC, SCStatus, TimeSC, PathSC, StatCC, CCStatus, Nphe, Chi2CC, Status;
+  Float_t StatDC, DCStatus, StatEC, ECStatus, TimeEC, PathEC, Chi2EC, StatSC, SCStatus, TimeSC, PathSC, StatCC, CCStatus, Nphe, Chi2CC,
+      Status;
   Float_t NRowsDC, NRowsEC, NRowsSC, NRowsCC;
   // event (1)
   Float_t evnt;
@@ -99,7 +103,8 @@ struct sim_p {
   Float_t vxec, vyec, vzec;
   Float_t XECe, YECe, ZECe;
   Float_t ThetaLabEl, PhiLabEl;
-  Float_t StatDCEl, DCStatusEl, StatECEl, ECStatusEl, TimeECEl, PathECEl, Chi2ECEl, StatSCEl, SCStatusEl, TimeSCEl, PathSCEl, StatCCEl, CCStatusEl, NpheEl, Chi2CCEl, StatusEl;
+  Float_t StatDCEl, DCStatusEl, StatECEl, ECStatusEl, TimeECEl, PathECEl, Chi2ECEl, StatSCEl, SCStatusEl, TimeSCEl, PathSCEl, StatCCEl,
+      CCStatusEl, NpheEl, Chi2CCEl, StatusEl;
   Float_t NRowsDCEl, NRowsECEl, NRowsSCEl, NRowsCCEl;
   // simrec particle (49)
   Float_t Eh, Zh, ThetaPQ, Pt2, Pl2, PhiPQ, Mx2, T;
@@ -111,7 +116,8 @@ struct sim_p {
   Float_t XEC, YEC, ZEC;
   Float_t pid;
   Float_t T4, deltaZ;
-  Float_t StatDC, DCStatus, StatEC, ECStatus, TimeEC, PathEC, Chi2EC, StatSC, SCStatus, TimeSC, PathSC, StatCC, CCStatus, Nphe, Chi2CC, Status;
+  Float_t StatDC, DCStatus, StatEC, ECStatus, TimeEC, PathEC, Chi2EC, StatSC, SCStatus, TimeSC, PathSC, StatCC, CCStatus, Nphe, Chi2CC,
+      Status;
   Float_t NRowsDC, NRowsEC, NRowsSC, NRowsCC;
   // event-related (1)
   Float_t evnt;
