@@ -876,13 +876,15 @@ class TIdentificatorV2 {
   }
 
   Double_t FidFuncPiMinus(Int_t k, Int_t side, Int_t param) {
+    // note that it's different from FidFunc() or FidFuncPiPlus()
+    // these functions are based on Eq. (4.5) of Lorenzo Zana's thesis
     Int_t sector = Sector(k);
     if (side == 0 && param == 0) {
-      return kFidPar0Low0_PiMinus[sector] +
-             kFidPar1Low0_PiMinus[sector] * TMath::Exp(kFidPar2Low0_PiMinus[sector] * (Momentum(k) - kFidPar3Low0_PiMinus[sector]));
+      return kFidPar0Low0_PiMinus[sector] -
+             kFidPar1Low0_PiMinus[sector] * TMath::ATan(kFidPar2Low0_PiMinus[sector] * (Momentum(k) - kFidPar3Low0_PiMinus[sector]));
     } else if (side == 1 && param == 0) {
-      return kFidPar0High0_PiMinus[sector] +
-             kFidPar1High0_PiMinus[sector] * TMath::Exp(kFidPar2High0_PiMinus[sector] * (Momentum(k) - kFidPar3High0_PiMinus[sector]));
+      return kFidPar0High0_PiMinus[sector] -
+             kFidPar1High0_PiMinus[sector] * TMath::ATan(kFidPar2High0_PiMinus[sector] * (Momentum(k) - kFidPar3High0_PiMinus[sector]));
     } else if (side == 0 && param == 1) {
       return kFidPar0Low1_PiMinus[sector] +
              kFidPar1Low1_PiMinus[sector] * Momentum(k) *
@@ -912,7 +914,7 @@ class TIdentificatorV2 {
   }
 
   Bool_t FidCheckCutPiMinus(Int_t k) {
-    // checks DC fiducial cut for pi+
+    // checks DC fiducial cut for pi-
     if (ThetaLab(k) > FidThetaMinPiMinus(k) && PhiLab(k) > FidPhiMinPiMinus(k) && PhiLab(k) < FidPhiMaxPiMinus(k)) {
       return 1;
     }  // closure
@@ -1233,7 +1235,7 @@ class TIdentificatorV2 {
 
   // For FidThetaMinPiMinus calculation for pi-
   const Double_t kThetaMinPar0_PiMinus[6] = {15, 15, 15, 15, 15, 15};
-  const Double_t kThetaMinPar1_PiMinus[6] = {0.256111, 7.77818e-12, 1.7508e-12, 1.53231e-12, 1.55422e-12, 2.10305e-11};
+  const Double_t kThetaMinPar1_PiMinus[6] = {0.256111, 7.77818E-12, 1.7508E-12, 1.53231E-12, 1.55422E-12, 2.10305E-11};
   const Double_t kThetaMinPar2_PiMinus[6] = {-0.925423, -0.126147, -0.936497, -0.501064, -1.09188, -0.154682};
   const Double_t kThetaMinPar3_PiMinus[6] = {4.01752, 4.72109, 5.08905, 4.50628, 5.22385, 4.03708};
   const Double_t kThetaMinPar4_PiMinus[6] = {3.97889, 9.33096, 2.98662, 7.2551, 3.77058, 11.844};
