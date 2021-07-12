@@ -1005,7 +1005,7 @@ class TIdentificatorV2 {
 
   Bool_t IsPiPlus(Int_t k, TVector3 *ECuvw) {
     if (Charge(k) == 1 && Status(k) > 0 && NRowsDC() != 0 && StatDC(k) > 0 && DCStatus(k) > 0 &&
-        (PiPlusPhaseSpace_CC(k) || PiPlusPhaseSpace_SC(k)) && FidCheckCutPiPlus(k)) {
+        (PiPlusPhaseSpace_CC(k) || PiPlusPhaseSpace_SC(k))) {  // && FidCheckCutPiPlus(k)) {
       return true;
     }  // closure
     return false;
@@ -1043,7 +1043,7 @@ class TIdentificatorV2 {
 
   Bool_t IsPiMinus(Int_t k, TVector3 *ECuvw, TString dataKind) {
     if (Charge(k) == -1 && Status(k) > 0 && NRowsDC() != 0 && DCStatus(k) > 0 && StatDC(k) > 0 && Momentum(k) < 5.0 &&
-        PiMinusPhaseSpace_SC(k, dataKind) && FidCheckCutPiMinus(k)) {
+        PiMinusPhaseSpace_SC(k, dataKind)) {  // && FidCheckCutPiMinus(k)) {
       return true;
     }  // closure
     return false;
