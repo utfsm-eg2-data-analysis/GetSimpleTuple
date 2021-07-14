@@ -14,7 +14,8 @@
 
 struct rec_p {
   // electron (46)
-  Float_t Q2;          // Q^2 = -q^2 = -((electron's initial four-momentum) - (electron's final four-momentum))^2, in (GeV^2), more info in TIdentificatorV2.h/Q2()
+  Float_t Q2;          // Q^2 = -q^2 = -((electron's initial four-momentum) - (electron's final four-momentum))^2, in (GeV^2), more info in
+                       // TIdentificatorV2.h/Q2()
   Float_t W;           //
   Float_t Nu;          // virtual photon's energy, Nu = (electron's initial energy) - (electron's final energy), in (GeV)
   Float_t Xb;          //
@@ -117,7 +118,8 @@ struct rec_p {
 
 struct gen_p {
   // electron (17)
-  Float_t Q2;          // Q^2 = -q^2 = -((electron's initial four-momentum) - (electron's final four-momentum))^2, in (GeV^2), more info in TIdentificatorV2.h/Q2()
+  Float_t Q2;          // Q^2 = -q^2 = -((electron's initial four-momentum) - (electron's final four-momentum))^2, in (GeV^2), more info in
+                       // TIdentificatorV2.h/Q2()
   Float_t W;           //
   Float_t Nu;          // virtual photon's energy, Nu = (electron's initial energy) - (electron's final energy), in (GeV)
   Float_t Xb;          //

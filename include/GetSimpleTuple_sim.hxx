@@ -16,9 +16,10 @@ void FindParticles(TClasTool* input, TIdentificatorV2* t, RVec<Int_t>& gsim_row,
 
     if (t->Id(0, 1) == gElectronID) {
       for (Int_t q = 1; q < input->GetNRows("GSIM"); q++) {
-        if (t->Id(q, 1) == gPiPlusID || t->Id(q, 1) == gPiMinusID || t->Id(q, 1) == gGammaID || t->Id(q, 1) == gElectronID || t->Id(q, 1) == gPositronID ||
-            t->Id(q, 1) == gProtonID || t->Id(q, 1) == gNeutronID || t->Id(q, 1) == gKaonPlusID || t->Id(q, 1) == gKaonMinusID || t->Id(q, 1) == gKaonZeroLongID ||
-            t->Id(q, 1) == gKaonZeroShortID || t->Id(q, 1) == gKaonZeroID) {
+        if (t->Id(q, 1) == gPiPlusID || t->Id(q, 1) == gPiMinusID || t->Id(q, 1) == gGammaID || t->Id(q, 1) == gElectronID ||
+            t->Id(q, 1) == gPositronID || t->Id(q, 1) == gProtonID || t->Id(q, 1) == gNeutronID || t->Id(q, 1) == gKaonPlusID ||
+            t->Id(q, 1) == gKaonMinusID || t->Id(q, 1) == gKaonZeroLongID || t->Id(q, 1) == gKaonZeroShortID ||
+            t->Id(q, 1) == gKaonZeroID) {
           gsim_row.push_back(q);
         }
       }  // end of loop in gsim-particles
@@ -47,7 +48,8 @@ RVec<Int_t> SortByMomentum(TIdentificatorV2* t, RVec<Int_t> vector_row, Int_t ki
   }
   // Argsort() creates an indices-vector with the indices sorted by the input-vector values
   RVec<Int_t> indices = Argsort(momentum);
-  // Take(input-vector, indices-vector) creates a sorted-vector by moving all input-vector indices to match the order assigned by the indices-vector
+  // Take(input-vector, indices-vector) creates a sorted-vector by moving all input-vector indices to match the order assigned by the
+  // indices-vector
   RVec<Int_t> vector_row2 = Take(vector_row, indices);
   return vector_row2;
 }
@@ -114,7 +116,7 @@ void AngularMatching(TIdentificatorV2* t, RVec<Int_t>& simrec_row, RVec<Int_t>& 
     // if it's not in gsim_new
     if (std::find(gsim_new.begin(), gsim_new.end(), gsim_row[m]) == gsim_new.end()) {
       gsim_new.push_back(gsim_row[m]);  // add gsim_row to gsim_new
-      simrec_new.push_back(-9999);         // add null simrec
+      simrec_new.push_back(-9999);      // add null simrec
     }
   }
 
@@ -122,7 +124,7 @@ void AngularMatching(TIdentificatorV2* t, RVec<Int_t>& simrec_row, RVec<Int_t>& 
     // if it's not in simrec_new
     if (std::find(simrec_new.begin(), simrec_new.end(), simrec_row[n]) == simrec_new.end()) {
       simrec_new.push_back(simrec_row[n]);  // add simrec_row to simrec_new
-      gsim_new.push_back(-9999);               // add null gsim
+      gsim_new.push_back(-9999);            // add null gsim
     }
   }
 
@@ -131,13 +133,14 @@ void AngularMatching(TIdentificatorV2* t, RVec<Int_t>& simrec_row, RVec<Int_t>& 
   simrec_row = simrec_new;
 }
 
-void FillElectronNParticles(TIdentificatorV2* t, TClasTool* input, TTree* tParticles, RVec<Int_t>& gsim_row, RVec<Int_t>& simrec_row, gen_p& mc, rec_p& rec, Int_t i) {
+void FillElectronNParticles(TIdentificatorV2* t, TClasTool* input, TTree* tParticles, RVec<Int_t>& gsim_row, RVec<Int_t>& simrec_row,
+                            gen_p& mc, rec_p& rec, Int_t i) {
 
   /*** Electron ***/
 
   if (input->GetNRows("GSIM") > 0) {  // prevent seg-fault
     if (t->Id(0, 1) == gElectronID) {
-      AssignElectronVar_GEN(t, mc);       // (TIdentificatorV2, gen_e)
+      AssignElectronVar_GEN(t, mc);  // (TIdentificatorV2, gen_e)
       rec.evnt = i;
       if (input->GetNRows("EVNT") > 0) {  // prevent seg-fault
         if (t->GetCategorization(0, gDataKind, gTargetOption) != "electron")
@@ -167,5 +170,5 @@ void FillElectronNParticles(TIdentificatorV2* t, TClasTool* input, TTree* tParti
 
   tParticles->Fill();
   ClearParticleVar_GEN(mc);
-  ClearParticleVar_REC(rec);  
+  ClearParticleVar_REC(rec);
 }

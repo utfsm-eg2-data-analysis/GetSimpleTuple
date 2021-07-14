@@ -253,11 +253,13 @@ void AssignParticleVar_REC(TIdentificatorV2* t, rec_p& rec, Int_t row) {
   Double_t fPl2 = fP * fP * fCosThetaPQ * fCosThetaPQ;
   rec.Pt2.push_back(fPt2);
   rec.Pl2.push_back(fPl2);
-  rec.Mx2.push_back(t->W() * t->W() + fMass * fMass - 2 * fZ * t->Nu() * t->Nu() + 2 * TMath::Sqrt(fPl2 * (t->Nu() * t->Nu() + t->Q2())) - 2 * kMassProton * fZ * t->Nu());
+  rec.Mx2.push_back(t->W() * t->W() + fMass * fMass - 2 * fZ * t->Nu() * t->Nu() + 2 * TMath::Sqrt(fPl2 * (t->Nu() * t->Nu() + t->Q2())) -
+                    2 * kMassProton * fZ * t->Nu());
   rec.T.push_back(fMass * fMass - 2 * fZ * t->Nu() * t->Nu() + 2 * TMath::Sqrt(fPl2 * (t->Nu() * t->Nu() + t->Q2())) - t->Q2());
   rec.Betta.push_back(t->Betta(row));  // BettaMeasured
   rec.Mass2.push_back(fP * fP * (TMath::Power(t->Betta(row), -2) - 1));
-  rec.T4.push_back(t->PathSC(0) / 30. - t->TimeSC(0) + t->TimeSC(row) - (t->PathSC(row) / 30.) * TMath::Sqrt(TMath::Power(fMass / fP, 2) + 1));
+  rec.T4.push_back(t->PathSC(0) / 30. - t->TimeSC(0) + t->TimeSC(row) -
+                   (t->PathSC(row) / 30.) * TMath::Sqrt(TMath::Power(fMass / fP, 2) + 1));
   rec.Xf.push_back(t->Xf(row));
   rec.StatDC.push_back(t->StatDC(row));
   rec.DCStatus.push_back(t->DCStatus(row));

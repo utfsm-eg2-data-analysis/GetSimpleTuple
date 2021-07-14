@@ -15,7 +15,7 @@ void FindNFillParticles(TTree* tParticles, TIdentificatorV2* t, TClasTool* input
         if (t->GetCategorization(p, gDataKind, gTargetOption) == "gamma" || t->GetCategorization(p, gDataKind, gTargetOption) == "pi+" ||
             t->GetCategorization(p, gDataKind, gTargetOption) == "pi-") {
           AssignParticleVar_REC(t, rec, p);  // (TIdentificator, rec_p, row)
-	  fNpart++;
+          fNpart++;
         }
       }  // end of loop in rest of particles
       tParticles->Fill();
