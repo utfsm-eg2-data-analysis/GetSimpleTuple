@@ -41,10 +41,10 @@ if [[ "$TARNAME" == "D" ]]; then SUFIX="${TARNAME}2_Pb"; fi # except for D
 source ~/.bashrc
 
 # set main dirs
-GSTDIR=${HOME}/GetSimpleTuple                                              # dir of the executable
-SIMDIR=/eos/user/o/orsosa/HSim/${CURRENTDIR}/ROOT                          # dir where are located all the HSims
-OUTDIR=/eos/user/${USER:0:1}/${USER}/out/GetSimpleTuple_HSim/${CURRENTDIR} # output dir
-TMPDIR=/eos/user/${USER:0:1}/${USER}/tmp/GetSimpleTuple_HSim/${CURRENTDIR} # temp dir to store logs and job scripts
+GSTDIR=${HOME}/GetSimpleTuple                                                 # dir of the executable
+SIMDIR=/eos/user/o/orsosa/HSim/${CURRENTDIR}/ROOT                             # dir where are located all the HSims
+OUTDIR=/eos/user/${USER:0:1}/${USER}/out/GetSimpleTuple_HSim/${CURRENTDIR}    # output dir
+TMPDIR=/eos/user/${USER:0:1}/${USER}/tmp/GetSimpleTuple_HSim/${CURRENTDIR}    # temp dir to store logs and job scripts
 mkdir -p ${OUTDIR} ${TMPDIR} # just in case
 
 # setting jobname
@@ -59,19 +59,28 @@ echo "#SBATCH -o ${TMPDIR}/${jobname}.out"                        >> ${jobfile}
 echo "#SBATCH -e ${TMPDIR}/${jobname}.err"                        >> ${jobfile}
 echo "#SBATCH --time=4:00:00"                                     >> ${jobfile} # 4hrs or 15min for test
 echo "#SBATCH --mem=1GB"                                          >> ${jobfile}
+#echo "#SBATCH --mail-user="         >> ${jobfile}
+echo "#SBATCH --mail-type=BEGIN,END,FAIL"                         >> ${jobfile}
 echo ""                                                           >> ${jobfile}
 echo "source ${HOME}/.bashrc"                                     >> ${jobfile}
 echo "cp ${GSTDIR}/bin/GetSimpleTuple_sim ${TMPDIR}"              >> ${jobfile} # retrieve executable
 echo "cd ${TMPDIR}"                                               >> ${jobfile}
+
 NFILES=$(ls -1 ${SIMDIR} | wc -l)
-for ((RN=1; RN <= ${NFILES}; RN++)); do # ${NFILES} or 10 for test
-    inputfile=$(readlink -f ${SIMDIR}/simul_${SUFIX}${RN}.root)                 # retrieve full path of input file (with $SUFIX)
-    echo "ln -s ${inputfile} recsis${TARNAME}_${RN}.root"         >> ${jobfile} # create symbolic link to input file with GST naming scheme
-    echo "./GetSimpleTuple_sim -t${TARNAME} -r${RN}"              >> ${jobfile} # execute program
-    echo "mv -v pruned${TARNAME}_${RN}.root ${OUTDIR}/"           >> ${jobfile} # move outfile to outdir
-    echo "rm -v recsis${TARNAME}_${RN}.root"                      >> ${jobfile} # removing symbolic link from temp dir
-    echo ""                                                       >> ${jobfile}
+NSIMS=0
+
+for ((RN=1; RN <= 500; RN++)); do
+    if [[ -e ${SIMDIR}/simul_${SUFIX}${RN}.root ]]; then
+    	inputfile=$(readlink -f ${SIMDIR}/simul_${SUFIX}${RN}.root)                 # retrieve full path of input file (with $SUFIX)
+    	echo "ln -s ${inputfile} recsis${TARNAME}_${RN}.root"         >> ${jobfile} # create symbolic link to input file with GST naming scheme
+    	echo "./GetSimpleTuple_sim -t${TARNAME} -r${RN}"              >> ${jobfile} # execute program
+    	echo "mv -v pruned${TARNAME}_${RN}.root ${OUTDIR}/"           >> ${jobfile} # move outfile to outdir
+    	echo "rm -v recsis${TARNAME}_${RN}.root"                      >> ${jobfile} # removing symbolic link from temp dir
+    	echo ""                                                       >> ${jobfile}
+	((NSIMS++))
+    fi
 done
-echo "rm GetSimpleTuple_sim"                                      >> ${jobfile} # remove binary from temp dir
+echo "rm GetSimpleTuple_sim"                                          >> ${jobfile} # remove binary from temp dir
 echo "Submitting job: ${jobfile}"
+echo "Number of simulation files: ${NSIMS} out of ${NFILES}"
 sbatch ${jobfile} # submit job!
