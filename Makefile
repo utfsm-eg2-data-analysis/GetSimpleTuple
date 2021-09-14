@@ -1,7 +1,7 @@
 .DELETE_ON_ERROR:
 
 ifndef CLASTOOL
-    $(error "Please set the variable CLASTOOL")
+    $(error "ERROR: please, set the variable CLASTOOL")
 endif
 
 MKDIR_P := mkdir -p
@@ -17,11 +17,11 @@ ROOTGLIBS := $(shell $(ROOTCONFIG) --glibs)
 CXX := c++
 LD := c++
 
-CXXFLAGS := -g -O0 -Wall -fPIC $(ROOTCFLAGS) # O0
-LDFLAGS := -g -O0 $(ROOTLDFLAGS) # O0
+CXXFLAGS := -g -O2 -Wall -fPIC $(ROOTCFLAGS) # -D DEBUG
+LDFLAGS := -g -O2 $(ROOTLDFLAGS)
 
-INCLUDES := -I$(CLASTOOL)/include -I./include
-LIBS := $(ROOTGLIBS) -L$(CLASTOOL)/slib/${OS_NAME} -lClasTool -lClasBanks -lDSTReader -lEG
+INCLUDES := -I$(CLASTOOL)/TClasTool -I$(CLASTOOL)/ClasBanks -I$(CLASTOOL)/VirtualReader -I$(CLASTOOL)/DSTReader -I./include
+LIBS := $(ROOTGLIBS) -L$(CLAS_ROOT)/slib/${OS_NAME} -lClasTool -lClasBanks -lDSTReader -lEG
 
 PROG := GetSimpleTuple_data GetSimpleTuple_sim
 LIST := $(addprefix $(BINDIR)/, $(PROG))
@@ -31,7 +31,7 @@ LIST := $(addprefix $(BINDIR)/, $(PROG))
 all: $(LIST)
 
 $(BINDIR)/%: $(BINDIR)/%.o
-	@echo "Doing application" $@ 
+	@echo "Doing application" $@
 	$(LD) $(LDFLAGS) $(LIBS) -o $@ $^
 
 $(BINDIR)/%.o: $(SRCDIR)/%.cxx

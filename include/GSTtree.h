@@ -129,7 +129,7 @@ struct sim_p {
   Float_t mc_Pex, mc_Pey, mc_Pez, mc_Pe;
   Float_t mc_BettaEl;
   Float_t mc_ThetaLabEl, mc_PhiLabEl;
-  // gsim particle (22)
+  // gsim particle (23)
   Float_t mc_Eh, mc_Zh, mc_ThetaPQ, mc_Pt2, mc_Pl2, mc_PhiPQ;
   Float_t mc_ThetaLab, mc_PhiLab;
   Float_t mc_Mx2, mc_T;
@@ -139,6 +139,7 @@ struct sim_p {
   Float_t mc_Betta;
   Float_t mc_Mass2, mc_deltaZ;
   Float_t mc_pid;
+  Float_t mc_ParentID;
 };
 
 #endif

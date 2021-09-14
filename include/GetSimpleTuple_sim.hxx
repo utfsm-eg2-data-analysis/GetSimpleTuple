@@ -200,7 +200,7 @@ void SetParticleBranches_Sim(TTree* tree, sim_p& sp) {
   tree->Branch("mc_BettaEl", &sp.mc_BettaEl);
   tree->Branch("mc_ThetaLabEl", &sp.mc_ThetaLabEl);
   tree->Branch("mc_PhiLabEl", &sp.mc_PhiLabEl);
-  // gsim particle (22)
+  // gsim particle (23)
   tree->Branch("mc_Eh", &sp.mc_Eh);
   tree->Branch("mc_Zh", &sp.mc_Zh);
   tree->Branch("mc_ThetaPQ", &sp.mc_ThetaPQ);
@@ -223,6 +223,7 @@ void SetParticleBranches_Sim(TTree* tree, sim_p& sp) {
   tree->Branch("mc_Mass2", &sp.mc_Mass2);
   tree->Branch("mc_pid", &sp.mc_pid);
   tree->Branch("mc_deltaZ", &sp.mc_deltaZ);
+  tree->Branch("mc_ParentID", &sp.mc_ParentID);
 }
 
 void NullElectronVar_SIMREC(sim_e& se) {
@@ -415,7 +416,7 @@ void NullParticleVar_GSIM(sim_p& sp) {
   sp.mc_BettaEl = INVLD;
   sp.mc_ThetaLabEl = INVLD;
   sp.mc_PhiLabEl = INVLD;
-  // gsim particle (22)
+  // gsim particle (23)
   sp.mc_Eh = INVLD;
   sp.mc_Zh = INVLD;
   sp.mc_ThetaPQ = INVLD;
@@ -438,6 +439,7 @@ void NullParticleVar_GSIM(sim_p& sp) {
   sp.mc_Mass2 = INVLD;
   sp.mc_deltaZ = INVLD;
   sp.mc_pid = INVLD;
+  sp.mc_ParentID = INVLD;
 }
 
 void AssignElectronVar_SIMREC(TIdentificatorV2* t, sim_e& se, Int_t evnt, TString dataKind, TString targetOption) {
@@ -651,7 +653,7 @@ void AssignParticleVar_GSIM(TIdentificatorV2* t, sim_p& sp, Int_t row, Int_t evn
   sp.mc_ThetaLabEl = t->ThetaLab(0, 1);
   sp.mc_PhiLabEl = t->PhiLab(0, 1);
   sp.mc_TargType = t->TargType(dataKind, targetOption);
-  // gsim particle (22)
+  // gsim particle (23)
   sp.mc_pid = ToPDG(t->Id(row, 1));  // from GEANT to PDG
   sp.mc_ThetaPQ = t->ThetaPQ(row, 1);
   sp.mc_PhiPQ = t->PhiPQ(row, 1);
@@ -676,6 +678,7 @@ void AssignParticleVar_GSIM(TIdentificatorV2* t, sim_p& sp, Int_t row, Int_t evn
   sp.mc_Betta = t->Betta(row, 1);
   sp.mc_Mass2 = t->Mass2(row, 1);
   sp.mc_deltaZ = t->Z(row, 1) - t->Z(0, 1);
+  sp.mc_ParentID = t->Status(row, 1);
 }
 
 /************************/

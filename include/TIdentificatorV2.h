@@ -160,7 +160,7 @@ class TIdentificatorV2 {
     if (kind == 0) {
       fEVNT = (TEVNTClass *)fCT->GetBankRow("EVNT", k);
       return fEVNT->Z;
-    } else {  // Fix this
+    } else {
       fGSIM = (TGSIMClass *)fCT->GetBankRow("GSIM", k);
       return fGSIM->Z;
     }
@@ -192,10 +192,16 @@ class TIdentificatorV2 {
     return fEVNT->Ecstat;
   }
 
-  Double_t Status(Int_t k) {
+  Double_t Status(Int_t k, Bool_t kind = 0) {
     // Returns the event general goodness status for the particle in the row k of the EVNT bank
-    fEVNT = (TEVNTClass *)fCT->GetBankRow("EVNT", k);
-    return fEVNT->Status;
+    // In the case of GSIM.Status, it corresponds to the parent id of the particle
+    if (kind == 0) {
+      fEVNT = (TEVNTClass *)fCT->GetBankRow("EVNT", k);
+      return fEVNT->Status;
+    } else {
+      fGSIM = (TGSIMClass *)fCT->GetBankRow("GSIM", k);
+      return fGSIM->Status;
+    }
   }
 
   /*** CCPB ***/

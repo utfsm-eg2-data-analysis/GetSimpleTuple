@@ -51,6 +51,10 @@ int main(int argc, char **argv) {
   TIdentificatorV2 *t = new TIdentificatorV2(input);
   Int_t nEvents = (Int_t)input->GetEntries();
 
+#ifdef DEBUG
+  nEvents = nEvents / 10;
+#endif
+
   /*** OUTPUT ***/
 
   // define output file
