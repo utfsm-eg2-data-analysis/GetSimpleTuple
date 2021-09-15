@@ -937,8 +937,7 @@ class TIdentificatorV2 {
                       (Sector(k) == 4 || Sector(k) == 5) * 28 &&
         Charge(k) == -1 && (TimeEC(k) - TimeSC(k) - (PathEC(k) - PathSC(k)) / 30) < 5 * 0.35 &&
         (TimeEC(k) - TimeSC(k) - (PathEC(k) - PathSC(k)) / 30) > -5 * 0.35 && Eout(k) != 0 && Ein(k) > 0.06 && ECuvw->X() > 40 &&
-        ECuvw->X() < 410 && ECuvw->Y() < 370 && ECuvw->Z() < 405 && SampFracCheck(k, dataKind, targetOption) &&
-        ElectronPhaseSpace(k, dataKind) && FidCheckCut(k)) {
+        ECuvw->X() < 400 && ECuvw->Y() < 360 && ECuvw->Z() < 390 && SampFracCheck(k, dataKind, targetOption) && FidCheckCut(k)) {
       return true;
     }  // closure
     return false;
@@ -963,11 +962,11 @@ class TIdentificatorV2 {
   Bool_t PiPlusPhaseSpace_SC(Int_t k) {
     Double_t P = Momentum(k);
     Double_t T4 = TimeCorr4(k, 0.13957);
-    // sebastian's paramaters
+    // sebastian's parameters
     const Double_t lines_PiPlus[14][2] = {{-0.70, 0.70}, {-0.70, 0.65}, {-0.70, 0.65}, {-0.70, 0.65}, {-0.55, 0.55},
                                           {-0.50, 0.55}, {-0.50, 0.40}, {-0.48, 0.40}, {-0.50, 0.40}, {-0.50, 0.40},
-                                          {-0.50, 0.40}, {-0.50, 0.40}, {-0.32, 0.32}, {-0.30, 0.37}};
-    if (P < 2.7 && NRowsSC() != 0 && StatSC(k) > 0 &&
+                                          {-0.50, 0.40}, {-0.60, 0.45}, {-0.60, 0.50}, {-0.60, 0.50}};
+    if (NRowsSC() != 0 && StatSC(k) > 0 &&
         ((P > 0.00 && P <= 0.25 && T4 >= lines_PiPlus[0][0] && T4 <= lines_PiPlus[0][1]) ||
          (P > 0.25 && P <= 0.50 && T4 >= lines_PiPlus[1][0] && T4 <= lines_PiPlus[1][1]) ||
          (P > 0.50 && P <= 0.75 && T4 >= lines_PiPlus[2][0] && T4 <= lines_PiPlus[2][1]) ||
@@ -977,30 +976,27 @@ class TIdentificatorV2 {
          (P > 1.50 && P <= 1.75 && T4 >= lines_PiPlus[6][0] && T4 <= lines_PiPlus[6][1]) ||
          (P > 1.75 && P <= 2.00 && T4 >= lines_PiPlus[7][0] && T4 <= lines_PiPlus[7][1]) ||
          (P > 2.00 && P <= 2.25 && T4 >= lines_PiPlus[8][0] && T4 <= lines_PiPlus[8][1]) ||
-         (P > 2.25 && P <= 2.50 && T4 >= lines_PiPlus[9][0] && T4 <= lines_PiPlus[9][1] && Mass2(k) < 0.5) ||
-         (P > 2.50 && P < 2.70 && T4 >= lines_PiPlus[10][0] && T4 <= lines_PiPlus[10][1] && Mass2(k) < 0.4) ||
-         (P > 2.7 && P <= 3.3 && T4 >= -0.5 && T4 <= 0.4 && Mass2(k) < 0.4) ||
-         (P > 3.3 && P <= 3.7 && T4 >= -0.32 && T4 <= 0.32 && Mass2(k) < 0.37) ||
-         (P > 3.7 && T4 >= -0.3 && T4 <= 0.3 && Mass2(k) < 0.37))) {
+         (P > 2.25 && P <= 2.50 && T4 >= lines_PiPlus[9][0] && T4 <= lines_PiPlus[9][1]) ||
+         (P > 2.50 && P <= 2.70 && T4 >= lines_PiPlus[10][0] && T4 <= lines_PiPlus[10][1]) ||
+         (P > 2.7 && P <= 3.3 && T4 >= lines_PiPlus[11][0] && T4 <= lines_PiPlus[11][1]) ||
+         (P > 3.3 && P <= 3.7 && T4 >= lines_PiPlus[12][0] && T4 <= lines_PiPlus[12][1]) ||
+         (P > 3.7 && P <= 6.0 && T4 >= lines_PiPlus[13][0] && T4 <= lines_PiPlus[13][1]))) {
       return true;
-    }  // closure
+    }
     return false;
   }
 
   Bool_t PiPlusPhaseSpace_CC(Int_t k) {
-    // for high energy pi+
-    Double_t P = Momentum(k);
-    Double_t T4 = TimeCorr4(k, 0.13957);
-    if (NRowsCC() != 0 && StatCC(k) > 0 && Nphe(k) > 15 && Chi2CC(k) < 5 / 57.3 && P >= 2.7 && T4 > -0.6 &&
-        T4 < (0.45 * (P > 2.7 && P < 3.3) + 0.5 * (P > 3.3 && P < 3.7) + 0.5 * (P > 3.7 && P < 6.))) {
+    if (NRowsCC() != 0 && StatCC(k) > 0 && Nphe(k) > 15 && Chi2CC(k) < 5 / 57.3) {
       return true;
     }  // closure
     return false;
   }
 
   Bool_t IsPiPlus(Int_t k, TVector3 *ECuvw) {
-    if (Charge(k) == 1 && Status(k) > 0 && NRowsDC() != 0 && StatDC(k) > 0 && DCStatus(k) > 0 &&
-        (PiPlusPhaseSpace_CC(k) || PiPlusPhaseSpace_SC(k))) {  // && FidCheckCutPiPlus(k)) {
+    // TOF id for p < 2.7, and TOF + CC id for p >= 2.7
+    if (Charge(k) == 1 && Status(k) > 0 && NRowsDC() != 0 && StatDC(k) > 0 && DCStatus(k) > 0 && PiPlusPhaseSpace_SC(k) &&
+        (Momentum(k) < 2.7 || PiPlusPhaseSpace_CC(k))) {
       return true;
     }  // closure
     return false;
@@ -1010,26 +1006,26 @@ class TIdentificatorV2 {
     Double_t P = Momentum(k);
     Double_t T4 = TimeCorr4(k, 0.13957);
     // sebastian's parameters
-    const Double_t lines_PiMinus[5][2] = {{-0.75, 0.80}, {-0.55, 0.55}, {-0.55, 0.55}, {-0.50, 0.44}, {-0.50, 0.45}};
-    const Double_t lines_PiMinus_sim[5][2] = {{-0.75, 0.80}, {-0.55, 0.60}, {-0.55, 0.65}, {-0.50, 0.54}, {-0.50, 0.45}};
+    const Double_t lines_PiMinus[6][2] = {{-0.75, 0.80}, {-0.55, 0.55}, {-0.55, 0.55}, {-0.50, 0.44}, {-0.50, 0.45}, {-0.50, 0.50}};
+    const Double_t lines_PiMinus_sim[6][2] = {{-0.75, 0.80}, {-0.55, 0.60}, {-0.55, 0.65}, {-0.50, 0.54}, {-0.50, 0.45}, {-0.50, 0.50}};
     if (dataKind == "data") {
       // data
-      if (StatSC(k) > 0 &&
-          ((0 < P && P <= 0.5 && T4 >= lines_PiMinus[0][0] && T4 <= lines_PiMinus[0][1]) ||
-           (0.5 < P && P <= 1.0 && T4 >= lines_PiMinus[1][0] && T4 <= lines_PiMinus[1][1]) ||
-           (1.0 < P && P <= 1.5 && T4 >= lines_PiMinus[2][0] && T4 <= lines_PiMinus[2][1]) ||
-           (1.5 < P && P <= 2.0 && T4 >= lines_PiMinus[3][0] && T4 <= lines_PiMinus[3][1]) ||
-           (2.0 < P && P <= 2.5 && T4 >= lines_PiMinus[4][0] && T4 <= lines_PiMinus[4][1]) || (P > 2.5 && T4 < 0.50 && T4 > -0.50))) {
+      if (StatSC(k) > 0 && ((P > 0. && P <= 0.5 && T4 >= lines_PiMinus[0][0] && T4 <= lines_PiMinus[0][1]) ||
+                            (P > 0.5 && P <= 1.0 && T4 >= lines_PiMinus[1][0] && T4 <= lines_PiMinus[1][1]) ||
+                            (P > 1.0 && P <= 1.5 && T4 >= lines_PiMinus[2][0] && T4 <= lines_PiMinus[2][1]) ||
+                            (P > 1.5 && P <= 2.0 && T4 >= lines_PiMinus[3][0] && T4 <= lines_PiMinus[3][1]) ||
+                            (P > 2.0 && P <= 2.5 && T4 >= lines_PiMinus[4][0] && T4 <= lines_PiMinus[4][1]) ||
+                            (P > 2.5 && P <= 5.0 && T4 >= lines_PiMinus[5][0] && T4 <= lines_PiMinus[5][1]))) {
         return true;
       }
     } else if (dataKind == "sim") {
       // sim
-      if (StatSC(k) > 0 && ((0 < P && P <= 0.5 && T4 >= lines_PiMinus_sim[0][0] && T4 <= lines_PiMinus_sim[0][1]) ||
-                            (0.5 < P && P <= 1.0 && T4 >= lines_PiMinus_sim[1][0] && T4 <= lines_PiMinus_sim[1][1]) ||
-                            (1.0 < P && P <= 1.5 && T4 >= lines_PiMinus_sim[2][0] && T4 <= lines_PiMinus_sim[2][1]) ||
-                            (1.5 < P && P <= 2.0 && T4 >= lines_PiMinus_sim[3][0] && T4 <= lines_PiMinus_sim[3][1]) ||
-                            (2.0 < P && P <= 2.5 && T4 >= lines_PiMinus_sim[4][0] && T4 <= lines_PiMinus_sim[4][1]) ||
-                            (P > 2.5 && T4 < 0.50 && T4 > -0.50))) {
+      if (StatSC(k) > 0 && ((P > 0 && P <= 0.5 && T4 >= lines_PiMinus_sim[0][0] && T4 <= lines_PiMinus_sim[0][1]) ||
+                            (P > 0.5 && P <= 1.0 && T4 >= lines_PiMinus_sim[1][0] && T4 <= lines_PiMinus_sim[1][1]) ||
+                            (P > 1.0 && P <= 1.5 && T4 >= lines_PiMinus_sim[2][0] && T4 <= lines_PiMinus_sim[2][1]) ||
+                            (P > 1.5 && P <= 2.0 && T4 >= lines_PiMinus_sim[3][0] && T4 <= lines_PiMinus_sim[3][1]) ||
+                            (P > 2.0 && P <= 2.5 && T4 >= lines_PiMinus_sim[4][0] && T4 <= lines_PiMinus_sim[4][1]) ||
+                            (P > 2.5 && P <= 5.0 && T4 >= lines_PiMinus_sim[5][0] && T4 <= lines_PiMinus_sim[5][1]))) {
         return true;
       }
     }
@@ -1037,7 +1033,7 @@ class TIdentificatorV2 {
   }
 
   Bool_t IsPiMinus(Int_t k, TVector3 *ECuvw, TString dataKind) {
-    if (Charge(k) == -1 && Status(k) > 0 && NRowsDC() != 0 && DCStatus(k) > 0 && StatDC(k) > 0 && Momentum(k) < 5.0 &&
+    if (Charge(k) == -1 && Status(k) > 0 && NRowsDC() != 0 && DCStatus(k) > 0 && StatDC(k) > 0 &&
         PiMinusPhaseSpace_SC(k, dataKind)) {  // && FidCheckCutPiMinus(k)) {
       return true;
     }  // closure
