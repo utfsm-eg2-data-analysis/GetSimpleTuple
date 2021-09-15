@@ -5,39 +5,27 @@
 /*                                     */
 /***************************************/
 
-// December 2020
-// Independent of Analyser
+// September 2021
 
 #include "GetSimpleTuple_sim.hxx"
 
-/*** Options ***/
-
-TString targetOption;
-TString rnOption;
-
-TString dataKind = "sim";
-
-/*** Declaration of functions ***/
-
-void parseCommandLine(int argc, char *argv[]);
-void printOptions();
-void printUsage();
-
 int main(int argc, char **argv) {
+
+  gDataKind = "sim";
 
   parseCommandLine(argc, argv);
   printOptions();
 
   // assign options
-  TString inputFiles = "recsis" + targetOption + "_" + rnOption + ".root";  // node dir
-  TString outputFile = "pruned" + targetOption + "_" + rnOption + ".root";  // node dir
+  TString gInputFile = "recsis" + gTargetOption + "_" + gRunNumber + ".root";   // current dir
+  TString gOutputFile = "pruned" + gTargetOption + "_" + gRunNumber + ".root";  // current dir
   TString outTitle = "Simulation of particles";
 
   /*** DATA STRUCTURES ***/
 
   // output
-  sim_e se;
-  sim_p sp;
+  rec_t rec;
+  gen_t gen;
 
   /*** INPUT ***/
 
@@ -45,7 +33,7 @@ int main(int argc, char **argv) {
   TClasTool *input = new TClasTool();
   input->InitDSTReader("ROOTDSTR");
 
-  input->Add(inputFiles);
+  input->Add(gInputFile);
 
   // define TIdentificatorV2
   TIdentificatorV2 *t = new TIdentificatorV2(input);
@@ -58,14 +46,16 @@ int main(int argc, char **argv) {
   /*** OUTPUT ***/
 
   // define output file
-  TFile *rootFile = new TFile(outputFile, "RECREATE", outTitle);
+  TFile *rootFile = new TFile(gOutputFile, "RECREATE", outTitle);
 
   // define output ntuples
   TTree *tElectrons = new TTree("ntuple_e", "All electrons");
-  SetElectronBranches_Sim(tElectrons, se);
+  SetElectronBranches_REC(tElectrons, rec);
+  SetElectronBranches_GEN(tElectrons, gen);
 
   TTree *tParticles = new TTree("ntuple_sim", "Stable particles");
-  SetParticleBranches_Sim(tParticles, sp);
+  SetParticleBranches_REC(tParticles, rec);
+  SetParticleBranches_GEN(tParticles, gen);
 
   /*** VECTORS ***/
 
@@ -86,10 +76,11 @@ int main(int argc, char **argv) {
     if (input->GetNRows("GSIM") > 0) {  // prevent seg-fault
 
       // first, check numbering scheme
-      if (t->Id(0, 1) == 11)
+      if (t->Id(0, 1) == 11) {
         SetNumberingScheme("PDG");
-      else if (t->Id(0, 1) == 3)
+      } else if (t->Id(0, 1) == 3) {
         SetNumberingScheme("GEANT");
+      }
 
       if (t->Id(0, 1) == gElectronID) {
         for (Int_t q = 1; q < input->GetNRows("GSIM"); q++) {
@@ -102,10 +93,11 @@ int main(int argc, char **argv) {
         }  // end of loop in gsim-particles
 
         if (input->GetNRows("EVNT") > 0) {  // prevent seg-fault
-          if (t->GetCategorization(0, dataKind, targetOption) == "electron") {
+          if (t->GetCategorization(0, gDataKind, gTargetOption) == "electron") {
             for (Int_t p = 1; p < input->GetNRows("EVNT"); p++) {
-              if (t->GetCategorization(p, dataKind, targetOption) == "pi+" || t->GetCategorization(p, dataKind, targetOption) == "pi-" ||
-                  t->GetCategorization(p, dataKind, targetOption) == "gamma") {
+              if (t->GetCategorization(p, gDataKind, gTargetOption) == "pi+" ||
+                  t->GetCategorization(p, gDataKind, gTargetOption) == "pi-" ||
+                  t->GetCategorization(p, gDataKind, gTargetOption) == "gamma") {
                 simrec_row.push_back(p);
               }
             }  // end of loop in simrec-particles
@@ -122,19 +114,22 @@ int main(int argc, char **argv) {
 
     /*** STEP 3: ANGULAR MATCHING ***/
 
-    AngularMatching(t, simrec_row, gsim_row, dataKind, targetOption);
+    AngularMatching(t, simrec_row, gsim_row, gDataKind, gTargetOption);
 
     /*** STEP 4: FILL ***/
 
     // (1) electron ntuple
     if (input->GetNRows("GSIM") > 0) {  // prevent seg-fault
+      // the event id never gets null'd
+      rec.evnt = i;
       if (t->Id(0, 1) == gElectronID) {
-        AssignElectronVar_GSIM(t, se, i, dataKind, targetOption);  // (TIdentificatorV2, sim_e, evnt, dataKind, targetOption)
-        if (input->GetNRows("EVNT") > 0) {                         // prevent seg-fault
-          if (t->GetCategorization(0, dataKind, targetOption) != "electron")
-            NullElectronVar_SIMREC(se);
-          else
-            AssignElectronVar_SIMREC(t, se, i, dataKind, targetOption);
+        AssignElectronVar_GEN(t, gen, i);
+        if (input->GetNRows("EVNT") > 0) {  // prevent seg-fault
+          if (t->GetCategorization(0, gDataKind, gTargetOption) != "electron") {
+            NullElectronVar_REC(rec);
+          } else {
+            AssignElectronVar_REC(t, rec, i);
+          }
         }  // end of smth-in-EVNT-bank condition
         tElectrons->Fill();
       }  // end of electorn-in-GSIM condition
@@ -143,17 +138,17 @@ int main(int argc, char **argv) {
     // (2) particles ntuple
     for (Int_t index = 0; index < (Int_t)simrec_row.size(); index++) {  // simrec_row.size() == gsim_row.size()
       // gsim
-      if (gsim_row[index] == -1)
-        NullParticleVar_GSIM(sp);
-      else
-        AssignParticleVar_GSIM(t, sp, gsim_row[index], i, dataKind,
-                               targetOption);  // (TIdentificatorV2, sim_p, row, evnt, dataKind, targetOption)
+      if (gsim_row[index] == -1) {
+        NullParticleVar_GEN(gen);
+      } else {
+        AssignParticleVar_GEN(t, gen, gsim_row[index], i);
+      }
       // simrec
-      if (simrec_row[index] == -1)
-        NullParticleVar_SIMREC(sp);
-      else
-        AssignParticleVar_SIMREC(t, sp, simrec_row[index], i, dataKind,
-                                 targetOption);  // (TIdentificatorV2, sim_p, row, evnt, dataKind, targetOption)
+      if (simrec_row[index] == -1) {
+        NullParticleVar_REC(rec);
+      } else {
+        AssignParticleVar_REC(t, rec, simrec_row[index], i);
+      }
       // fill!
       tParticles->Fill();
     }
@@ -170,57 +165,7 @@ int main(int argc, char **argv) {
   rootFile->Write();
   rootFile->Close();
 
-  std::cout << "File " << outputFile << " has been created!" << std::endl;
+  std::cout << "File " << gOutputFile << " has been created!" << std::endl;
 
   return 0;
-}
-
-/*** Input/output functions ***/
-
-void printUsage() {
-  std::cout << "GetSimpleTuple_sim program. Usage is:" << std::endl;
-  std::cout << std::endl;
-  std::cout << "./GetSimpleTuple_sim -h" << std::endl;
-  std::cout << "    prints usage and exit program" << std::endl;
-  std::cout << std::endl;
-  std::cout << "./GetSimpleTuple_sim -t[target]" << std::endl;
-  std::cout << "    selects target, which can be: D, C, Fe, Pb" << std::endl;
-  std::cout << std::endl;
-  std::cout << "./GetSimpleTuple_sim -r[run number]" << std::endl;
-  std::cout << "    selects run number" << std::endl;
-  std::cout << "    numbering scheme for sim files = recsis<target>_<run number>.root" << std::endl;
-  std::cout << std::endl;
-}
-
-void parseCommandLine(int argc, char *argv[]) {
-  int c;
-  if (argc == 1) {
-    std::cerr << "Empty command line. Execute ./bin/GetSimpleTuple_sim -h to print usage." << std::endl;
-    exit(1);
-  }
-  while ((c = getopt(argc, argv, "ht:r:")) != -1) {
-    switch (c) {
-      case 'h':
-        printUsage();
-        exit(0);
-        break;
-      case 't':
-        targetOption = optarg;
-        break;
-      case 'r':
-        rnOption = optarg;
-        break;
-      default:
-        std::cerr << "Unrecognized argument. Execute ./bin/GetSimpleTuple_sim -h to print usage." << std::endl;
-        exit(0);
-        break;
-    }
-  }
-}
-
-void printOptions() {
-  std::cout << "Executing GetSimpleTuple_sim program. The chosen parameters are: " << std::endl;
-  std::cout << "  targetOption   = " << targetOption << std::endl;
-  std::cout << "  rnOption       = " << rnOption << std::endl;
-  std::cout << std::endl;
 }

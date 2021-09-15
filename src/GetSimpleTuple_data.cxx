@@ -5,40 +5,28 @@
 /*                                     */
 /***************************************/
 
-// December 2020
-// Independent of Analyser
+// September 2021
 
 #include "GetSimpleTuple_data.hxx"
 
-/*** Options ***/
-
-TString targetOption;
-TString rnOption;
-
-TString dataKind = "data";
-
-/*** Declaration of functions ***/
-
-void parseCommandLine(int argc, char *argv[]);
-void printOptions();
-void printUsage();
-
 int main(int argc, char **argv) {
+
+  gDataKind = "data";
+
   parseCommandLine(argc, argv);
   printOptions();
 
   SetNumberingScheme("PDG");
 
   // assign options
-  TString inputFiles = "clas_" + rnOption + "_*.pass2.root";                // *: all rn files, node dir
-  TString outputFile = "pruned" + targetOption + "_" + rnOption + ".root";  // node dir
+  TString gInputFile = "clas_" + gRunNumber + "_*.pass2.root";                  // *: all rn files, node dir
+  TString gOutputFile = "pruned" + gTargetOption + "_" + gRunNumber + ".root";  // node dir
   TString outTitle = "Data of particles";
 
   /*** DATA STRUCTURES ***/
 
   // output
-  data_e de;
-  data_p dp;
+  rec_t rec;
 
   /*** INPUT ***/
 
@@ -46,7 +34,7 @@ int main(int argc, char **argv) {
   TClasTool *input = new TClasTool();
   input->InitDSTReader("ROOTDSTR");
 
-  input->Add(inputFiles);
+  input->Add(gInputFile);
 
   // define TIdentificatorV2
   TIdentificatorV2 *t = new TIdentificatorV2(input);
@@ -55,14 +43,14 @@ int main(int argc, char **argv) {
   /*** OUTPUT ***/
 
   // define output file
-  TFile *rootFile = new TFile(outputFile, "RECREATE", outTitle);
+  TFile *rootFile = new TFile(gOutputFile, "RECREATE", outTitle);
 
   // define output ntuples
   TTree *tElectrons = new TTree("ntuple_e", "All electrons");
-  SetElectronBranches_Data(tElectrons, de);
+  SetElectronBranches_REC(tElectrons, rec);
 
   TTree *tParticles = new TTree("ntuple_data", "Stable particles");
-  SetParticleBranches_Data(tParticles, dp);
+  SetParticleBranches_REC(tParticles, rec);
 
   /*** START ***/
 
@@ -70,17 +58,17 @@ int main(int argc, char **argv) {
   input->Next();
 
   // loop around events
-  for (Int_t i = 0; i < nEvents; i++) {  // nEvents or 2000
+  for (Int_t i = 0; i < nEvents; i++) {
     if (input->GetNRows("EVNT") > 0) {   // prevent seg-fault
-      if (t->GetCategorization(0, dataKind, targetOption) == "electron") {
-        AssignElectronVar_Data(t, de, i, dataKind, targetOption);  // (TIdentificator, data_e, evnt, dataKind, targetOption)
+      if (t->GetCategorization(0, gDataKind, gTargetOption) == "electron") {
+        AssignElectronVar_REC(t, rec, i);
         tElectrons->Fill();
         // loop in detected particles
         for (Int_t p = 1; p < input->GetNRows("EVNT"); p++) {
           // rest of particles
-          if (t->GetCategorization(p, dataKind, targetOption) == "gamma" || t->GetCategorization(p, dataKind, targetOption) == "pi+" ||
-              t->GetCategorization(p, dataKind, targetOption) == "pi-") {
-            AssignParticleVar_Data(t, dp, p, i, dataKind, targetOption);  // (TIdentificator, data_p, row, evnt, dataKind, targetOption)
+          if (t->GetCategorization(p, gDataKind, gTargetOption) == "gamma" || t->GetCategorization(p, gDataKind, gTargetOption) == "pi+" ||
+              t->GetCategorization(p, gDataKind, gTargetOption) == "pi-") {
+            AssignParticleVar_REC(t, rec, p, i);
             tParticles->Fill();
           }
         }  // end of loop in rest of particles
@@ -94,55 +82,7 @@ int main(int argc, char **argv) {
   // write and close output file
   rootFile->Write();
   rootFile->Close();
-  std::cout << "File " << outputFile << " has been created!" << std::endl;
+  std::cout << "File " << gOutputFile << " has been created!" << std::endl;
 
   return 0;
-}
-
-/*** Input/output functions ***/
-
-void printUsage() {
-  std::cout << "GetSimpleTuple_data program. Usage is:" << std::endl;
-  std::cout << std::endl;
-  std::cout << "./GetSimpleTuple_data -h" << std::endl;
-  std::cout << "    prints usage and exit program" << std::endl;
-  std::cout << std::endl;
-  std::cout << "./GetSimpleTuple_data -t[target]" << std::endl;
-  std::cout << "    selects target, which can be: C, Fe, Pb" << std::endl;
-  std::cout << std::endl;
-  std::cout << "./GetSimpleTuple_data -r[run number]" << std::endl;
-  std::cout << "    selects run number" << std::endl;
-  std::cout << "    numbering scheme for data files = clas_<run number>_*.pass2.root" << std::endl;
-  std::cout << std::endl;
-}
-
-void parseCommandLine(int argc, char *argv[]) {
-  int c;
-  if (argc == 1) {
-    std::cerr << "Empty command line. Execute ./bin/GetSimpleTuple_data -h to print usage." << std::endl;
-    exit(1);
-  }
-  while ((c = getopt(argc, argv, "ht:r:")) != -1) switch (c) {
-      case 'h':
-        printUsage();
-        exit(0);
-        break;
-      case 't':
-        targetOption = optarg;
-        break;
-      case 'r':
-        rnOption = optarg;
-        break;
-      default:
-        std::cerr << "Unrecognized argument. Execute ./bin/GetSimpleTuple_data -h to print usage." << std::endl;
-        exit(0);
-        break;
-    }
-}
-
-void printOptions() {
-  std::cout << "Executing GetSimpleTuple_data program. The chosen parameters are: " << std::endl;
-  std::cout << "  targetOption   = " << targetOption << std::endl;
-  std::cout << "  rnOption       = " << rnOption << std::endl;
-  std::cout << std::endl;
 }
