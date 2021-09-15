@@ -2,7 +2,6 @@ GetSimpleTuple
 ==============
 
 ## About this branch
----
 
 This branch (`aborquez/analysis-omega`) differs from `main` and `development` in these areas:
 
@@ -21,18 +20,16 @@ This branch (`aborquez/analysis-omega`) differs from `main` and `development` in
 * Incorporates **parent id** information of the generated simulations
 
 ## Requirements
----
 
 * **ROOT**
 
 * [**ClasTool**](http://github.com/utfsm-eg2-data-analysis/clas_package)
 
 ## Compilation
----
+
 Compile by running `make`.
 
 ## Execution
----
 
 ```
 ./GetSimpleTuple_[data-type] -t[target] -r[run-number]
@@ -54,7 +51,6 @@ Where:
   : corresponds to the run number of the file(s)
 
 ## Examples
----
 
 If you have all the files from the run number `42011`, the following command will parse all of them:
 
