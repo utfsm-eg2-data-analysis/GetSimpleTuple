@@ -726,11 +726,11 @@ class TIdentificatorV2 {
       } else if (targetOption == "Fe") {
         MeanE = kFePar[s][0] + kFePar[s][1] * p + kFePar[s][2] * p * p;
         SigmaE = TMath::Sqrt(kFePar[s][3] * kFePar[s][3] + kFePar[s][4] * kFePar[s][4] / p);
-      } else if (targetOption == "Pb") {
+      } else { // when targetOption == "Pb"
         MeanE = kPbPar[s][0] + kPbPar[s][1] * p + kPbPar[s][2] * p * p;
         SigmaE = TMath::Sqrt(kPbPar[s][3] * kPbPar[s][3] + kPbPar[s][4] * kPbPar[s][4] / p);
       }
-    } else if (dataKind == "sim") {
+    } else { // when dataKind == "sim"
       MeanE = 0.2623 + 0.0089 * p - 0.0019 * p * p;
       SigmaE = TMath::Sqrt(0.0057 * 0.0057 + 0.0305 * 0.0305 / p);
     }
