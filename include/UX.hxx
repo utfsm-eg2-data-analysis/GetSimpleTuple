@@ -25,24 +25,26 @@ void printUsage() {
   std::cout << "    prints usage and exit program" << std::endl;
   std::cout << std::endl;
   std::cout << "./GetSimpleTuple_" << gDataKind << " -t[target]" << std::endl;
-  if (gDataKind == "data")
+  if (gDataKind == "data") {
     std::cout << "    selects target, which can be: C, Fe, Pb" << std::endl;
-  else
+  } else {
     std::cout << "    selects target, which can be: D, C, Fe, Pb" << std::endl;
+  }
   std::cout << std::endl;
-  std::cout << "./GetSimpleTuple_" << gDataKind << " -r[run number]" << std::endl;
+  std::cout << "./GetSimpleTuple_" << gDataKind << " -r[rn]" << std::endl;
   std::cout << "    selects run number" << std::endl;
-  if (gDataKind == "data")
-    std::cout << "    numbering scheme for data files = clas_<run number>_*.pass2.root" << std::endl;
-  else
-    std::cout << "    numbering scheme for sim files = recsis<target>_<run number>.root" << std::endl;
+  if (gDataKind == "data") {
+    std::cout << "    numbering scheme for data files = clas_<rn>_*.pass2.root" << std::endl;
+  } else {
+    std::cout << "    numbering scheme for sim files = recsis<target>_<rn>.root" << std::endl;
+  }
   std::cout << std::endl;
 }
 
 void parseCommandLine(int argc, char *argv[]) {
   int c;
   if (argc == 1) {
-    std::cerr << "Empty command line. Execute ./bin/GetSimpleTuple_" << gDataKind << " -h to print usage." << std::endl;
+    std::cerr << "Empty command line. Execute ./GetSimpleTuple_" << gDataKind << " -h to print usage." << std::endl;
     exit(1);
   }
   while ((c = getopt(argc, argv, "ht:r:")) != -1) {
@@ -58,8 +60,8 @@ void parseCommandLine(int argc, char *argv[]) {
         gRunNumber = optarg;
         break;
       default:
-        std::cerr << "Unrecognized argument. Execute ./bin/GetSimpleTuple_" << gDataKind << " -h to print usage." << std::endl;
-        exit(0);
+        std::cerr << "Unrecognized argument. Execute ./GetSimpleTuple_" << gDataKind << " -h to print usage." << std::endl;
+        exit(1);
         break;
     }
   }
