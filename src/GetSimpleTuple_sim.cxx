@@ -17,15 +17,15 @@ int main(int argc, char **argv) {
   printOptions();
 
   // assign options
-  TString gInputFile = "recsis" + gTargetOption + "_" + gRunNumber + ".root";   // current dir
-  TString gOutputFile = "pruned" + gTargetOption + "_" + gRunNumber + ".root";  // current dir
+  TString gInputFile = "recsis" + gTargetOption + "_" + gRunNumber + ".root";
+  TString gOutputFile = "pruned" + gTargetOption + "_" + gRunNumber + ".root";
   TString outTitle = "Simulation of particles";
 
   /*** DATA STRUCTURES ***/
 
   // output
-  rec_t rec;
-  gen_t gen;
+  elec_t elec, mc_elec;
+  part_t part, mc_part;
 
   /*** INPUT ***/
 
@@ -50,12 +50,12 @@ int main(int argc, char **argv) {
 
   // define output ntuples
   TTree *tElectrons = new TTree("ntuple_e", "All electrons");
-  SetElectronBranches_REC(tElectrons, rec);
-  SetElectronBranches_GEN(tElectrons, gen);
+  SetElectronBranches_REC(tElectrons, elec);
+  SetElectronBranches_GEN(tElectrons, mc_elec);
 
   TTree *tParticles = new TTree("ntuple_sim", "Stable particles");
-  SetParticleBranches_REC(tParticles, rec);
-  SetParticleBranches_GEN(tParticles, gen);
+  SetParticleBranches_REC(tParticles, elec, part);
+  SetParticleBranches_GEN(tParticles, mc_elec, mc_part);
 
   /*** VECTORS ***/
 
@@ -121,14 +121,14 @@ int main(int argc, char **argv) {
     // (1) electron ntuple
     if (input->GetNRows("GSIM") > 0) {  // prevent seg-fault
       // the event id never gets null'd
-      rec.evnt = i;
+      elec.evnt = i;
       if (t->Id(0, 1) == gElectronID) {
-        AssignElectronVar_GEN(t, gen, i);
+        WriteElectronVar_GEN(t, mc_elec);
         if (input->GetNRows("EVNT") > 0) {  // prevent seg-fault
           if (t->GetCategorization(0, gDataKind, gTargetOption) != "electron") {
-            NullElectronVar_REC(rec);
+            NullElectronVar_REC(elec);
           } else {
-            AssignElectronVar_REC(t, rec, i);
+            WriteElectronVar_REC(t, elec, i);
           }
         }  // end of smth-in-EVNT-bank condition
         tElectrons->Fill();
@@ -139,15 +139,15 @@ int main(int argc, char **argv) {
     for (Int_t index = 0; index < (Int_t)simrec_row.size(); index++) {  // simrec_row.size() == gsim_row.size()
       // gsim
       if (gsim_row[index] == -1) {
-        NullParticleVar_GEN(gen);
+        NullParticleVar_GEN(mc_elec, mc_part);
       } else {
-        AssignParticleVar_GEN(t, gen, gsim_row[index], i);
+        WriteParticleVar_GEN(t, mc_elec, mc_part, gsim_row[index]);
       }
       // simrec
       if (simrec_row[index] == -1) {
-        NullParticleVar_REC(rec);
+        NullParticleVar_REC(elec, part);
       } else {
-        AssignParticleVar_REC(t, rec, simrec_row[index], i);
+        WriteParticleVar_REC(t, elec, part, simrec_row[index], i);
       }
       // fill!
       tParticles->Fill();
@@ -165,7 +165,7 @@ int main(int argc, char **argv) {
   rootFile->Write();
   rootFile->Close();
 
-  std::cout << "File " << gOutputFile << " has been created!" << std::endl;
+  std::cout << "This file has been created: " << gOutputFile << std::endl;
 
   return 0;
 }

@@ -19,14 +19,15 @@ int main(int argc, char **argv) {
   SetNumberingScheme("PDG");
 
   // assign options
-  TString gInputFile = "clas_" + gRunNumber + "_*.pass2.root";                  // *: all rn files, node dir
-  TString gOutputFile = "pruned" + gTargetOption + "_" + gRunNumber + ".root";  // node dir
+  TString gInputFile = "clas_" + gRunNumber + "_*.pass2.root";  // *: all rn files in current dir
+  TString gOutputFile = "pruned" + gTargetOption + "_" + gRunNumber + ".root";
   TString outTitle = "Data of particles";
 
   /*** DATA STRUCTURES ***/
 
   // output
-  rec_t rec;
+  elec_t elec;
+  part_t part;
 
   /*** INPUT ***/
 
@@ -47,10 +48,10 @@ int main(int argc, char **argv) {
 
   // define output ntuples
   TTree *tElectrons = new TTree("ntuple_e", "All electrons");
-  SetElectronBranches_REC(tElectrons, rec);
+  SetElectronBranches_REC(tElectrons, elec);
 
   TTree *tParticles = new TTree("ntuple_data", "Stable particles");
-  SetParticleBranches_REC(tParticles, rec);
+  SetParticleBranches_REC(tParticles, elec, part);
 
   /*** START ***/
 
@@ -59,16 +60,16 @@ int main(int argc, char **argv) {
 
   // loop around events
   for (Int_t i = 0; i < nEvents; i++) {
-    if (input->GetNRows("EVNT") > 0) {   // prevent seg-fault
+    if (input->GetNRows("EVNT") > 0) {  // prevent seg-fault
       if (t->GetCategorization(0, gDataKind, gTargetOption) == "electron") {
-        AssignElectronVar_REC(t, rec, i);
+        WriteElectronVar_REC(t, elec, i);
         tElectrons->Fill();
         // loop in detected particles
         for (Int_t p = 1; p < input->GetNRows("EVNT"); p++) {
           // rest of particles
           if (t->GetCategorization(p, gDataKind, gTargetOption) == "gamma" || t->GetCategorization(p, gDataKind, gTargetOption) == "pi+" ||
               t->GetCategorization(p, gDataKind, gTargetOption) == "pi-") {
-            AssignParticleVar_REC(t, rec, p, i);
+            WriteParticleVar_REC(t, elec, part, p, i);
             tParticles->Fill();
           }
         }  // end of loop in rest of particles
@@ -82,7 +83,8 @@ int main(int argc, char **argv) {
   // write and close output file
   rootFile->Write();
   rootFile->Close();
-  std::cout << "File " << gOutputFile << " has been created!" << std::endl;
+
+  std::cout << "This file has been created: " << gOutputFile << std::endl;
 
   return 0;
 }
