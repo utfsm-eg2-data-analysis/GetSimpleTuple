@@ -726,11 +726,11 @@ class TIdentificatorV2 {
       } else if (targetOption == "Fe") {
         MeanE = kFePar[s][0] + kFePar[s][1] * p + kFePar[s][2] * p * p;
         SigmaE = TMath::Sqrt(kFePar[s][3] * kFePar[s][3] + kFePar[s][4] * kFePar[s][4] / p);
-      } else { // when targetOption == "Pb"
+      } else {  // when targetOption == "Pb"
         MeanE = kPbPar[s][0] + kPbPar[s][1] * p + kPbPar[s][2] * p * p;
         SigmaE = TMath::Sqrt(kPbPar[s][3] * kPbPar[s][3] + kPbPar[s][4] * kPbPar[s][4] / p);
       }
-    } else { // when dataKind == "sim"
+    } else {  // when dataKind == "sim"
       MeanE = 0.2623 + 0.0089 * p - 0.0019 * p * p;
       SigmaE = TMath::Sqrt(0.0057 * 0.0057 + 0.0305 * 0.0305 / p);
     }
@@ -937,7 +937,8 @@ class TIdentificatorV2 {
                       (Sector(k) == 4 || Sector(k) == 5) * 28 &&
         Charge(k) == -1 && (TimeEC(k) - TimeSC(k) - (PathEC(k) - PathSC(k)) / 30) < 5 * 0.35 &&
         (TimeEC(k) - TimeSC(k) - (PathEC(k) - PathSC(k)) / 30) > -5 * 0.35 && Eout(k) != 0 && Ein(k) > 0.06 && ECuvw->X() > 40 &&
-        ECuvw->X() < 400 && ECuvw->Y() < 360 && ECuvw->Z() < 390 && SampFracCheck(k, dataKind, targetOption) && FidCheckCut(k)) {
+        ECuvw->X() < 400 && ECuvw->Y() < 360 && ECuvw->Z() < 390 && SampFracCheck(k, dataKind, targetOption) && FidCheckCut(k) &&
+        (TargType(dataKind, targetOption) == 1 || TargType(dataKind, targetOption) == 2)) {
       return true;
     }  // closure
     return false;
