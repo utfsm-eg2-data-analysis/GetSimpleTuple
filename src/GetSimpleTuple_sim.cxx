@@ -60,8 +60,8 @@ int main(int argc, char **argv) {
   /*** VECTORS ***/
 
   // define sorting vectors
-  RVec<Int_t> gsim_row;
-  RVec<Int_t> simrec_row;
+  std::vector<int> gsim_row;
+  std::vector<int> simrec_row;
 
   /*** START ***/
 

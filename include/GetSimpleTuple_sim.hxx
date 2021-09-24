@@ -6,24 +6,26 @@
 #include "TreeOps.hxx"
 #endif
 
-using namespace ROOT::VecOps;
+#ifndef VECOPS_HXX
+#include "VecOps.hxx"
+#endif
 
-RVec<Int_t> SortByMomentum(TIdentificatorV2* t, RVec<Int_t> vector_row, Int_t kind) {
+std::vector<int> SortByMomentum(TIdentificatorV2* t, std::vector<int> vector_row, Int_t kind) {
   // Returns a new "vector_row2" where particle indices are sorted by their respective momentum (from lower to higher)
   // first, fill the momentum vector
-  RVec<Double_t> momentum;
+  std::vector<double> momentum;
   for (Int_t m = 0; m < (Int_t)vector_row.size(); m++) {
     momentum.push_back(t->Momentum(vector_row[m], kind));
   }
   // Argsort() creates an indices-vector with the indices sorted by the input-vector values
-  RVec<Int_t> indices = Argsort(momentum);
+  std::vector<int> indices = Argsort(momentum);
   // Take(input-vector, indices-vector) creates a sorted-vector by moving all input-vector indices to match the order assigned by the
   // indices-vector
-  RVec<Int_t> vector_row2 = Take(vector_row, indices);
+  std::vector<int> vector_row2 = Take(vector_row, indices);
   return vector_row2;
 }
 
-void AngularMatching(TIdentificatorV2* t, RVec<Int_t>& simrec_row, RVec<Int_t>& gsim_row, TString dataKind, TString targetOption) {
+void AngularMatching(TIdentificatorV2* t, std::vector<int>& simrec_row, std::vector<int>& gsim_row, TString dataKind, TString targetOption) {
   // Matches the "simrec_row" vector with the "gsim_row" vector under angular matching
   // if particles don't match, the counterpart is filled with null
 
@@ -38,8 +40,8 @@ void AngularMatching(TIdentificatorV2* t, RVec<Int_t>& simrec_row, RVec<Int_t>& 
   const Double_t fDeltaPhiLab = 5.43;    // Delta_Phi = 3*sigma_Phi
 
   // define output vectors - initially empty
-  RVec<Int_t> simrec_new;
-  RVec<Int_t> gsim_new;
+  std::vector<int> simrec_new;
+  std::vector<int> gsim_new;
 
   // declare PhiLab and ThetaLab
   Double_t simrec_phi;

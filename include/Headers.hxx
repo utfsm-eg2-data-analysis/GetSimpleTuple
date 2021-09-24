@@ -16,6 +16,4 @@
 #include "TTree.h"
 #include "TVector3.h"
 
-#include "ROOT/RVec.hxx"
-
 #endif
