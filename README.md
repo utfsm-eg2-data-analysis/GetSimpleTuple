@@ -21,9 +21,9 @@ This branch (`aborquez/analysis-omega`) differs from `main` and `development` in
 
 ## Requirements
 
-* **ROOT**
-
 * [**ClasTool**](http://github.com/utfsm-eg2-data-analysis/clas_package)
+
+* **ROOT**: it must be the same version that was used to compile **ClasTool**.
 
 ## Compilation
 
