@@ -17,9 +17,7 @@ void FindParticles(TClasTool* input, TIdentificatorV2* t, RVec<Int_t>& gsim_row,
     if (t->Id(0, 1) == gElectronID) {
       for (Int_t q = 1; q < input->GetNRows("GSIM"); q++) {
         if (t->Id(q, 1) == gPiPlusID || t->Id(q, 1) == gPiMinusID || t->Id(q, 1) == gGammaID || t->Id(q, 1) == gElectronID ||
-            t->Id(q, 1) == gPositronID || t->Id(q, 1) == gProtonID || t->Id(q, 1) == gNeutronID || t->Id(q, 1) == gKaonPlusID ||
-            t->Id(q, 1) == gKaonMinusID || t->Id(q, 1) == gKaonZeroLongID || t->Id(q, 1) == gKaonZeroShortID ||
-            t->Id(q, 1) == gKaonZeroID) {
+	    t->Id(q, 1) == gPositronID || t->Id(q, 1) == gProtonID || t->Id(q, 1) == gNeutronID) {
           gsim_row.push_back(q);
         }
       }  // end of loop in gsim-particles
@@ -28,7 +26,8 @@ void FindParticles(TClasTool* input, TIdentificatorV2* t, RVec<Int_t>& gsim_row,
         if (t->GetCategorization(0, gDataKind, gTargetOption) == "electron") {
           for (Int_t p = 1; p < input->GetNRows("EVNT"); p++) {
             if (t->GetCategorization(p, gDataKind, gTargetOption) == "pi+" || t->GetCategorization(p, gDataKind, gTargetOption) == "pi-" ||
-                t->GetCategorization(p, gDataKind, gTargetOption) == "gamma") {
+		t->GetCategorization(p, gDataKind, gTargetOption) == "gamma" || t->GetCategorization(p, gDataKind, gTargetOption) == "electron" ||
+		t->GetCategorization(p, gDataKind, gTargetOption) == "positron" || t->GetCategorization(p, gDataKind, gTargetOption) == "proton") {
               simrec_row.push_back(p);
             }
           }  // end of loop in simrec-particles
